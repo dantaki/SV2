@@ -1,4 +1,5 @@
 __version__='1.0'
+__author__='Danny Antaki'
 import sys,os,argparse
 from .core import check_in,Bed,check_cnv,errFH,reportTime,preprocess,extract_feats,genotype,annotate
 from argparse import RawTextHelpFormatter
