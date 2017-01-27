@@ -78,7 +78,7 @@ HG00096 | /bam/HG00096.bam | /vcf/HG00096_SNVs.vcf.gz | M
    * BAM files must have supplementary alignment tags (SA).
    * SNV VCF must contain Allelic Depth. SV<sup>2</sup> can accomodate [GATK Haplotype Caller](https://software.broadinstitute.org/gatk/gatkdocs/org_broadinstitute_gatk_tools_walkers_haplotypecaller_HaplotypeCaller.php) and [FreeBayes](https://github.com/ekg/freebayes) VCFs.
       * SNV VCF must be compressed and indexed with [bgzip and tabix](http://www.htslib.org/doc/tabix.html)
-* SV<sup>2<\sup> operates with a bi-allelic model with a copy number range of 0-4
+* SV<sup>2</sup> operates with a bi-allelic model with a copy number range of 0-4
 * Output is in VCF format.
    * Median Phred-adjusted non-reference likelihoods are reported in the QUAL column
    * Positions are annotated based on their overlap to genes, RepeatMasker, segmental duplications, 1000 Genomes phase 3 CNV, and more
