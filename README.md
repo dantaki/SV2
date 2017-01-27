@@ -6,7 +6,7 @@ Support Vector Structural Variation Genotyper
 ## Getting Started
 #### 1: Download Source Code :floppy_disk:
 ```
-wget http://downloads.sourceforge.net/project/gtcnv/gtcnv-2.4.zip # gtcnv-2.4.tar.gz also available
+wget http://downloads.sourceforge.net/project/sv2/sv2-1.0.zip # sv2-1.0.tar.gz also available
 unzip sv2-1.0.zip
 ```
 #### 2: Configure Environment
