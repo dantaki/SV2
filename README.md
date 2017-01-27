@@ -46,7 +46,7 @@ head -n 1 CEU.in >sub.in
 sv2 -i sub.in -r cnv.vcf -g hg38 -o sub_CEU_cnv_genotypes.vcf -pre sv2_preprocessing/ -feats sv2_features/
 
 # output is in sv2_genotypes/
-ls sv2_gentypes/*
+ls sv2_genotypes/*
     CEU_cnv_genotypes.txt # Tab-delimited genotypes
     CEU_cnv_genotypes.vcf # VCF formatted genotypes
     ...
