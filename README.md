@@ -4,7 +4,7 @@ Support Vector Structural Variation Genotyper
 
 *A resource for whole genome short-read sequencing libraries.*
 
-[bioRxiv Preprint](http://biorxiv.org/content/early/2017/03/03/113498) 
+[bioRxiv Preprint](http://biorxiv.org/content/early/2017/03/17/113498) 
 
 [doi](https://doi.org/10.1101/113498)
 
