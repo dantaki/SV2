@@ -4,12 +4,14 @@ Support Vector Structural Variation Genotyper
 
 *A resource for whole genome short-read sequencing libraries.*
 
-[BioRxiv Preprint](http://biorxiv.org/content/early/2017/03/03/113498) 
+[bioRxiv Preprint](http://biorxiv.org/content/early/2017/03/03/113498) 
 
 [doi](https://doi.org/10.1101/113498)
 
-## Version 1.1 will include standard and stringent de novo filters
-## Version 1.1 will be released on Monday March 20th, 2017
+===
+### Version 1.1 will include standard and stringent de novo filters
+### Version 1.1 will be released on Monday March 20th, 2017
+===
 
 ## Getting Started
 #### 1: Download Source Code :floppy_disk:
