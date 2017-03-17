@@ -5,6 +5,7 @@ Support Vector Structural Variation Genotyper
 *A resource for whole genome short-read sequencing libraries.*
 
 [BioRxiv Preprint](http://biorxiv.org/content/early/2017/03/03/113498) 
+
 [doi](https://doi.org/10.1101/113498)
 
 ## Version 1.1 will include standard and stringent de novo filters
