@@ -8,10 +8,8 @@ Support Vector Structural Variation Genotyper
 
 [doi](https://doi.org/10.1101/113498)
 
-=====
 ### Version 1.1 will include standard and stringent de novo filters
 ### Version 1.1 will be released on Monday March 20th, 2017
-=====
 
 ## Getting Started
 #### 1: Download Source Code :floppy_disk:
