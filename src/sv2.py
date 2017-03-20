@@ -1,5 +1,4 @@
-__version__='1.0'
-__author__='Danny Antaki'
+__version__='1.1'
 import sys,os,argparse
 from .core import check_in,Bed,check_cnv,errFH,reportTime,preprocess,extract_feats,genotype,annotate
 from argparse import RawTextHelpFormatter
@@ -8,7 +7,7 @@ from glob import glob
 from time import time
 def main():
 	init_time = int(time())
-	splash='\n                       ____\n  _____________   ___ |___ \\\n /   _____/\   \ /   // ___/\n \_____  \  \   Y   //_____)\n /        \  \     /\n/_________/   \___/\nSupport Vector Structural Variation Genotyper\nVersion 1.0        Author: Danny Antaki <dantaki at ucsd dot edu>\n'
+	splash='\n                       ____\n  _____________   ___ |___ \\\n /   _____/\   \ /   // ___/\n \_____  \  \   Y   //_____)\n /        \  \     /\n/_________/   \___/\nSupport Vector Structural Variation Genotyper\nVersion 1.1        Author: Danny Antaki <dantaki at ucsd dot edu>\n'
 	parser = argparse.ArgumentParser(description=splash,formatter_class=RawTextHelpFormatter)
 	parser.add_argument('-i','-in', help='Tab delimited input [ ID, BAM-PATH, VCF-PATH, M/F ]',required=True)
 	parser.add_argument('-r','-cnv', help='SV to genotype. Either in BED or VCF format',type=str)
@@ -117,6 +116,6 @@ def main():
 	for iid in feats_files:
 		with open(feats_files[iid]) as f:
 			for l in f: feats.append(tuple(l.rstrip('\n').split('\t')))
-	genos,REF,NON,GQ,HEMI,FILT = genotype(raw,feats,gender_dict,gen,ofh.replace('.vcf','.txt'))
-	annotate(raw,genos,gen,REF,NON,GQ,ofh,gender_dict,HEMI,FILT)
+	genos,REF,NON,GQ,HEMI,STD_FILT,DNM_FILT = genotype(raw,feats,gender_dict,gen,ofh.replace('.vcf','.txt'))
+	annotate(raw,genos,gen,REF,NON,GQ,ofh,gender_dict,HEMI,STD_FILT,DNM_FILT)
 	reportTime(init_time,'GENOTYPING COMPLETE')	

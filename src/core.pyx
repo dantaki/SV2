@@ -327,7 +327,7 @@ cdef is_split(read,windows,c):
 		else:
 			second_align[1] = int(second_align[1])
 			if ( ((int(s1) <= read.pos+1 <= int(e1)) and (int(s2) <= second_align[1] <= int(e2)))
-			     or ((int(s2) <= read.pos+1 <= int(e2)) and (int(s1) <= second_align[1] <= int(e1)))):
+			 or ((int(s2) <= read.pos+1 <= int(e2)) and (int(s1) <= second_align[1] <= int(e1)))):
 				"""secondary alignment must be near the opposite breakpoint of the primary alignment"""
 				return True
 			else:
@@ -349,19 +349,19 @@ cdef discordant_split_cnv(flank_list,bam,size,ci,windows,chrFlag):
 				"""skip noninformative reads
 				- courtsey of svtyper - https://github.com/hall-lab/svtyper --"""
 				if (read.is_qcfail
-				    or read.is_unmapped
-				    or read.mate_is_unmapped
-				    or read.tid != read.rnext
-				    or read.is_reverse == read.mate_is_reverse
-				    or read.is_duplicate): continue
+				or read.is_unmapped
+				or read.mate_is_unmapped
+				or read.tid != read.rnext
+				or read.is_reverse == read.mate_is_reverse
+				or read.is_duplicate): continue
 				else:
 					mate_pos = read.pnext
 					if is_discordant(read,windows,ci,mate_pos) == True: discordant_count+=1
 					if is_split(read,windows,c)  == True: split_count+=1
 					if (read.is_proper_pair
-					    and read.mapping_quality >= 10
-					    and not read.is_secondary
-					    and abs(read.tlen) < ci):
+					and read.mapping_quality >= 10
+					and not read.is_secondary
+					and abs(read.tlen) < ci):
 						concordant_count+=1
 					else: continue
 		
@@ -433,7 +433,7 @@ cdef sv2_preprocess (iid,bamfh,vcffh,bed,out,gen):
 				str(np.median(insert_size)),
 				str(MAD(np.array(insert_size))),
 				str(chr_size),str(chr_snp_cov),str(chr_snp)
-			      )
+			  )
 			genome_cov.append(norm)
 			genome_read_length.append(np.median(read_length))
 			genome_insert_size.append(np.median(insert_size))
@@ -451,7 +451,7 @@ cdef sv2_preprocess (iid,bamfh,vcffh,bed,out,gen):
 				str(genome_size),
 				str(genome_snp_cov),
 				str(genome_SNP)
-			     ))+'\n')
+			 ))+'\n')
 	ofh.close()
 	bam.close()
 def vcfrow(VCF,x):
@@ -672,9 +672,9 @@ def extract_feats(iid,bamfh,vcffh,cnv,prefh,gender,out,gen,pcrfree):
 			discordant_ratio = str(round(float(discordant)/float(concordant),3))
 			split_ratio = str(round(float(split)/float(concordant),3))
 		ofh.write('\t'.join((   str(c),str(s),str(e),str(cl),str(size),str(iid),
-				    str(round(float(cov),3)), str(round(float(GCcov),3)),
-				    discordant_ratio, split_ratio,
-				    str(np.around(snp_coverage,decimals=3)),str(snps),str(np.around(het_ratio,decimals=3)),str(hets) ))+'\n')
+				str(round(float(cov),3)), str(round(float(GCcov),3)),
+				discordant_ratio, split_ratio,
+				str(np.around(snp_coverage,decimals=3)),str(snps),str(np.around(het_ratio,decimals=3)),str(hets) ))+'\n')
 	bam.close()
 	ofh.close()
 cdef returnPAR(cnv,gen):
@@ -689,53 +689,118 @@ cdef removePAR(cnv,gen):
 	if len(results) > 0:
 		for x in results.sort(): out.append(tuple(x))
 	return out
-def likFilter(x,lik,f):
+cdef likFilter(NON,PEF):
 	'''
-	de novo filter recommendations
+	standard stringency filters 1==PASS 0==FAIL	
 	'''
+	FILT={}
 	cdef unsigned int sz
 	cdef double dpe
 	cdef double sr
 	cdef unsigned short passflag
-	clf=x[len(x)-1]
-	sz=int(x[3])
-	dpe=float(x[7])
-	sr=float(x[8])
-	passflag=1
-	if 'DEL' in clf and 'HEMIZYGOUS' not in clf:
-		if (dpe!=0 or sr!=0) and lik<12: passflag=0
-		elif dpe==0 and sr==0:
-			if f=='r':
-				if sz<=1000: passflag=0
-				elif (1000<sz<=5000) and lik<20: passflag=0
-				elif sz>5000 and lik<18: passflag=0
-			elif f=='n':
-				if sz<=1000: passflag=0
-				elif (1000<sz<=3000) and lik<24: passflag=0
-				elif sz>3000 and lik<20: passflag=0
-	elif 'DUP_PairedEnd' in clf and lik <11: passflag=0
-	elif 'DUP_HetAllelicDepth' in clf:
-		if (dpe!=0 or sr!=0) and lik<10: passflag=0
-		elif dpe==0 and sr==0:
-			if f=='r':
-				if sz<=3000: passflag=0
-				elif (3000<sz<=100000) and lik<15: passflag=0
-				elif sz>100000 and lik<13: passflag=0
-			elif f=='n':
-				if sz<=3000: passflag=0
-				elif sz>3000 and lik<10: passflag=0
-	elif 'HEMIZYGOUS_DEL' in clf and lik<8: passflag=0
-	elif 'HEMIZYGOUS_DUP' in clf:
-		if sz<=5000: passflag=0
-		elif sz>5000 and lik<10: passflag=0
-	return passflag
+	cdef unsigned int lik
+	for x in NON:
+		lik = NON[x]
+		dpe=0
+		sr=0
+		if PEF.get(x)!=None:
+			dpe = PEF[x][0]
+			sr = PEF[x][1]
+		clf=x[len(x)-1]
+		sz=int(x[2])-int(x[1])+1
+		passflag=1
+		if 'DEL' in clf and 'HEMIZYGOUS' not in clf:
+			if (dpe!=0 or sr!=0) and lik<8: passflag=0
+			elif dpe==0 and sr==0:
+				if 'DEL_lt1KB' in clf and lik <18: passflag=0
+				if 'DEL_gt1KB' in clf:
+					if sz < 3000: passflag=0
+					elif 3000<=sz<5000 and lik <20: passflag=0
+					elif sz >=5000 and lik <18: passflag=0 
+		elif 'DUP_PairedEnd' in clf:
+			if (dpe!=0 or sr!=0): 
+				if sz < 1000 and lik < 12: passflag=0
+				if sz >= 1000 and lik < 10: passflag=0
+			elif dpe==0 and sr==0: 
+				if sz < 3000: passflag=0
+				elif sz >=3000 and lik < 12: passflag=0
+		elif 'DUP_HetAllelicDepth' in clf:
+			if (dpe!=0 or sr!=0) and lik<15 and sz < 3000 : passflag=0
+			elif (dpe!=0 or sr!=0) and lik<12 and sz >=3000 : passflag=0
+			elif dpe==0 and sr==0:
+				if sz<5000: passflag=0
+				elif sz>=5000 and lik<15: passflag=0
+		elif 'HEMIZYGOUS_DEL' in clf and lik<8 and (dpe!=0 or sr!=0): passflag=0
+		elif 'HEMIZYGOUS_DEL' in clf and lik<10 and dpe==0 and sr==0 and sz>=1000: passflag=0
+		elif 'HEMIZYGOUS_DEL' in clf and sz<1000 and dpe==0 and sr==0: passflag=0
+		elif 'HEMIZYGOUS_DUP' in clf:
+			if sz<5000: passflag=0
+			elif sz>=5000 and lik<10: passflag=0
+			elif sr==0 and dpe==0: passflag=0
+		k= (x[0],x[1],x[2],x[3])
+		if FILT.get(k)==None: FILT[k]=[passflag]
+		else: FILT[k].append(passflag)
+	FIN={}
+	for x in FILT:
+		if 0 in FILT[x]: FIN[x]=0
+		else: FIN[x]=1
+	return FIN
+cdef dnmFilter(NON,REF,PEF):
+	'''
+	de novo filter recommendations
+	'''
+	FILT={}
+	cdef unsigned int sz
+	cdef double dpe
+	cdef double sr
+	cdef unsigned short passflag
+	cdef unsigned int ref
+	cdef unsigned int non
+	for x in NON:
+		dpe=0
+		sr=0
+		if PEF.get(x)!=None: 
+			dpe=PEF[x][0]
+			sr=PEF[x][1]
+		clf=x[len(x)-1]
+		sz=int(x[2])-int(x[1])+1
+		passflag=1
+		ref=20
+		non=NON[x]
+		if REF.get(x)!=None: ref=REF[x]
+		if 'DEL' in clf and 'HEMIZYGOUS' not in clf:
+			if (dpe!=0 or sr!=0) and non<12 and ref<12: passflag=0
+			elif dpe==0 and sr==0:
+				if sz < 1000: passflag=0
+				elif 1000<=sz<3000 and non <24 and ref < 20: passflag=0
+				elif 3000<=sz<5000 and non <20 and ref < 20: passflag=0
+				elif sz >= 5000 and non < 20 and ref < 18: passflag=0	 
+		elif 'DUP_PairedEnd' in clf:
+			if (dpe!=0 or sr !=0) and non<11 and ref<11: passflag=0
+			if dpe==0 and sr==0 and sz < 3000: passflag=0
+			if dpe==0 and sr==0 and 3000<=sz<100000 and non<10 and ref<15: passflag=0
+			if dpe==0 and sr==0 and sz >= 100000 and non<10 and ref<13: passflag=0
+		elif 'DUP_HetAllelicDepth' in clf:
+			if non<10 and ref<10: passflag=0
+		elif 'HEMIZYGOUS_DEL' in clf and non<8 and ref<8: passflag=0
+		elif 'HEMIZYGOUS_DUP' in clf:
+			if sz<5000: passflag=0
+			elif sz>=5000 and ref<10 and non<10: passflag=0
+		k=(x[0],x[1],x[2],x[3])
+		if FILT.get(k)==None: FILT[k]=[passflag]
+		else: FILT[k].append(passflag)
+	FIN={}
+	for x in FILT:
+		if 0 in FILT[x]: FIN[x]=0
+		else: FIN[x]=1
+	return FIN
 def genotype(raw,feats,sex,gen,out):
 	REF={}
 	NON={}
 	GQ={}
 	HEMI={}
+	PEF={}	
 	FILT={}
-	#feats = [x for x in prefeats if (x[0],x[1],x[2],x[4]) in raw] 
 	males = [k for k in sex if sex[k] == 'M']
 	sex_chrom = ['chrX','chrY']
 	dels = [ k for k in feats if 'DEL' in k[3]]
@@ -771,15 +836,16 @@ def genotype(raw,feats,sex,gen,out):
 		for x in autosome_del_svm(autosome_del_df).values:
 			ofh.write('\t'.join(map(str,x))+'\n')
 			k = (x[0],x[1],x[2],x[4],x[5])
-			kk = (x[0],x[1],x[2],x[4])
+			kk = (x[0],x[1],x[2],x[4],x[len(x)-1])
 			x[6] = format(float(x[6])*2,'.2f')
 			GQ[k]= ','.join((format(float(x[14]),'.2f'),format(float(x[15]),'.2f'),format(float(x[16]),'.2f')))
+			if PEF.get(kk)==None: PEF[kk]=[float(x[7]),float(x[8])]
+			else: PEF[kk]=[PEF[kk][0]+float(x[7]),PEF[kk][1]+float(x[8])]
 			if int(x[13]) == 2:
 				x[13]='0/0'
 				if x[5] not in males and x[0] == 'chrY': x[13]='.'
 				else:
 					lik=ceil(float(x[18]))
-					FILT[k]=likFilter(x,lik,'r')
 					if REF.get(kk)==None: REF[kk]=[lik]
 					else: REF[kk].append(lik)
 			else:
@@ -788,7 +854,6 @@ def genotype(raw,feats,sex,gen,out):
 				if x[5] not in males and x[0] == 'chrY': x[13]='.'
 				else:
 					lik=ceil(float(x[19]))
-					FILT[k]=likFilter(x,lik,'n')
 					if NON.get(kk)==None: NON[kk]=[lik]
 					else: NON[kk].append(lik)
 			genos.append(tuple(x))
@@ -798,15 +863,16 @@ def genotype(raw,feats,sex,gen,out):
 		for x in autosome_dup_svm(autosome_dup_df).values:
 			ofh.write('\t'.join(map(str,x))+'\n')
 			k = (x[0],x[1],x[2],x[4],x[5])
-			kk = (x[0],x[1],x[2],x[4])
+			kk = (x[0],x[1],x[2],x[4],x[len(x)-1])
 			x[6] = format(float(x[6])*2,'.2f')
 			GQ[k]= ','.join((format(float(x[14]),'.2f'),format(float(x[15]),'.2f'),format(float(x[16]),'.2f')))
+			if PEF.get(kk)==None: PEF[kk]=[float(x[7]),float(x[8])]
+			else: PEF[kk]=[PEF[kk][0]+float(x[7]),PEF[kk][1]+float(x[8])]
 			if int(x[13]) == 2:
 				x[13]='0/0'
 				if x[5] not in males and x[0] == 'chrY': x[13]='.'
 				else:
 					lik=ceil(float(x[18]))
-					FILT[k]=likFilter(x,lik,'r')
 					if REF.get(kk)==None: REF[kk]=[lik]
 					else: REF[kk].append(lik)
 			else:
@@ -815,7 +881,6 @@ def genotype(raw,feats,sex,gen,out):
 				if x[5] not in males and x[0] == 'chrY': x[13]='.'
 				else:
 					lik=ceil(float(x[19]))
-					FILT[k]=likFilter(x,lik,'n')
 					if NON.get(kk)==None: NON[kk]=[lik]
 					else: NON[kk].append(lik)
 			genos.append(tuple(x))
@@ -825,20 +890,20 @@ def genotype(raw,feats,sex,gen,out):
 		for x in sexchr_del_svm(sexchr_del_df).values:
 			ofh.write('\t'.join(map(str,x))+'\n')
 			k = (x[0],x[1],x[2],x[4],x[5])
-			kk = (x[0],x[1],x[2],x[4])
+			kk = (x[0],x[1],x[2],x[4],x[len(x)-1])
 			x[6] = format(float(x[6]),'.2f')
 			GQ[k]= ','.join((format(float(x[15]),'.2f'),format(float(x[16]),'.2f')))
+			if PEF.get(kk)==None: PEF[kk]=[float(x[7]),float(x[8])]
+			else: PEF[kk]=[PEF[kk][0]+float(x[7]),PEF[kk][1]+float(x[8])]
 			HEMI[kk]=1
 			if int(x[13]) == 1:
 				x[13]='0'
 				lik=ceil(float(x[18]))
-				FILT[k]=likFilter(x,lik,'r')
 				if REF.get(kk)==None: REF[kk]=[lik]
 				else: REF[kk].append(lik)
 			else:
 				x[13]='1'
 				lik=ceil(float(x[19]))
-				FILT[k]=likFilter(x,lik,'n')
 				if NON.get(kk)==None: NON[kk]=[lik]
 				else: NON[kk].append(lik)
 			genos.append(tuple(x))
@@ -848,18 +913,18 @@ def genotype(raw,feats,sex,gen,out):
 		for x in sexchr_dup_svm(sexchr_dup_df).values:
 			ofh.write('\t'.join(map(str,x))+'\n')
 			k = (x[0],x[1],x[2],x[4],x[5])
-			kk = (x[0],x[1],x[2],x[4])
+			kk = (x[0],x[1],x[2],x[4],x[len(x)-1])
 			x[6] = format(float(x[6])*2,'.2f')
 			GQ[k]= ','.join((format(float(x[15]),'.2f'),format(float(x[16]),'.2f')))
+			if PEF.get(kk)==None: PEF[kk]=[float(x[7]),float(x[8])]
+			else: PEF[kk]=[PEF[kk][0]+float(x[7]),PEF[kk][1]+float(x[8])]
 			HEMI[kk]=1
 			if int(x[13]) == 1:
 				x[13]='0'
 				lik=ceil(float(x[18]))
 				if x[5] not in males and x[0] == 'chrY':
 					x[13]='.'
-					FILT[k]=0
 				if x[5] in males:
-					FILT[k]=likFilter(x,lik,'r')	
 					if REF.get(kk)==None: REF[kk]=[lik]
 					else: REF[kk].append(lik)
 			else:
@@ -867,18 +932,21 @@ def genotype(raw,feats,sex,gen,out):
 				lik=ceil(float(x[19]))
 				if x[5] not in males and x[0] == 'chrY':
 						x[13]='.'
-						FILT[k]=0	
 				if x[5] in males:
-					FILT[k]=likFilter(x,lik,'n')	
 					if NON.get(kk)==None: NON[kk]=[lik]
 					else: NON[kk].append(lik)
 			genos.append(tuple(x))
-	refmed={}
-	nonmed={}
 	ofh.close()
-	for x in REF: refmed[x]=int(np.median(REF[x]))
-	for x in NON: nonmed[x]=int(np.median(NON[x]))
-	return genos,refmed,nonmed,GQ,HEMI,FILT
+	nuREF={}
+	nuNON={}
+	for x in REF: REF[x]=int(ceil(np.median(REF[x])))
+	for x in NON: NON[x]=int(ceil(np.median(NON[x])))
+	STD_FILT,DNM_FILT = likFilter(NON,PEF),dnmFilter(NON,REF,PEF)
+	for x in REF: nuREF[(x[0],x[1],x[2],x[3])]=REF[x]
+	for x in NON: nuNON[(x[0],x[1],x[2],x[3])]=NON[x]
+	del REF
+	del NON
+	return genos,nuREF,nuNON,GQ,HEMI,STD_FILT,DNM_FILT
 cdef del_autosome_tab(df,lik,clfname):
 	df['classif']=clfname
 	cn=[]
@@ -1196,7 +1264,7 @@ cdef geneOverlap(cnv,gen):
 					genlist.append(','.join(map(str,(y,trx[y],'upstream_1kb'))))
 		if len(genlist)>=1 : genes[x]='|'.join(genlist)
 	return genes
-def annotate(raw,genos,gen,REF,NON,GQ,OFH,sex,hemi,filt):
+def annotate(raw,genos,gen,REF,NON,GQ,OFH,sex,hemi,FILT,DNMFILT):
 	cdef unsigned int CNV_ID
 	cdef unsigned int SZ
 	genes={}
@@ -1204,9 +1272,9 @@ def annotate(raw,genos,gen,REF,NON,GQ,OFH,sex,hemi,filt):
 	mei={}
 	flags={}
 	thouGen={}
-	FILT={}
 	AF={}
 	GT={}
+	GTed={}
 	refcnt={}
 	males = [k for k in sex if sex[k] == 'M']
 	IID = list(set([x[5] for x in genos]))
@@ -1219,35 +1287,28 @@ def annotate(raw,genos,gen,REF,NON,GQ,OFH,sex,hemi,filt):
 	genes=geneOverlap(cnv,gen)
 	for x in genos:
 		k = (x[0],x[1],x[2],x[4])
-		filty='FAIl'
-		if filt.get((x[0],x[1],x[2],x[4],x[5]))!=None: filty=filt[(x[0],x[1],x[2],x[4],x[5])]
-		if filty==0: filty='FAIL'
-		if filty==1: filty='PASS'
+		GTed[k]=1
 		if GQ.get((x[0],x[1],x[2],x[4],x[5]))!=None:
 			lik=format(float(x[len(x)-2]),'.2f')
 			if '1' not in x[13]:
 				lik=format(float(x[len(x)-3]),'.2f')
 				if refcnt.get(k)==None: refcnt[k]=1
 				else: refcnt[k]+=1
+			for y in x[13].split('/'):
+				if AF.get(k)==None: AF[k]=[int(y),1]
+				else: AF[k]=[AF[k][0]+int(y),AF[k][1]+1]
 			if '1' in x[13]:
-				if AF.get((k,x[5]))==None:
-					if AF.get(k)==None: AF[k]=1
-					else: AF[k]+=1
-					AF[(k,x[5])]=1
 				lik=format(float(x[len(x)-2]),'.2f')
 			v = ':'.join(map(str,(x[13],
-					filty,
+					format(float(x[6]),'.2f'), #COVR
 					format(float(x[7]),'.2f'), #DPE
 					format(float(x[8]),'.2f'), #SR
-					format(float(x[6]),'.2f'), #COVR
 					format(float(x[9]),'.2f'),  #SNP COVR
 					int(x[10]), #SNPs
 					format(float(x[11]),'.2f'), #HET ratio
 					int(x[12]), #HETs
 					lik,
 					GQ[(x[0],x[1],x[2],x[4],x[5])])))
-			if FILT.get(k)==None: FILT[k]=[filty]
-			else : FILT[k].append(filty)
 			GT[(k,x[5])]=v
 	for x in genos:
 		k = (x[0],x[1],x[2],x[4])
@@ -1258,10 +1319,11 @@ def annotate(raw,genos,gen,REF,NON,GQ,OFH,sex,hemi,filt):
 				elif x[0] == 'chrX' and iid in males and hemi.get(k) != None: GT[(k,iid)]='0'
 				else: GT[(k,iid)]='0/0'
 	VCF=[]
-	CNV_ID=1
+	CNV_ID=0
 	for (c,s,e,cl) in pbed.BedTool(list(set([(x[0],x[1],x[2],x[3]) for x in raw]))).sort():
 		SZ=int(e)-int(s)+1
 		TYPE=cl
+		DENOVO_FILT='FAIL'
 		THOUGEN_ID='NA'
 		THOUGEN_OVR='NA'
 		SEGD=0.00
@@ -1296,7 +1358,7 @@ def annotate(raw,genos,gen,REF,NON,GQ,OFH,sex,hemi,filt):
 		if genes.get((c,s,e))!=None: GENE=genes[(c,s,e)]
 		if REF.get((c,s,e,cl))!=None: MEDREF=REF[(c,s,e,cl)]
 		if NON.get((c,s,e,cl))!=None: QUAL=NON[(c,s,e,cl)]
-		if AF.get((c,s,e,cl))!=None: ALLELE=format(AF[(c,s,e,cl)]/float(len(IID)),'.2f')
+		if AF.get((c,s,e,cl))!=None: ALLELE=format(float(AF[(c,s,e,cl)][0])/float(AF[(c,s,e,cl)][1]),'.2f')
 		if float(ABPTS) >= 0.5: fail.append('ABPARTS')
 		if float(CENTMER) >= 0.5: fail.append('CENTROMERE')
 		if float(SEGD) >= 0.5: fail.append('SEGDUP')
@@ -1304,15 +1366,16 @@ def annotate(raw,genos,gen,REF,NON,GQ,OFH,sex,hemi,filt):
 		if float(UNMAP) >= 0.5: fail.append('UNMAPABLE')
 		if cnvref == len(IID): fail.append('ALLREF')
 		if FILT.get((c,s,e,cl))!= None: 
-			gtPass = len([x for x in FILT[(c,s,e,cl)] if x=='PASS'])
-			if gtPass/len(FILT[(c,s,e,cl)]) < 0.9: fail.append('GENOTYPE-FAIL')
-		else: fail.append('FAIL')
+			if FILT[(c,s,e,cl)]==0: fail.append('GENOTYPE-FAIL')
+		if GTed.get((c,s,e,cl))==None: fail.append('FAIL')	
+		if DNMFILT.get((c,s,e,cl))!=None:
+			if DNMFILT[(c,s,e,cl)]==1: DENOVO_FILT='PASS'
 		if len(fail) > 0: PASS = ','.join(fail)
-		INFO = 'END={};SVTYPE={};SVLEN={};AF={};CYTOBAND={};REPEATMASKER={},{};1000G_ID={};1000G_OVERLAP={};DESCRIPTION={};GENES={};ABPARTS={};CENTROMERE={};SEGDUP={};STR={};UNMAPABLE={};MEDREFGL={}'.format(e,TYPE,SZ,ALLELE,CYTOB,meiName,REPEATMASKER,THOUGEN_ID,THOUGEN_OVR,DESX,GENE,ABPTS,CENTMER,SEGD,STR,UNMAP,MEDREF)
+		INFO = 'END={};SVTYPE={};SVLEN={};DENOVO_FILTER={};REF_GTL={};AF={};CYTOBAND={};REPEATMASKER={},{};1000G_ID={};1000G_OVERLAP={};DESCRIPTION={};GENES={};ABPARTS={};CENTROMERE={};SEGDUP={};STR={};UNMAPABLE={}'.format(e,TYPE,SZ,DENOVO_FILT,MEDREF,ALLELE,CYTOB,meiName,REPEATMASKER,THOUGEN_ID,THOUGEN_OVR,DESX,GENE,ABPTS,CENTMER,SEGD,STR,UNMAP)
 		for x in IID:
 			if GT.get(((c,s,e,cl),x))!=None: GTS.append(GT[((c,s,e,cl),x)])
 			else: GTS.append('./.')
-		out= '\t'.join(map(str,(c,s,CNV_ID,'.','<'+TYPE+'>',QUAL,PASS,INFO,'GT:FT:PE:SR:CN:SC:SP:AR:HT:SQ:GL','\t'.join(GTS))))
+		out= '\t'.join(map(str,(c,s,'SV2:'+str(CNV_ID),'.','<'+TYPE+'>',QUAL,PASS,INFO,'GT:CN:PE:SR:SC:SP:AR:HT:SQ:GL','\t'.join(GTS))))
 		VCF.append(out)
 		CNV_ID+=1
 	date=[]
@@ -1321,11 +1384,13 @@ def annotate(raw,genos,gen,REF,NON,GQ,OFH,sex,hemi,filt):
 			'##fileDate={}'.format(date[0]),
 			'##reference={}'.format(fasta_config(gen)),
 			'##GTCNV_CMD="{}"'.format(' '.join(map(str,sys.argv[:]))),
-			'##INFO=<ID=END,Number=1,Type=Integer,Description="End position of the structural variant">',
+			'##INFO=<ID=END,Number=1,Type=Integer,Description="End position of structural variant">',
 			'##INFO=<ID=SVTYPE,Number=1,Type=String,Description="Type of structural variant">',
 			'##INFO=<ID=SVLEN,Number=1,Type=Integer,Description="Difference in length between REF and ALT alleles">',
-			'##INFO=<ID=AF,Number=1,Type=Float,Description="Allele frequency,in the range (0,1)">',
-			'##INFO=<ID=CYTOBAND,Number=.,Type=String,Description="cytoBand(s) of the variant">',
+			'##INFO=<ID=DENOVO_FILTER,Number=1,Type=String,Description="Stringent filter status, recommended for de novo mutation discovery">',
+			'##INFO=<ID=REF_GTL,Number=1,Type=Float,Description="Median Phred-adjusted REF genotype likelihood">',
+			'##INFO=<ID=AF,Number=1,Type=Float,Description="Alternate allele frequency,in the range (0,1)">',
+			'##INFO=<ID=CYTOBAND,Number=.,Type=String,Description="Cytoband(s) of the variant">',
 			'##INFO=<ID=REPEATMASKER,Number=2,Type=String,Description="Name and reciprocal overlap of RepeatMasker vairant">',
 			'##INFO=<ID=1000G_ID,Number=1,Type=String,Description="1000 Genomes Phase 3 integrated SV callset variant name">',
 			'##INFO=<ID=1000G_ID,Number=1,Type=Float,Description="Overlap to 1000 Genomes Phase 3 variant, in the range (0,1)">',
@@ -1336,16 +1401,14 @@ def annotate(raw,genos,gen,REF,NON,GQ,OFH,sex,hemi,filt):
 			'##INFO=<ID=SEGDUP,Number=1,Type=Float,Description="Segmental duplication overlap, in the range (0,1)">',
 			'##INFO=<ID=STR,Number=1,Type=Float,Description="Short Tandem Repeat overlap, in the range (0,1)">',
 			'##INFO=<ID=UNMAPABLE,Number=1,Type=Float,Description="Overlap with regions unmapable using 100bp reads with respect to the hg19 assembly, in the range (0,1)">',
-			'##INFO=<ID=MEDREFGL,Number=1,Type=Float,Description="Median Phred-scaled genotype likelihood for individuals genotyped homozygous reference">',
 			'##FORMAT=<ID=GT,Number=1,Type=String,Description="Genotype">',
-			'##FORMAT=<ID=FT,Number=1,Type=String,Description="Sample filter">',
-			'##FORMAT=<ID=PE,Number=1,Type=Float,Description="Ratio of Discordant Paired-Ends to Concordant Paired-Ends">',
-			'##FOTMAT=<ID=SR,Number=1,Type=Float,Description="Ratio of Split reads to Concordant Paired-Ends">',
-			'##FORMAT=<ID=CN,Number=1,Type=Float,Description="Copy Number">',
+			'##FORMAT=<ID=CN,Number=1,Type=Float,Description="Copy number as a function of coverage">',
+			'##FORMAT=<ID=PE,Number=1,Type=Float,Description="Ratio of discordant paired-ends to concordant paired-ends">',
+			'##FOTMAT=<ID=SR,Number=1,Type=Float,Description="Ratio of split reads to concordant paired-ends">',
 			'##FORMAT=<ID=SC,Number=1,Type=Float,Description="SNP normalized coverage">',
 			'##FORMAT=<ID=SP,Number=1,Type=Float,Description="Number of SNPs within locus">',
-			'##FORMAT=<ID=AR,Number=1,Type=Float,Description="Heterozygous Allelic Depth ratio">',
-			'##FORMAT=<ID=HT,Number=1,Type=Float,Description="Number of Heterozygous SNPs">',
+			'##FORMAT=<ID=AR,Number=1,Type=Float,Description="Heterozygous allelic depth ratio">',
+			'##FORMAT=<ID=HT,Number=1,Type=Float,Description="Number of heterozygous SNPs">',
 			'##FORMAT=<ID=SQ,Number=1,Type=Float,Description="Phred-scaled genotype likelihood">',
 			'##FORMAT=<ID=GL,Number=2|3,Type=Float,Description="Phred-scaled genotype likelihood; homozygous alt, heterogygous alt, homozygous ref">',
 			'##FILTER=<ID=ABPARTS,Description="Variant overlaps to antibody parts >50%">',
@@ -1354,9 +1417,9 @@ def annotate(raw,genos,gen,REF,NON,GQ,OFH,sex,hemi,filt):
 			'##FILTER=<ID=STR,Description="Variant overlaps to short tandem repeats >50%">',
 			'##FILTER=<ID=UNMAPABLE,Description="Variant overlaps to unmapable regions >50%">',
 			'##FILTER=<ID=ALLREF,Description="All samples genotyped as homozygous reference">',
-			'##FILTER=<ID=GENOTYPE-FAIL,Description="Less than 90% of the samples did not pass genotype likelihood filters">',
+			'##FILTER=<ID=GENOTYPE-FAIL,Description="Variant fails standard filters of SV2">',
 			'##FILTER=<ID=FAIL,Description="Variant was unable to be genotyped">',
-			'##FILTER=<ID=PASS,Description="More than 90% of the samples passed genotyping">',
+			'##FILTER=<ID=PASS,Description="Variant passes standard filters of SV2">',
 			'##ALT=<ID=DEL,Description="Deletion, if 80% reciprocal overlap with RepeatMasker element, the class, name, and family are given separated by colons">',
 			'##ALT=<ID=DUP,Description="Duplication, if 80% reciprocal overlap with RepeatMasker element, the class, name, and family are given separated by colons">',
 		]
