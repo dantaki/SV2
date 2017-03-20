@@ -1,8 +1,11 @@
 SV<sup>2</sup>
 =====
+[![DOI](https://zenodo.org/badge/80166279.svg)](https://zenodo.org/badge/latestdoi/80166279)
+
 Support Vector Structural Variation Genotyper
 
 *A resource for whole genome short-read sequencing libraries.*
+
 ## Preprint
 
 [bioRxiv](http://biorxiv.org/content/early/2017/03/17/113498) 
