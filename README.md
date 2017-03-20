@@ -112,7 +112,7 @@ HG00096 | /bam/HG00096.bam | /vcf/HG00096_SNVs.vcf.gz | M
 
 ## Credits
 
-####Author:
+#### Author:
 
 * Danny Antaki
     * dantaki@ucsd.edu
