@@ -46,7 +46,7 @@ Flag | Description
 -feats | Feature output directory. *Skips feature extraction*
 #### Example
 ```
-# genotype sv 
+# genotype SV 
 sv2 -i CEU.in -r sv.vcf -g hg38 -o CEU_sv_genotypes
 
 # genotype cnv2 skipping preprocessing
