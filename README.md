@@ -40,21 +40,21 @@ Flag | Description
 -c \| -cpu | Parallelize sample-wise. 1 per CPU 
 -g \| -genome | Reference genome build [ hg19, hg38 ]. Default: hg19
 -pcrfree | GC content normalization for PCR-free libraries
--s \| -seed | Random seed for genome shuffling in preprocessing. Default 42
+-s \| -seed | Random seed for genome shuffling in preprocessing. Default: 42
 -o \| -out | Output name
 -pre | Preprocessing output directory. *Skips preprocessing*
 -feats | Feature output directory. *Skips feature extraction*
 #### Example
 ```
 # genotype sv 
-sv2 -i CEU.in -r sv.vcf -g hg38 -o CEU_sv_genotypes.vcf
+sv2 -i CEU.in -r sv.vcf -g hg38 -o CEU_sv_genotypes
 
 # genotype cnv2 skipping preprocessing
-sv2 -i CEU.in -r sv-2.vcf -g hg38 -o CEU_sv-2_genotypes.vcf -pre sv2_preprocessing/
+sv2 -i CEU.in -r sv-2.vcf -g hg38 -o CEU_sv-2_genotypes -pre sv2_preprocessing/
 
 # produce a VCF of one individual skipping feature extraction 
 head -n 1 CEU.in >sub.in
-sv2 -i sub.in -r sv.vcf -g hg38 -o sub_CEU_sv_genotypes.vcf -pre sv2_preprocessing/ -feats sv2_features/
+sv2 -i sub.in -r sv.vcf -g hg38 -o sub_CEU_sv_genotypes -pre sv2_preprocessing/ -feats sv2_features/
 
 # output is in sv2_genotypes/
 ls sv2_genotypes/*
