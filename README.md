@@ -7,8 +7,6 @@ Support Vector Structural Variation Genotyper
 
 [![DOI](https://zenodo.org/badge/80166279.svg)](https://zenodo.org/badge/latestdoi/80166279)
 
-*A resource for whole genome short-read sequencing libraries.*
-
 ## Preprint
 
 [bioRxiv](http://biorxiv.org/content/early/2017/03/17/113498) 
