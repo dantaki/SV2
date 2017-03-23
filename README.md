@@ -49,7 +49,7 @@ Flag | Description
 # genotype SV 
 sv2 -i CEU.in -r sv.vcf -g hg38 -o CEU_sv_genotypes
 
-# genotype cnv2 skipping preprocessing
+# genotype a different set of SV while skipping preprocessing
 sv2 -i CEU.in -r sv-2.vcf -g hg38 -o CEU_sv-2_genotypes -pre sv2_preprocessing/
 
 # produce a VCF of one individual skipping feature extraction 
