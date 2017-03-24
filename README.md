@@ -35,10 +35,10 @@ python setup.py install # ignore numpy warnings
 
 Flag | Description
 --- | -------------
--i \| -in | Tab-delimited input [ID,BAM path, VCF path, Gender]
+-i \| -in | Tab-delimited input [ID, BAM path, VCF path, Gender]
 -r \| -cnv | SV to genotype. BED or VCF
 -c \| -cpu | Parallelize sample-wise. 1 per CPU 
--g \| -genome | Reference genome build [ hg19, hg38 ]. Default: hg19
+-g \| -genome | Reference genome build [hg19, hg38]. Default: hg19
 -pcrfree | GC content normalization for PCR-free libraries
 -s \| -seed | Random seed for genome shuffling in preprocessing. Default: 42
 -o \| -out | Output name
@@ -71,6 +71,14 @@ ID | BAM PATH |  VCF PATH | Gender [M/F]
 --- | --- | --- | ---
 NA12878 | /bam/NA12878.bam | /vcf/NA12878_SNVs.vcf.gz | F 
 HG00096 | /bam/HG00096.bam | /vcf/HG00096_SNVs.vcf.gz | M
+
+* BAM format
+  * Supplementary alignment tags (SA) are required for split-read analysis
+* VCF format
+  * Allele Depth (AD) is required 
+  * bgzip and tabix indexed VCF
+* see [Usage](#usage) for more details
+  
 #### CNVs to genotype < -r >
 * BED format
   * Tab-delimited: first four columns 
@@ -80,13 +88,14 @@ HG00096 | /bam/HG00096.bam | /vcf/HG00096_SNVs.vcf.gz | M
     * Type: DEL | DUP
 * VCF format
   * SVTYPE= DEL | DUP
-  * Must have END=   
+  * Must have END=
+  
 ## Usage
 * SV<sup>2</sup> is designed for human whole genome short-read sequencing libraries. Given deletion and tandem duplication positions, SV<sup>2</sup> returns a VCF with predicted copy number genotypes.
 * Whole genome alignments from the [1000 Genomes Project](http://www.1000genomes.org/) were used for training. Validated genotypes were obtained from the phase 3 integrated structural variation call set ([DOI:10.1038/nature15394](http://dx.doi.org/10.1038%2Fnature15394); PMID:    26432246).
-* Features for genotyping include coverage, discordant paired-ends, split-reads, and heterozygous allelic depth ratio.
+* Features for genotyping include coverage, discordant paired-ends, split-reads, and heterozygous allele depth ratio.
    * BAM files must have supplementary alignment tags (SA).
-   * SNV VCF must contain Allelic Depth. SV<sup>2</sup> can accomodate [GATK Haplotype Caller](https://software.broadinstitute.org/gatk/gatkdocs/org_broadinstitute_gatk_tools_walkers_haplotypecaller_HaplotypeCaller.php) and [FreeBayes](https://github.com/ekg/freebayes) VCFs.
+   * SNV VCF must contain Allele Depth (AD). SV<sup>2</sup> can accomodate [GATK Haplotype Caller](https://software.broadinstitute.org/gatk/gatkdocs/org_broadinstitute_gatk_tools_walkers_haplotypecaller_HaplotypeCaller.php) and [FreeBayes](https://github.com/ekg/freebayes) VCFs.
       * SNV VCF must be compressed and indexed with [bgzip and tabix](http://www.htslib.org/doc/tabix.html)
 * SV<sup>2</sup> operates with a bi-allelic model with a copy number range of 0-4
 * Output is in VCF format.
