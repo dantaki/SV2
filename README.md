@@ -64,7 +64,7 @@ ls sv2_genotypes/*
 ```
 *Output VCF comes with gene annotations and other useful statistics*
 ## Inputs
-#### Sample information < -i >
+### Sample information < -i >
 Tab-delimited file containing sample information. Gender can also be encoded as 1 for M and 2 for F
 
 ID | BAM PATH |  VCF PATH | Gender [M/F]
@@ -79,7 +79,7 @@ HG00096 | /bam/HG00096.bam | /vcf/HG00096_SNVs.vcf.gz | M
   * bgzip and tabix indexed VCF
 * see [Usage](#usage) for more details
   
-#### CNVs to genotype < -r >
+### CNVs to genotype < -r >
 * BED format
   * Tab-delimited: first four columns 
     * Chromosome
