@@ -79,7 +79,7 @@ HG00096 | /bam/HG00096.bam | /vcf/HG00096_SNVs.vcf.gz | M
   * bgzip and tabix indexed VCF
 * see [Usage](#usage) for more details
   
-### CNVs to genotype < -r >
+### Variants to genotype < -r >
 * BED format
   * Tab-delimited: first four columns 
     * Chromosome
