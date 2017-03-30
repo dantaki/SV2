@@ -1,5 +1,5 @@
 
-![alt text](sv2.png "Support Vector Structural Variation Genotyper")
+![alt text](https://raw.githubusercontent.com/dantaki/SV2/master/png/sv2.png "Support Vector Structural Variation Genotyper")
 
 Support Vector Structural Variation Genotyper
 
@@ -11,7 +11,7 @@ Support Vector Structural Variation Genotyper
 
 [bioRxiv](http://biorxiv.org/content/early/2017/03/17/113498) : [doi](https://doi.org/10.1101/113498)
 
-![alt text](sv2_flowchart.png "Support Vector Structural Variation Genotyper Work Flow")
+![alt text](https://raw.githubusercontent.com/dantaki/SV2/master/png/sv2_flowchart.png "Support Vector Structural Variation Genotyper Work Flow")
 
 ## Getting Started
 #### 1: Download Source Code :floppy_disk:
@@ -90,6 +90,9 @@ HG00096 | /bam/HG00096.bam | /vcf/HG00096_SNVs.vcf.gz | M
   * Must have END=
   
 ## Usage
+
+![alt text](https://raw.githubusercontent.com/dantaki/SV2/master/png/sv2_auc.png "Support Vector Structural Variation Genotyper Work Flow")
+
 * SV<sup>2</sup> is designed for human whole genome short-read sequencing libraries. Given deletion and tandem duplication positions, SV<sup>2</sup> returns a VCF with predicted copy number genotypes.
 * Whole genome alignments from the [1000 Genomes Project](http://www.1000genomes.org/) were used for training. Validated genotypes were obtained from the phase 3 integrated structural variation call set ([DOI:10.1038/nature15394](http://dx.doi.org/10.1038%2Fnature15394); PMID:    26432246).
 * Features for genotyping include coverage, discordant paired-ends, split-reads, and heterozygous allele depth ratio.
