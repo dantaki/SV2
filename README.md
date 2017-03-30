@@ -9,10 +9,9 @@ Support Vector Structural Variation Genotyper
 
 ## Preprint
 
-[bioRxiv](http://biorxiv.org/content/early/2017/03/17/113498) 
+[bioRxiv](http://biorxiv.org/content/early/2017/03/17/113498) : [doi](https://doi.org/10.1101/113498)
 
-[doi](https://doi.org/10.1101/113498)
-
+![alt text](sv2_flowchart.png "Support Vector Structural Variation Genotyper Work Flow")
 
 ## Getting Started
 #### 1: Download Source Code :floppy_disk:
