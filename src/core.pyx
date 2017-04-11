@@ -1333,7 +1333,9 @@ def annotate(raw,genos,gen,REF,NON,GQ,OFH,sex,hemi,FILT,DNMFILT):
 				else: GT[(k,iid)]='0/0'
 	VCF=[]
 	CNV_ID=0
+	CHROMS={}
 	for (c,s,e,cl) in pbed.BedTool(list(set([(x[0],x[1],x[2],x[3]) for x in raw]))).sort():
+		CHROMS[c]=1
 		SZ=int(e)-int(s)+1
 		TYPE=cl
 		DENOVO_FILT='FAIL'
@@ -1422,10 +1424,10 @@ def annotate(raw,genos,gen,REF,NON,GQ,OFH,sex,hemi,FILT,DNMFILT):
 			'##FOTMAT=<ID=SR,Number=1,Type=Float,Description="Ratio of split reads to concordant paired-ends">',
 			'##FORMAT=<ID=SC,Number=1,Type=Float,Description="SNP normalized coverage">',
 			'##FORMAT=<ID=SP,Number=1,Type=Float,Description="Number of SNPs within locus">',
-			'##FORMAT=<ID=AR,Number=1,Type=Float,Description="Heterozygous allelic depth ratio">',
+			'##FORMAT=<ID=AR,Number=1,Type=Float,Description="Heterozygous allele depth ratio">',
 			'##FORMAT=<ID=HT,Number=1,Type=Float,Description="Number of heterozygous SNPs">',
 			'##FORMAT=<ID=SQ,Number=1,Type=Float,Description="Phred-scaled genotype likelihood">',
-			'##FORMAT=<ID=GL,Number=2|3,Type=Float,Description="Phred-scaled genotype likelihood; homozygous alt, heterogygous alt, homozygous ref">',
+			'##FORMAT=<ID=GL,Number=2|3,Type=Float,Description="Phred-scaled genotype likelihood; homozygous ALT, heterogygous ALT, homozygous REF">',
 			'##FILTER=<ID=ABPARTS,Description="Variant overlaps to antibody parts >50%">',
 			'##FILTER=<ID=CENTROMERE,Description="Variant overlaps to centromere >50%">',
 			'##FILTER=<ID=SEGDUP,Description="Variant overlaps to segmental duplications >50%">',
@@ -1441,7 +1443,7 @@ def annotate(raw,genos,gen,REF,NON,GQ,OFH,sex,hemi,FILT,DNMFILT):
 	with open(get_path()+'/resources/{}.chrom.sizes'.format(gen)) as f:
 		for l in f:
 			(chrom,size) = l.rstrip('\n').split('\t')
-			VCFHEAD.append('##contig=<ID={},length={}>'.format(chrom.replace('chr',''),size))
+			if CHROMS.get(chrom) != None: VCFHEAD.append('##contig=<ID={},length={}>'.format(chrom,size))
 	outdir = os.getcwd()+'/sv2_genotypes/'
 	if not os.path.exists(outdir): os.makedirs(outdir)
 	outfh = open(outdir+OFH,'w')
