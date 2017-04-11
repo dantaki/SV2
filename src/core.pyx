@@ -4,7 +4,6 @@
 #cython: cdivision=True
 import os,sys,pysam,datetime
 from collections import OrderedDict as OD
-from math import ceil
 from glob import glob
 import pybedtools as pbed
 from time import time
@@ -509,10 +508,10 @@ class gtVCF():
 		self.fh=FH
 		self.isHC = False
 		self.isFB = False
-		if [x for x in lines if 'HaplotypeCaller' in x]: self.isHC=True
-		if [x for x in lines if 'freeBayes' in x]: self.isFB=True
+		if [x for x in lines if 'FORMAT=<ID=AD' in x]: self.isHC=True
+		if [x for x in lines if 'FORMAT=<ID=DPR' in x]: self.isFB=True
 		if self.isHC == self.isFB:
-			sys.stderr.write('ERROR: {} IS AMBIGUOUS. VCF HEADER MUST CONTAIN EITHER <HaplotypeCaller> or <freeBayes>\n'.format(FH))
+			sys.stderr.write('ERROR: {} IS AMBIGUOUS. VCF FORMATS MUST CONTAIN EITHER <AD> or <DPR>\n'.format(FH))
 			sys.exit(1)
 		self.formatTag=None
 		if self.isFB == True: self.formatTag = 'DPR'
@@ -560,7 +559,7 @@ class gtVCF():
 			TOT=len(genome)
 		snp_cov['GENOME']=(MED,TOT)
 		return snp_cov	
-	def extract_SNP_features(self,sorted_cnv,master_cnv,snp_cov,chrFlag):
+	def extract_SNP_features(self,sorted_cnv,master_cnv,snp_cov,chrFlag,gender,gen):
 		cdef int s=0
 		cdef int e=0
 		cdef int depth=0
@@ -575,8 +574,10 @@ class gtVCF():
 			het_ratio_locus=[]
 			for x in cnv_span:
 				c = x[0]
-				norm_cov = snp_cov[(self.iid,c)]
+				normc = c
 				s,e = map(int,(x[1],x[2]))
+				if gender == 'M' and checkPAR('{} {} {}'.format(c,s,e),gen)==True: normc='GENOME' 
+				norm_cov = snp_cov[(self.iid,normc)]
 				if chrFlag == False: c = c.replace("chr","")
 				for y in tbx.fetch(region='{}:{}-{}'.format(c,int(s)-1,int(e)-1)):
 					dats = vcfrow(self,y.split('\t'))
@@ -636,7 +637,7 @@ def extract_feats(iid,bamfh,vcffh,cnv,prefh,gender,out,gen,pcrfree):
 	ofh = open(outdir+out,'w')
 	out_head = '\t'.join(('chr','start','end','type','size','id','coverage','coverage_GCcorrected','discordant_ratio','split_ratio','SNP_coverage','HET_ratio','SNPs','HET_SNPs'))
 	ofh.write(out_head+'\n')
-	SNPs, HETs = gtVCF(vcffh,iid).extract_SNP_features(cnv,master_cnv,snp_cov,chrFlag)
+	SNPs, HETs = gtVCF(vcffh,iid).extract_SNP_features(cnv,master_cnv,snp_cov,chrFlag,gender,gen)
 	for call in cnv:
 		(c,s,e,cl) = call
 		if SNPs.get(call)==None or HETs.get(call)==None or cnv_gc.get(call)==None or master_cnv.get(call)==None: continue
@@ -651,7 +652,9 @@ def extract_feats(iid,bamfh,vcffh,cnv,prefh,gender,out,gen,pcrfree):
 			"""read count coverage estimation"""
 			(read_count,bp_span) = count_reads(cnv_span,bam,ci,chrFlag)
 			cov=float('nan')
-			if pre.chr_cov[(iid,c)] != 0: cov = normalize_coverage(read_count,bp_span,pre.chr_cov[(iid,c)],pre.read_len[iid])
+			normc=c
+			if gender == 'M' and checkPAR('{} {} {}'.format(c,s,e),gen)== True: normc='GENOME'
+			if pre.chr_cov[(iid,c)] != 0: cov = normalize_coverage(read_count,bp_span,pre.chr_cov[(iid,normc)],pre.read_len[iid])
 			GCnorm_ratio = 1.0
 			if gc_dict.get(('RC',GC_content))==None:
 				if gc_dict.get(('DOC',GC_content)) !=None: GCnorm_ratio=gc_dict[('DOC',GC_content)]
@@ -677,6 +680,11 @@ def extract_feats(iid,bamfh,vcffh,cnv,prefh,gender,out,gen,pcrfree):
 				str(np.around(snp_coverage,decimals=3)),str(snps),str(np.around(het_ratio,decimals=3)),str(hets) ))+'\n')
 	bam.close()
 	ofh.close()
+cdef checkPAR(cnv,gen):
+	cdef bint i
+	i=0 
+	if len(pbed.BedTool(cnv,from_string=True).intersect(pbed.BedTool(get_path()+'/resources/par_'+gen+'.bed'),f=0.5)) > 0: i=1
+	return i
 cdef returnPAR(cnv,gen):
 	out=[]
 	results = pbed.BedTool(cnv).intersect(pbed.BedTool(get_path()+'/resources/par_'+gen+'.bed'),f=0.5,wa=True,u=True)
@@ -689,7 +697,7 @@ cdef removePAR(cnv,gen):
 	if len(results) > 0:
 		for x in results.sort(): out.append(tuple(x))
 	return out
-cdef likFilter(NON,PEF):
+cdef likFilter(NON,PEF,CLF):
 	'''
 	standard stringency filters 1==PASS 0==FAIL	
 	'''
@@ -697,6 +705,7 @@ cdef likFilter(NON,PEF):
 	cdef unsigned int sz
 	cdef double dpe
 	cdef double sr
+	cdef double feat
 	cdef unsigned short passflag
 	cdef unsigned int lik
 	for x in NON:
@@ -706,37 +715,36 @@ cdef likFilter(NON,PEF):
 		if PEF.get(x)!=None:
 			dpe = PEF[x][0]
 			sr = PEF[x][1]
+		feat = dpe+sr
 		clf=x[len(x)-1]
 		sz=int(x[2])-int(x[1])+1
 		passflag=1
-		if 'DEL' in clf and 'HEMIZYGOUS' not in clf:
-			if (dpe!=0 or sr!=0) and lik<8: passflag=0
-			elif dpe==0 and sr==0:
+		if 'DEL' in clf and 'Male_Sex_Chrom' not in clf:
+			if feat!=0 and lik<8: passflag=0
+			elif feat==0:
 				if 'DEL_lt1KB' in clf and lik <18: passflag=0
 				if 'DEL_gt1KB' in clf:
 					if sz < 3000: passflag=0
 					elif 3000<=sz<5000 and lik <20: passflag=0
 					elif sz >=5000 and lik <18: passflag=0 
-		elif 'DUP_PairedEnd' in clf:
-			if (dpe!=0 or sr!=0): 
+		elif 'DUP_Breakpoint' in clf:
+			if feat != 0: 
 				if sz < 1000 and lik < 12: passflag=0
 				if sz >= 1000 and lik < 10: passflag=0
-			elif dpe==0 and sr==0: 
+			elif feat==0: 
 				if sz < 3000: passflag=0
 				elif sz >=3000 and lik < 12: passflag=0
-		elif 'DUP_HetAllelicDepth' in clf:
-			if (dpe!=0 or sr!=0) and lik<15 and sz < 3000 : passflag=0
-			elif (dpe!=0 or sr!=0) and lik<12 and sz >=3000 : passflag=0
-			elif dpe==0 and sr==0:
-				if sz<5000: passflag=0
-				elif sz>=5000 and lik<15: passflag=0
-		elif 'HEMIZYGOUS_DEL' in clf and lik<8 and (dpe!=0 or sr!=0): passflag=0
-		elif 'HEMIZYGOUS_DEL' in clf and lik<10 and dpe==0 and sr==0 and sz>=1000: passflag=0
-		elif 'HEMIZYGOUS_DEL' in clf and sz<1000 and dpe==0 and sr==0: passflag=0
-		elif 'HEMIZYGOUS_DUP' in clf:
+		elif 'DUP_SNV' in clf:
+			if 'DUP_Breakpoint' in CLF[(x[0],x[1],x[2],x[3])] and lik < 8: passflag=0
+			if 'DUP_Breakpoint' not in CLF[(x[0],x[1],x[2],x[3])] and sz < 3000 and lik < 18: passflag=0
+			if 'DUP_Breakpoint' not in CLF[(x[0],x[1],x[2],x[3])] and sz >= 3000 and lik < 13: passflag=0
+		elif 'DEL_Male_Sex_Chrom' in clf and lik<8 and feat!=0: passflag=0
+		elif 'DEL_Male_Sex_Chrom' in clf and lik<10 and feat==0 and sz>=1000: passflag=0
+		elif 'DEL_Male_Sex_Chrom' in clf and sz<1000 and feat==0: passflag=0
+		elif 'DUP_Male_Sex_Chrom' in clf:
 			if sz<5000: passflag=0
 			elif sz>=5000 and lik<10: passflag=0
-			elif sr==0 and dpe==0: passflag=0
+			elif feat==0: passflag=0
 		k= (x[0],x[1],x[2],x[3])
 		if FILT.get(k)==None: FILT[k]=[passflag]
 		else: FILT[k].append(passflag)
@@ -745,7 +753,7 @@ cdef likFilter(NON,PEF):
 		if 0 in FILT[x]: FIN[x]=0
 		else: FIN[x]=1
 	return FIN
-cdef dnmFilter(NON,REF,PEF):
+cdef dnmFilter(NON,REF,PEF,CLF):
 	'''
 	de novo filter recommendations
 	'''
@@ -753,6 +761,7 @@ cdef dnmFilter(NON,REF,PEF):
 	cdef unsigned int sz
 	cdef double dpe
 	cdef double sr
+	cdef double feat
 	cdef unsigned short passflag
 	cdef unsigned int ref
 	cdef unsigned int non
@@ -762,30 +771,29 @@ cdef dnmFilter(NON,REF,PEF):
 		if PEF.get(x)!=None: 
 			dpe=PEF[x][0]
 			sr=PEF[x][1]
+		feat = dpe+sr
 		clf=x[len(x)-1]
 		sz=int(x[2])-int(x[1])+1
-		passflag=1
+		passflag=0
 		ref=20
 		non=NON[x]
 		if REF.get(x)!=None: ref=REF[x]
-		if 'DEL' in clf and 'HEMIZYGOUS' not in clf:
-			if (dpe!=0 or sr!=0) and non<12 and ref<12: passflag=0
-			elif dpe==0 and sr==0:
-				if sz < 1000: passflag=0
-				elif 1000<=sz<3000 and non <24 and ref < 20: passflag=0
-				elif 3000<=sz<5000 and non <20 and ref < 20: passflag=0
-				elif sz >= 5000 and non < 20 and ref < 18: passflag=0	 
-		elif 'DUP_PairedEnd' in clf:
-			if (dpe!=0 or sr !=0) and non<11 and ref<11: passflag=0
-			if dpe==0 and sr==0 and sz < 3000: passflag=0
-			if dpe==0 and sr==0 and 3000<=sz<100000 and non<10 and ref<15: passflag=0
-			if dpe==0 and sr==0 and sz >= 100000 and non<10 and ref<13: passflag=0
-		elif 'DUP_HetAllelicDepth' in clf:
-			if non<10 and ref<10: passflag=0
-		elif 'HEMIZYGOUS_DEL' in clf and non<8 and ref<8: passflag=0
-		elif 'HEMIZYGOUS_DUP' in clf:
-			if sz<5000: passflag=0
-			elif sz>=5000 and ref<10 and non<10: passflag=0
+		if 'DEL' in clf and 'Male_Sex_Chrom' not in clf:
+			if feat != 0 and non >=12 and ref >=12: passflag=1
+			elif feat==0 and 1000<=sz<3000 and non >=24 and ref >=20: passflag=1
+			elif feat==0 and 3000<=sz<5000 and non >=20 and ref >=20: passflag=1
+			elif feat==0 and sz >= 5000 and non >=20 and ref >=18: passflag=1	 
+		elif 'DUP_Breakpoint' in clf:
+			if feat != 0 and non >=11 and ref >=11: passflag=1
+			if feat==0 and 3000<=sz<100000 and non >=10 and ref >=15: passflag=1
+			if feat==0 and sz >= 100000 and non >=10 and ref >=13: passflag=1
+		elif 'DUP_SNV' in clf and non >=10 and ref >=10 and 'DUP_Breakpoint' in CLF[(x[0],x[1],x[2],x[3])]: passflag=1
+		elif 'DUP_SNV' in clf and 'DUP_Breakpoint' not in CLF[(x[0],x[1],x[2],x[3])]:
+			if sz < 5000 and ref >= 18 and non >= 18: passflag=1
+			elif 5000 <= sz < 100000 and ref >= 15 and non >= 10: passflag=1
+			elif sz >= 100000 and ref >= 13 and non >= 10: passflag=1
+		elif 'DEL= Male_Sex_Chrom' in clf and non>=8 and ref>=8: passflag=1
+		elif 'DUP_Male_Sex_Chrom' in clf and sz>=5000 and ref>=10 and non>=10: passflag=1
 		k=(x[0],x[1],x[2],x[3])
 		if FILT.get(k)==None: FILT[k]=[passflag]
 		else: FILT[k].append(passflag)
@@ -794,12 +802,19 @@ cdef dnmFilter(NON,REF,PEF):
 		if 0 in FILT[x]: FIN[x]=0
 		else: FIN[x]=1
 	return FIN
+cdef rowParser(x):
+	clf = x[len(x)-1]
+	k = (x[0],x[1],x[2],x[4],x[5])
+	j = (x[0],x[1],x[2],x[4],clf)
+	i = (x[0],x[1],x[2],x[4])
+	return (clf,k,j,i)	
 def genotype(raw,feats,sex,gen,out):
 	REF={}
 	NON={}
 	GQ={}
 	HEMI={}
 	PEF={}	
+	CLF={}
 	FILT={}
 	males = [k for k in sex if sex[k] == 'M']
 	sex_chrom = ['chrX','chrY']
@@ -835,8 +850,7 @@ def genotype(raw,feats,sex,gen,out):
 		autosome_del_df.columns=head
 		for x in autosome_del_svm(autosome_del_df).values:
 			ofh.write('\t'.join(map(str,x))+'\n')
-			k = (x[0],x[1],x[2],x[4],x[5])
-			kk = (x[0],x[1],x[2],x[4],x[len(x)-1])
+			clf,k,kk,j = rowParser(x)
 			x[6] = format(float(x[6])*2,'.2f')
 			GQ[k]= ','.join((format(float(x[14]),'.2f'),format(float(x[15]),'.2f'),format(float(x[16]),'.2f')))
 			if PEF.get(kk)==None: PEF[kk]=[float(x[7]),float(x[8])]
@@ -845,7 +859,7 @@ def genotype(raw,feats,sex,gen,out):
 				x[13]='0/0'
 				if x[5] not in males and x[0] == 'chrY': x[13]='.'
 				else:
-					lik=ceil(float(x[18]))
+					lik=np.rint(float(x[18]))
 					if REF.get(kk)==None: REF[kk]=[lik]
 					else: REF[kk].append(lik)
 			else:
@@ -853,7 +867,7 @@ def genotype(raw,feats,sex,gen,out):
 				else: x[13]='1/1'
 				if x[5] not in males and x[0] == 'chrY': x[13]='.'
 				else:
-					lik=ceil(float(x[19]))
+					lik=np.rint(float(x[19]))
 					if NON.get(kk)==None: NON[kk]=[lik]
 					else: NON[kk].append(lik)
 			genos.append(tuple(x))
@@ -862,8 +876,9 @@ def genotype(raw,feats,sex,gen,out):
 		autosome_dup_df.columns=head
 		for x in autosome_dup_svm(autosome_dup_df).values:
 			ofh.write('\t'.join(map(str,x))+'\n')
-			k = (x[0],x[1],x[2],x[4],x[5])
-			kk = (x[0],x[1],x[2],x[4],x[len(x)-1])
+			clf,k,kk,j = rowParser(x)
+			if CLF.get(j)==None: CLF[j]=[clf]
+			else: CLF[j].append(clf)
 			x[6] = format(float(x[6])*2,'.2f')
 			GQ[k]= ','.join((format(float(x[14]),'.2f'),format(float(x[15]),'.2f'),format(float(x[16]),'.2f')))
 			if PEF.get(kk)==None: PEF[kk]=[float(x[7]),float(x[8])]
@@ -872,7 +887,7 @@ def genotype(raw,feats,sex,gen,out):
 				x[13]='0/0'
 				if x[5] not in males and x[0] == 'chrY': x[13]='.'
 				else:
-					lik=ceil(float(x[18]))
+					lik=np.rint(float(x[18]))
 					if REF.get(kk)==None: REF[kk]=[lik]
 					else: REF[kk].append(lik)
 			else:
@@ -880,7 +895,7 @@ def genotype(raw,feats,sex,gen,out):
 				else: x[13]='1/1'
 				if x[5] not in males and x[0] == 'chrY': x[13]='.'
 				else:
-					lik=ceil(float(x[19]))
+					lik=np.rint(float(x[19]))
 					if NON.get(kk)==None: NON[kk]=[lik]
 					else: NON[kk].append(lik)
 			genos.append(tuple(x))
@@ -889,8 +904,7 @@ def genotype(raw,feats,sex,gen,out):
 		sexchr_del_df.columns=head
 		for x in sexchr_del_svm(sexchr_del_df).values:
 			ofh.write('\t'.join(map(str,x))+'\n')
-			k = (x[0],x[1],x[2],x[4],x[5])
-			kk = (x[0],x[1],x[2],x[4],x[len(x)-1])
+			clf,k,kk,j = rowParser(x)
 			x[6] = format(float(x[6]),'.2f')
 			GQ[k]= ','.join((format(float(x[15]),'.2f'),format(float(x[16]),'.2f')))
 			if PEF.get(kk)==None: PEF[kk]=[float(x[7]),float(x[8])]
@@ -898,12 +912,12 @@ def genotype(raw,feats,sex,gen,out):
 			HEMI[kk]=1
 			if int(x[13]) == 1:
 				x[13]='0'
-				lik=ceil(float(x[18]))
+				lik=np.rint(float(x[18]))
 				if REF.get(kk)==None: REF[kk]=[lik]
 				else: REF[kk].append(lik)
 			else:
 				x[13]='1'
-				lik=ceil(float(x[19]))
+				lik=np.rint(float(x[19]))
 				if NON.get(kk)==None: NON[kk]=[lik]
 				else: NON[kk].append(lik)
 			genos.append(tuple(x))
@@ -912,8 +926,7 @@ def genotype(raw,feats,sex,gen,out):
 		sexchr_dup_df.columns=head
 		for x in sexchr_dup_svm(sexchr_dup_df).values:
 			ofh.write('\t'.join(map(str,x))+'\n')
-			k = (x[0],x[1],x[2],x[4],x[5])
-			kk = (x[0],x[1],x[2],x[4],x[len(x)-1])
+			clf,k,kk,j = rowParser(x)
 			x[6] = format(float(x[6])*2,'.2f')
 			GQ[k]= ','.join((format(float(x[15]),'.2f'),format(float(x[16]),'.2f')))
 			if PEF.get(kk)==None: PEF[kk]=[float(x[7]),float(x[8])]
@@ -921,7 +934,7 @@ def genotype(raw,feats,sex,gen,out):
 			HEMI[kk]=1
 			if int(x[13]) == 1:
 				x[13]='0'
-				lik=ceil(float(x[18]))
+				lik=np.rint(float(x[18]))
 				if x[5] not in males and x[0] == 'chrY':
 					x[13]='.'
 				if x[5] in males:
@@ -929,7 +942,7 @@ def genotype(raw,feats,sex,gen,out):
 					else: REF[kk].append(lik)
 			else:
 				x[13]='1'
-				lik=ceil(float(x[19]))
+				lik=np.rint(float(x[19]))
 				if x[5] not in males and x[0] == 'chrY':
 						x[13]='.'
 				if x[5] in males:
@@ -939,9 +952,9 @@ def genotype(raw,feats,sex,gen,out):
 	ofh.close()
 	nuREF={}
 	nuNON={}
-	for x in REF: REF[x]=int(ceil(np.median(REF[x])))
-	for x in NON: NON[x]=int(ceil(np.median(NON[x])))
-	STD_FILT,DNM_FILT = likFilter(NON,PEF),dnmFilter(NON,REF,PEF)
+	for x in REF: REF[x]=int(np.rint(np.median(REF[x])))
+	for x in NON: NON[x]=int(np.rint(np.median(NON[x])))
+	STD_FILT,DNM_FILT = likFilter(NON,PEF,CLF),dnmFilter(NON,REF,PEF,CLF)
 	for x in REF: nuREF[(x[0],x[1],x[2],x[3])]=REF[x]
 	for x in NON: nuNON[(x[0],x[1],x[2],x[3])]=NON[x]
 	del REF
@@ -1055,7 +1068,7 @@ cdef sexchr_del_svm(df):
 	clf=''
 	with open(get_path()+'/resources/training_sets/1000Genomes_HighCov_sexchr_deletion_CLF.pkl','rb') as f: clf=pickle.load(f)
 	lik = clf.predict_proba(X)
-	return del_sexchr_tab(df,lik,'HEMIZYGOUS_DEL')
+	return del_sexchr_tab(df,lik,'DEL_Male_Sex_Chrom')
 cdef autosome_dup_svm(df):
 	snpCLF=pd.DataFrame()
 	peCLF=pd.DataFrame()
@@ -1083,7 +1096,7 @@ cdef autosome_dup_svm(df):
 		temp,X = prepHET(snpCLF)
 		with open(get_path()+'/resources/training_sets/1000Genomes_HighCov_autosome_duplication_SNP-CLF.pkl','rb') as f: clf=pickle.load(f)
 		lik = clf.predict_proba(X)
-		final=final.append(dup_autosome_tab(temp,lik,'DUP_HetAllelicDepth'))
+		final=final.append(dup_autosome_tab(temp,lik,'DUP_SNV'))
 	clf=None
 	X=None
 	temp=pd.DataFrame()
@@ -1091,14 +1104,14 @@ cdef autosome_dup_svm(df):
 		temp,X= prepPE(peCLF)
 		with open(get_path()+'/resources/training_sets/1000Genomes_LowCov_autosome_duplication_PE-CLF.pkl','rb') as f: clf=pickle.load(f)
 		lik = clf.predict_proba(X)
-		final=final.append(dup_autosome_tab(temp,lik,'DUP_PairedEnd'))
+		final=final.append(dup_autosome_tab(temp,lik,'DUP_Breakpoint'))
 	return final
 cdef sexchr_dup_svm(df):
 	(df,X) = prep3d(df)
 	clf=''
 	with open(get_path()+'/resources/training_sets/1000Genomes_LowCov_sexchr_duplication_CLF.pkl','rb') as f: clf=pickle.load(f)
 	lik = clf.predict_proba(X)
-	return dup_sexchr_tab(df,lik,'HEMIZYGOUS_DUP')
+	return dup_sexchr_tab(df,lik,'DUP_Male_Sex_Chrom')
 cdef recipOver(x):
 	cdef unsigned int s1
 	cdef unsigned int s2
@@ -1359,18 +1372,20 @@ def annotate(raw,genos,gen,REF,NON,GQ,OFH,sex,hemi,FILT,DNMFILT):
 		if REF.get((c,s,e,cl))!=None: MEDREF=REF[(c,s,e,cl)]
 		if NON.get((c,s,e,cl))!=None: QUAL=NON[(c,s,e,cl)]
 		if AF.get((c,s,e,cl))!=None: ALLELE=format(float(AF[(c,s,e,cl)][0])/float(AF[(c,s,e,cl)][1]),'.2f')
+		if FILT.get((c,s,e,cl))!= None: 
+			if FILT[(c,s,e,cl)]==0: fail.append('GENOTYPE-FAIL')
+			else: fail.append('PASS')
 		if float(ABPTS) >= 0.5: fail.append('ABPARTS')
 		if float(CENTMER) >= 0.5: fail.append('CENTROMERE')
 		if float(SEGD) >= 0.5: fail.append('SEGDUP')
 		if float(STR) >= 0.5: fail.append('STR')
 		if float(UNMAP) >= 0.5: fail.append('UNMAPABLE')
 		if cnvref == len(IID): fail.append('ALLREF')
-		if FILT.get((c,s,e,cl))!= None: 
-			if FILT[(c,s,e,cl)]==0: fail.append('GENOTYPE-FAIL')
 		if GTed.get((c,s,e,cl))==None: fail.append('FAIL')	
 		if DNMFILT.get((c,s,e,cl))!=None:
 			if DNMFILT[(c,s,e,cl)]==1: DENOVO_FILT='PASS'
 		if len(fail) > 0: PASS = ','.join(fail)
+		if 'FAIL' in PASS: DENOVO_FILT = 'FAIL'
 		INFO = 'END={};SVTYPE={};SVLEN={};DENOVO_FILTER={};REF_GTL={};AF={};CYTOBAND={};REPEATMASKER={},{};1000G_ID={};1000G_OVERLAP={};DESCRIPTION={};GENES={};ABPARTS={};CENTROMERE={};SEGDUP={};STR={};UNMAPABLE={}'.format(e,TYPE,SZ,DENOVO_FILT,MEDREF,ALLELE,CYTOB,meiName,REPEATMASKER,THOUGEN_ID,THOUGEN_OVR,DESX,GENE,ABPTS,CENTMER,SEGD,STR,UNMAP)
 		for x in IID:
 			if GT.get(((c,s,e,cl),x))!=None: GTS.append(GT[((c,s,e,cl),x)])
