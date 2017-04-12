@@ -91,7 +91,7 @@ SV<sup>2</sup> genotypes SV with six [support vector machine classifiers](http:/
 
 Each classifier, with the exception of Duplication SNV implements depth of coverage, discordant paired-ends, and split-reads as features. The Duplication SNV classifier employs depth of coverage and heterozygous allele depth as features. 
 
-Genotyping output in BED and VCF format are located in `sv2_genotypes/` in the current working directory.
+[Genotyping output](#genotyping-output) in BED and VCF format are located in `sv2_genotypes/` in the current working directory.
 
 ## Installation
 
@@ -122,11 +122,9 @@ tar xvzf sv2-1.1.tar.gz
 
 ### Configure 
 
-Here you will generate the config files SV<sup>2</sup> requires for installation. 
-
 Below are two methods for generating the config files. [Configure with Perl 5](#configure-with-perl-5) is recommended. 
 
-The config files contain the paths of hg19/hg38 FASTA files. One FASTA file is required.
+The config files contain the paths of the install directory and the hg19/hg38 FASTA files. One FASTA file is required for SV<sup>2</sup>.
 
 ```
 cd sv2-1.1/
@@ -175,7 +173,7 @@ python setup.py install # ignore numpy warnings
 
 Append `export PATH=$SV2_INSTALL_DIR:$PATH` to your `~/.bashrc` if you have not already. 
 
-**Note:** `$SV2_INSTALL_DIR` is the install path defined in the config files. For this example, append `export PATH=/home/usr/bin/sv2:$PATH` to your `~/.bashrc`
+**Note:** `$SV2_INSTALL_DIR` is the install path defined in the config files. For this example, append `export PATH=/home/usr/bin/sv2:$PATH` to `~/.bashrc`
 
 `source ~/.bashrc`
 
@@ -212,7 +210,7 @@ If you get this error: `Error detail: Resource temporarily unavailable` there is
 
 ## Input
 
-Running SV<sup>2</sup> requires two input files: sample information and a list of SVs to genotype.
+The SV<sup>2</sup> command requires two input files: sample information and a list of SVs to genotype. The sample information input file contains paths to BAM and VCF files. 
 
 A FASTA file for hg19 or hg38 is required for SV<sup>2</sup> to run. The SV<sup>2</sup> [config](#configure) files contain the paths to the hg19 and hg38 FASTA.  
 
@@ -220,7 +218,7 @@ A FASTA file for hg19 or hg38 is required for SV<sup>2</sup> to run. The SV<sup>
 
 `[-i|-in] SAMPLE_INFORMATION.txt` 
 
-ID | BAM PATH |  VCF PATH | Gender [M/F]
+ID | BAM PATH | VCF PATH | Gender [M/F]
 --- | --- | --- | ---
 NA12878 | /bam/NA12878.bam | /vcf/NA12878_SNVs.vcf.gz | F
 HG00096 | /bam/HG00096.bam | /vcf/HG00096_SNVs.vcf.gz | M
@@ -229,13 +227,14 @@ The sample information file must be tab-delimited with four columns. Failure to 
 
 Each row of the sample information file corresponds to a sample. The sample information file can contain multiple samples and can be run in parallel given `[-c|-cpu NUMBER_OF_THREADS]`. 
 
-The first column is the sample identifier. The second column contains the full path to the BAM file for that sample. Likewise, the third column contains the full path to the SNV VCF file for that sample. The SNV VCF can contain multiple samples, however the sample identifier in the first column must uniquely match one of the sample identifiers in the VCF header. The final column has the gender for that sample. Either a character `[M|F]` or an integer `[1|2]` is recognized. Integer encoding for gender is the same as PLINK fam files: 1 for male, 2 for female. Unknown genders are not supported. The purpose of including gender is to properly normalize coverage for males on sex chromosomes. 
+The first column is the sample identifier. The second column contains the full path to the BAM file for that sample. Likewise, the third column contains the full path to the SNV VCF file. The SNV VCF can contain multiple samples, however the sample identifier in the first column must uniquely match one of the sample identifiers in the VCF header. The final column has the gender. Either a character `[M|F]` or an integer `[1|2]` is recognized. Integer encoding for gender is the same as PLINK fam files: 1 for male, 2 for female. Unknown genders are not supported. The purpose of including gender is to properly normalize coverage for males on sex chromosomes. 
  
 #### BAM
 
-BAM files must contain supplementary alignment tags (SA) to recognize split-reads. Without SA tags, SV<sup>2</sup> may not genotype certain variants well. SV<sup>2</sup> supports [BWA-MEM](http://github.com/lh3/bwa) alignments.
+BAM files must contain supplementary alignment tags (SA) to recognize split-reads. Without SA tags, SV<sup>2</sup> may not genotype variants well. SV<sup>2</sup> supports [BWA-MEM](http://github.com/lh3/bwa) alignments.
 
 BAM files must also be indexed with the `.bai` file in the same directory as the BAM file. 
+
 #### VCF
 
 SNV VCF files must contain allele depth encoded as either `AD` or `DPR` in the format column. Additionally, VCF files must be compressed with [bgzip](http://www.htslib.org/doc/tabix.html) and indexed with [tabix](http://www.htslib.org/doc/tabix.html) with the index file in the same path as the VCF. 
@@ -244,24 +243,28 @@ When defining a VCF for a given sample, the sample identifier in the VCF header 
 
 ### SV Input
 
+`[-r|-cnv] SV_LIST` 
+
 SV<sup>2</sup> requires either a BED or VCF file of deletions and tandem duplications.
 
 #### BED Input
 
-BED files must be tab-delimited with at least four columns, extra columns are ignored by SV<sup>2</sup>. SV type must be contain either `DEL` or `DUP`.
+BED files must be tab-delimited with at least four columns, extra columns are ignored. SV type must be contain either `DEL` or `DUP`.
 
 CHROM | START | END | SV TYPE
 ---- | ---- | ----- | -----
 chr1 | 100 | 200 | DEL
 chr1 | 500 | 1000 | DUP
 
+Failure to format this file correctly will result in a `Segmentation Fault`.
+
 #### VCF Input
 
-SV<sup>2</sup> supports uncompressed VCF files. VCF files must contain both `END=` and `SVTYPE=` in the INFO column. `SVTYPE=` must contain either `DEL` or `DUP`.
+SV<sup>2</sup> only supports uncompressed VCF files. VCF files must contain both `END=` and `SVTYPE=` in the INFO column. `SVTYPE=` must contain either `DEL` or `DUP`.
 
 ### FASTA
 
-SV<sup>2</sup> requires a FASTA file of either hg19 or hg38 for GC content correction. The full paths of the FASTA files are passed during [configuration](#configure) before installation. The config file is located in `$SV2_INSTALL_PATH/sv2/src/config/sv2.ini`
+SV<sup>2</sup> requires a FASTA file of either hg19 or hg38 for GC content correction. The full paths of the FASTA files are supplied during [configuration](#configure) during installation. The config file is located in `$SV2_INSTALL_PATH/sv2/src/config/sv2.ini`
  
 ## Output
 
