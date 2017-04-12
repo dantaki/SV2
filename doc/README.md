@@ -55,19 +55,27 @@ SV<sup>2</sup> genotypes using four features of SV: depth of coverage, discordan
 
 #### Depth of Coverage
 
+![alt text](https://raw.githubusercontent.com/dantaki/SV2/master/png/doc.png "Depth of Coverage")
+
 Depth of coverage is estimated via the number of reads spanning a locus for SV greater than 1000bp. For smaller SVs, depth of coverage was recorded as the median per-base-pair read depth. 
 
 Coverage features are first normalized according to the median chromosome coverage. For SVs in pseudoautosomal regions on male sex chromosomes, coverage normalization implements the median genome coverage. Normalized coverage is then corrected for GC content, adapted from [CNVator](http://genome.cshlp.org/content/21/6/974.long), for either PCR or PCR-free libraries. For PCR-free libraries supply the `-pcrfree` flag.
 
 #### Discordant Paired-Ends
 
+![alt text](https://raw.githubusercontent.com/dantaki/SV2/master/png/dpe.png "Discordant Paired-Ends")
+
 Discordant paired-ends contain insert sizes greater than the chromosome average plus five times the median absolute deviation. SV<sup>2</sup> only considers discordant paired-ends if both mates bridge the putative breakpoint by +/- 500bp. Likewise, SV<sup>2</sup> requires that both mates rest on opposite sides of the breakpoint. The resulting number of discordant paired-ends that meet these criteria are then normalized by the number of concordant paired-ends that span 500bp windows of the start and end positions of the SV.
    
 #### Split-Reads
 
+![alt text](https://raw.githubusercontent.com/dantaki/SV2/master/png/sr.png "Split-Reads")
+
 Split-reads are those with supplementary alignments. To reduce noise, SV<sup>2</sup> only considered split-reads if the primary and supplementary alignments bridged the breakpoint by +/- 500bp. Likewise, both alignments must map to opposite sides of the breakpoint. The resulting number of split-reads were then normalized to the number of concordant reads that span 500bp windows of the start and end positions of the SV. 
 
 #### Heterozygous Allele Depth
+
+![alt text](https://raw.githubusercontent.com/dantaki/SV2/master/png/had.png "Heterozygous Allele Depth")
 
 Akin to B-allele frequency in microarrays, heterozygous allele depth is defined as the median ratio of minor allele reads to major allele reads for every heterozygous SNV within the SV. 
 
