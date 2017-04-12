@@ -45,13 +45,13 @@ For more information or citing SV<sup>2</sup> please refer to the [bioRxiv prepr
 
 SV<sup>2</sup> preprocessing records the median coverage, insert size, read length for each chromosome for downstream normalization of features. Preprocessing statistics are obtained for each chromosome in 100 random nonoverlapping regions 100kb in length. The default random seed is 42, but can be altered with the `[-s|-seed] INT` option.
 
-[Preprocessing output](#preprocessing-output) can be found in the `sv2_preprocessing/` directory in the current working directory. If preprocessing has been completed, supplying `-pre sv2_preprocessing/` to the SV<sup>2</sup> command will bypass this stage.
+[Preprocessing output](#preprocessing-output) can be found in `sv2_preprocessing/` in the current working directory. If preprocessing has been completed, supplying `-pre sv2_preprocessing/` to the SV<sup>2</sup> command will bypass this stage.
  
 ### Feature Extraction
 
-Before feature extraction, the user supplied SV regions are masked to problematic regions in the genome. The genome mask, which includes segmental duplications, short tandem-repeats, centromeres, telomeres, and unmappable regions can be found in the SV<sup>2</sup> install path `$SV2_INSTALL_DIR/sv2/src/resources/annotation_files/hg*flags.bed.gz`. The genome mask with merged positions is located here `$SV@_INSTALL_DIR/sv2/src/resources/hg*_unmapped.bed.gz`. SV calls that completely overlap masked elements cannot be genotyped and are represented as `./.` in the output VCF.
+Before feature extraction, a mask is applied to SV regions. The mask includes segmental duplications, short tandem-repeats, centromeres, telomeres, and unmappable regions and is included here `$SV2_INSTALL_DIR/sv2/src/resources/annotation_files/hg*flags.bed.gz`. The genome mask with merged positions is located here `$SV@_INSTALL_DIR/sv2/src/resources/hg*_unmapped.bed.gz`. SV calls that completely overlap masked elements cannot be genotyped and are represented as `./.` in the output VCF.
 
-SV<sup>2</sup> genotypes using four features of SV: depth of coverage, discordant paired-end, split-reads, and heterozygous allele depth. Feature extraction output is located in `sv2_features/` directory in the current working directory. If feature extraction is complete and a VCF of multiple samples is desired, supplying the option `-feats sv2_features/` to the SV<sup>2</sup> command with skip feature extraction. 
+SV<sup>2</sup> genotypes using four features of SV: depth of coverage, discordant paired-end, split-reads, and heterozygous allele depth. [Feature extraction output](#feature-output) is located in `sv2_features/` in the current working directory. If feature extraction has completed and a VCF of multiple samples is desired, supplying the option `-feats sv2_features/` to the SV<sup>2</sup> command with skip feature extraction. 
 
 #### Depth of Coverage
 
@@ -59,29 +59,35 @@ SV<sup>2</sup> genotypes using four features of SV: depth of coverage, discordan
 
 Depth of coverage is estimated via the number of reads spanning a locus for SV greater than 1000bp. For smaller SVs, depth of coverage was recorded as the median per-base-pair read depth. 
 
-Coverage features are first normalized according to the median chromosome coverage. For SVs in pseudoautosomal regions on male sex chromosomes, coverage normalization implements the median genome coverage. Normalized coverage is then corrected for GC content, adapted from [CNVator](http://genome.cshlp.org/content/21/6/974.long), for either PCR or PCR-free libraries. For PCR-free libraries supply the `-pcrfree` flag.
+Coverage features are first normalized according to the median chromosome coverage. For SVs overlapping pseudoautosomal regions on male sex chromosomes, normalization implements the median genome coverage. Normalized coverage is then corrected for GC content, adapted from [CNVator](http://genome.cshlp.org/content/21/6/974.long), for either PCR or PCR-free libraries. 
+
+For PCR-free libraries supply the `-pcrfree` flag.
+
+SV<sup>2</sup> cannot genotype SVs when normalized coverage exceeds 5.0 (10 autosomal copies).
 
 #### Discordant Paired-Ends
 
 ![alt text](https://raw.githubusercontent.com/dantaki/SV2/master/png/dpe.png "Discordant Paired-Ends")
 
-Discordant paired-ends contain insert sizes greater than the chromosome average plus five times the median absolute deviation. SV<sup>2</sup> only considers discordant paired-ends if both mates bridge the putative breakpoint by +/- 500bp. Likewise, SV<sup>2</sup> requires that both mates rest on opposite sides of the breakpoint. The resulting number of discordant paired-ends that meet these criteria are then normalized by the number of concordant paired-ends that span 500bp windows of the start and end positions of the SV.
+Discordant paired-ends contain insert sizes greater than the chromosome median plus five times the median absolute deviation. SV<sup>2</sup> only considers discordant paired-ends if both mates bridge the putative breakpoint by +/- 500bp. Likewise, SV<sup>2</sup> requires that both mates rest on opposite sides of the breakpoint. The resulting number of discordant paired-ends that meet these criteria are then normalized by the number of concordant paired-ends that span 500bp windows of the start and end positions of the SV.
    
 #### Split-Reads
 
 ![alt text](https://raw.githubusercontent.com/dantaki/SV2/master/png/sr.png "Split-Reads")
 
-Split-reads are those with supplementary alignments. To reduce noise, SV<sup>2</sup> only considered split-reads if the primary and supplementary alignments bridged the breakpoint by +/- 500bp. Likewise, both alignments must map to opposite sides of the breakpoint. The resulting number of split-reads were then normalized to the number of concordant reads that span 500bp windows of the start and end positions of the SV. 
+Split-reads are those with supplementary alignments. To reduce noise, SV<sup>2</sup> only considers split-reads if the primary and supplementary alignments bridge the breakpoint by +/- 500bp. Likewise, both alignments must map to opposite sides of the breakpoint. The resulting number of split-reads are normalized to the number of concordant reads that span 500bp windows of the start and end positions of the SV. 
 
 #### Heterozygous Allele Depth
 
 ![alt text](https://raw.githubusercontent.com/dantaki/SV2/master/png/had.png "Heterozygous Allele Depth")
 
-Akin to B-allele frequency in microarrays, heterozygous allele depth is defined as the median ratio of minor allele reads to major allele reads for every heterozygous SNV within the SV. 
+Akin to B-allele frequency in microarrays, heterozygous allele depth is defined as the median ratio of minor allele reads to major allele reads for every heterozygous SNV within the SV. This feature is parsed from a SNV VCF that contains either `AD` or `DPR` in the format column.  
 
 ### Genotyping
 
 SV<sup>2</sup> genotypes SV with six [support vector machine classifiers](http://scikit-learn.org) that are trained with respect to SV type and length.
+
+![alt text](https://raw.githubusercontent.com/dantaki/SV2/master/png/clf.png SVM Classifiers)
 
 * SV<sup>2</sup> Classifiers
    * Deletion: SV > 1000bp
