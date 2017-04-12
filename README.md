@@ -12,6 +12,7 @@ Support Vector Structural Variation Genotyper
 [bioRxiv](http://biorxiv.org/content/early/2017/03/17/113498) : [doi](https://doi.org/10.1101/113498)
 
 [User Guide][UserGuide]
+
 [UserGuide]:doc/README.md
 
 ![alt text](https://raw.githubusercontent.com/dantaki/SV2/master/png/sv2_flowchart.png "Support Vector Structural Variation Genotyper Work Flow")
