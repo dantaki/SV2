@@ -89,15 +89,6 @@ SV<sup>2</sup> genotypes SV with six [support vector machine classifiers](http:/
 
 ![alt text](https://raw.githubusercontent.com/dantaki/SV2/master/png/clf.png "SVM Classifiers")
 
-* SV<sup>2</sup> Classifiers
-   * Deletion: SV > 1000bp
-   * Deletion: SV <= 1000bp
-   * Deletion: Sex Chromosome in Males
-
-   * Duplication: Breakpoint
-   * Duplication: SNV
-   * Duplication: Sex Chromosome in Males 
-
 Each classifier, with the exception of Duplication SNV implements depth of coverage, discordant paired-ends, and split-reads as features. The Duplication SNV classifier employs depth of coverage and heterozygous allele depth as features. 
 
 Genotyping output in BED and VCF format are located in `sv2_genotypes/` in the current working directory.
