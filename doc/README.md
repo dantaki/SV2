@@ -251,6 +251,8 @@ SV<sup>2</sup> requires either a BED or VCF file of deletions and tandem duplica
 
 BED files must be tab-delimited with at least four columns, extra columns are ignored. SV type must be contain either `DEL` or `DUP`.
 
+The first four columns must be formatted in this order below,
+
 CHROM | START | END | SV TYPE
 ---- | ---- | ----- | -----
 chr1 | 100 | 200 | DEL
@@ -264,7 +266,7 @@ SV<sup>2</sup> only supports uncompressed VCF files. VCF files must contain both
 
 ### FASTA
 
-SV<sup>2</sup> requires a FASTA file of either hg19 or hg38 for GC content correction. The full paths of the FASTA files are supplied during [configuration](#configure) during installation. The config file is located in `$SV2_INSTALL_PATH/sv2/src/config/sv2.ini`
+SV<sup>2</sup> requires a FASTA file in either hg19 or hg38 for GC content correction. The full paths of the FASTA files are supplied during [configuration](#configure). The config file is located in `$SV2_INSTALL_PATH/sv2/src/config/sv2.ini`
  
 ## Output
 
@@ -272,7 +274,9 @@ All output is generated in the current working directory. SV<sup>2</sup> generat
 
 ### Preprocessing Output
 
-Preprocessing output is located in the `sv2_preprocessing/` directory in the current working directory. Preprocessing can be skipped if a directory containing SV<sup>2</sup> preprocessing output via the `-pre sv2_preprocessing/` argument. 
+Preprocessing output is located in `sv2_preprocessing/` in the current working directory. Preprocessing can be skipped if a directory containing SV<sup>2</sup> preprocessing output via the `-pre sv2_preprocessing/` argument. 
+
+##### Example Preprocessing Output
 
 ID | CHROM | COVERAGE_MEDIAN | READ_LENGTH_MEDIAN | INSERT_SIZE_MEDIAN | INSERT_SIZE_MAD | BAM_BP_PARSED | SNP_COVERAGE_MEDIAN | SNP_PARSED
 ---- | ---- | -------------- | ------------------ | ------------------ | --------------- | ------------- | ------------------- | ----------
