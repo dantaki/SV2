@@ -1419,7 +1419,7 @@ def annotate(raw,genos,gen,REF,NON,GQ,OFH,sex,hemi,FILT,DNMFILT):
 			'##INFO=<ID=CYTOBAND,Number=.,Type=String,Description="Cytoband(s) of the variant">',
 			'##INFO=<ID=REPEATMASKER,Number=2,Type=String,Description="Name and reciprocal overlap of RepeatMasker vairant">',
 			'##INFO=<ID=1000G_ID,Number=1,Type=String,Description="1000 Genomes Phase 3 integrated SV callset variant name">',
-			'##INFO=<ID=1000G_ID,Number=1,Type=Float,Description="Overlap to 1000 Genomes Phase 3 variant, in the range (0,1)">',
+			'##INFO=<ID=1000G_OVERLAP,Number=1,Type=Float,Description="Overlap to 1000 Genomes Phase 3 variant, in the range (0,1)">',
 			'##INFO=<ID=DESCRIPTION,Number=1,Type=String,Description="Verbose description of SV"',
 			'##INFO=<ID=GENES,Number=1,Type=String,Description="Genes within this SV locus, pipe-separated by transcripts with comma-separated details including the refGene name>"',
 			'##INFO=<ID=ABPARTS,Number=1,Type=Float,Description="Parts of antibodies overlap, in the range (0,1)">',
