@@ -87,7 +87,7 @@ Akin to B-allele frequency in microarrays, heterozygous allele depth is defined 
 
 SV<sup>2</sup> genotypes SV with six [support vector machine classifiers](http://scikit-learn.org) that are trained with respect to SV type and length.
 
-![alt text](https://raw.githubusercontent.com/dantaki/SV2/master/png/clf.png SVM Classifiers)
+![alt text](https://raw.githubusercontent.com/dantaki/SV2/master/png/clf.png "SVM Classifiers")
 
 * SV<sup>2</sup> Classifiers
    * Deletion: SV > 1000bp
