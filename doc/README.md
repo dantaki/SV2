@@ -308,6 +308,8 @@ BED output does not contain filtering information or annotations that are found 
 
 ## Tutorial
 
+**Please allow some time to get the proper tutorial files ready for distribution**
+
 ### Overview
 Here you will run SV<sup>2</sup> to genotype SV called on chromosome 21 in two samples from the [1000Genomes Project](http://www.internationalgenome.org/). 
 
