@@ -116,13 +116,13 @@ Each classifier, with the exception of Duplication SNV implements depth of cover
 
 #### .zip
 ```
-wget http://downloads.sourceforge.net/project/sv2/sv2-1.1.zip
-unzip sv2-1.1.zip
+wget http://downloads.sourceforge.net/project/sv2/sv2-1.2.zip
+unzip sv2-1.2.zip
 ```
 #### .tar.gz
 ```
-wget http://downloads.sourceforge.net/project/sv2/sv2-1.1.tar.gz
-tar xvzf sv2-1.1.tar.gz
+wget http://downloads.sourceforge.net/project/sv2/sv2-1.2.tar.gz
+tar xvzf sv2-1.2.tar.gz
 ```
 
 ### Configure 
@@ -136,7 +136,7 @@ The config files contain the paths of the install directory and the hg19/hg38 FA
 * [hg19 FASTA](http://ftp.1000genomes.ebi.ac.uk/vol1/ftp/technical/reference/human_g1k_v37.fasta.gz)
 
 ```
-cd sv2-1.1/
+cd sv2-1.2/
 ```
 
 #### Configure with Perl 5
@@ -147,7 +147,7 @@ perl configure.pl # follow the instructions
 
 #### Configure without Perl 5
 
-The config file is located in `sv2-1.1/src/config/sv2.ini`. Edit this file to include the paths of FASTA files and the installation directory. 
+The config file is located in `sv2-1.2/src/config/sv2.ini`. Edit this file to include the paths of FASTA files and the installation directory. 
 
 ```
 # src/config/sv2.ini
@@ -161,7 +161,7 @@ sv2_home=/home/usr/bin/sv2
 # the last directory for [INSTALL_DIR] should be 'sv2'
 ```
 
-Append the following lines to the python setup config file located here: `sv2-1.1/setup.cfg`
+Append the following lines to the python setup config file located here: `sv2-1.2/setup.cfg`
 
 **Note:** the directories must be the same as [INSTALL_DIR] in `src/config/sv2.ini` 
 
@@ -200,7 +200,7 @@ usage: sv2 [-h] -i I [-r R] [-c C] [-g G] [-pcrfree] [-s S] [-o O] [-pre PRE]
  /        \  \     /
 /_________/   \___/
 Support Vector Structural Variation Genotyper
-Version 1.1        Author: Danny Antaki <dantaki at ucsd dot edu>
+Version 1.2        Author: Danny Antaki <dantaki at ucsd dot edu>
 
 optional arguments:
   -h, --help       show this help message and exit
@@ -363,6 +363,7 @@ gunzip human_g1k_v37.fasta.gz
 # put the full path of the FASTA file in the sv2 config file under [FASTA_PATHS] hg19=
 # this is typically done during the configure stage
 ``` 
+**Ensure you have properly [installed](#installation) and [tested](#check-installation) SV<sup>2</sup> before starting the tutorial.**
 
 ### Download Tutorial Files
 
