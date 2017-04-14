@@ -33,6 +33,7 @@
    * [Overview](#overview)
    * [Files](#tutorial-files)
    * [Genotype](#genotype-sv)
+7. [Troubleshooting](#troubleshooting)
 
 ## Introduction
 
@@ -128,6 +129,10 @@ tar xvzf sv2-1.1.tar.gz
 Below are two methods for generating the config files. [Configure with Perl 5](#configure-with-perl-5) is recommended. 
 
 The config files contain the paths of the install directory and the hg19/hg38 FASTA files. One FASTA file is required for SV<sup>2</sup>.
+
+* [hg38 FASTA](http://ftp.1000genomes.ebi.ac.uk/vol1/ftp/technical/reference/GRCh38_reference_genome/GRCh38_full_analysis_set_plus_decoy_hla.fa)
+
+* [hg19 FASTA](http://ftp.1000genomes.ebi.ac.uk/vol1/ftp/technical/reference/human_g1k_v37.fasta.gz)
 
 ```
 cd sv2-1.1/
@@ -269,8 +274,12 @@ SV<sup>2</sup> only supports uncompressed VCF files. VCF files must contain both
 
 ### FASTA
 
-SV<sup>2</sup> requires a FASTA file in either hg19 or hg38 for GC content correction. The full paths of the FASTA files are supplied during [configuration](#configure). The config file is located in `$SV2_INSTALL_PATH/sv2/src/config/sv2.ini`
+SV<sup>2</sup> requires a FASTA file in either hg19 (GRCh37) or hg38 for GC content correction. The full paths of the FASTA files are supplied during [configuration](#configure). The config file is located in `$SV2_INSTALL_PATH/sv2/src/config/sv2.ini`
  
+* [hg38 FASTA](http://ftp.1000genomes.ebi.ac.uk/vol1/ftp/technical/reference/GRCh38_reference_genome/GRCh38_full_analysis_set_plus_decoy_hla.fa)
+
+* [hg19 FASTA](http://ftp.1000genomes.ebi.ac.uk/vol1/ftp/technical/reference/human_g1k_v37.fasta.gz)
+
 ## Output
 
 All output is generated in the current working directory. SV<sup>2</sup> generates output files for each stage of genotyping. 
@@ -334,7 +343,7 @@ SV<sup>2</sup> provides stringent filters for *de novo* mutation discovery in th
 **Please allow some time to get the proper tutorial files ready for distribution**
 
 ### Overview
-Here you will run SV<sup>2</sup> to genotype SV called on chromosome 21 in two samples from the [1000Genomes Project](http://www.internationalgenome.org/). 
+Run SV<sup>2</sup> to genotype SV called on chromosome 21 in two samples from the [1000Genomes Project](http://www.internationalgenome.org/). 
 
 Included in the tutorial are down-sampled (10%) BAM files aligned using [BWA-MEM](https://github.com/lh3/bwa) to hg19. 
 
@@ -346,57 +355,83 @@ Also included are SNV calls produced with [GATK Haplotype Caller](https://softwa
 
 [1000 Genomes Phase 3 integrated SV](http://ftp.1000genomes.ebi.ac.uk/vol1/ftp/phase3/integrated_sv_map) calls are included in VCF format. 
 
-### Tutorial Files
+A hg19 FASTA file is required to complete this tutorial.
 
-#### Alignments 
+```
+wget http://ftp.1000genomes.ebi.ac.uk/vol1/ftp/technical/reference/human_g1k_v37.fasta.gz
+gunzip human_g1k_v37.fasta.gz
+
+# put the full path of the FASTA file in the sv2 config file under [FASTA_PATHS] hg19=
+# this is typically done during the configure stage
+``` 
+
+### Download Tutorial Files
+
+```
+wget http://downloads.sourceforge.net/project/sv2/sv2_tutorial.zip
+unzip sv2_tutorial.zip
+cd sv2_tutorial/
+```
+
+#### Tutorial Files
+
+##### Alignments 
 * HG00096_chr21_sub.bam 
 * HG00096_chr21_sub.bam.bai
 * HG01051_chr21_sub.bam
 * HG01051_chr21_sub.bam.bai
 
-#### SNV VCFs
-
+##### SNV VCFs
 * HG00096_chr21.vcf.gz
 * HG00096_chr21.vcf.gz.tbi
 * HG01051_chr21.vcf.gz
 * HG01051_chr21.vcf.gz.tbi
 
-#### SV Predictions to Genotype
-
+##### SV Predictions to Genotype
 * chr21_forestSV.bed
 * ALL.wgs.integrated_sv_map_v1.20130502.chr21.sv.genotypes.vcf
 
-#### Input Script
-
+##### Input Script
 * make_sv2_input.py
 
 ### Generate Input
 
+`make_sv2_input.py` is executed in the `sv2_tutorial/` directory. It will generate the sample input files used in this tutorial.
+
 ```
 python make_sv2_input.py
+ls *sv2_input.txt
+
+# HG00096_sv2_input.txt
+# HG01051_sv2_input.txt
+# sv2_input.txt
+```
+#### Standard Usage
+
+##### Run SV<sup>2</sup> for individual samples
+
+```
+sv2  -i HG00096_sv2_input.txt -r chr21_forestSV.bed -o HG00096_sv2
+sv2 -i HG01051_sv2_input.txt -r chr21_forestSV.bed -o HG01051_sv2
 ```
 
-### Genotype SV
-
-#### Standard Usage
+##### Run SV<sup>2</sup> for multiple samples
 
 ```
 sv2 -i sv2_input.txt -r chr21_forestSV.bed -o sv2_forestSV
-
 ```
 
-#### Parallelize by Sample
+##### Parallelize by Sample
 
-Running samples in parallel may reduce the run time of SV<sup>2</sup>. Serial run time was reduced from 6 minutes to 3 minutes running SV<sup>2</sup> on a CPU with 4 cores with the `-c 2` option. 
+When given multiple samples, SV<sup>2</sup> can run each sample in parallel, reducing the run time.
 
 ```
 sv2 -i sv2_input.txt -r chr21_forestSV.bed -c 2 -o sv2_forestSV
 ```
 
-
 #### Genotype SV: Skip Preprocessing
 
-You may want to skip preprocessing if you are genotyping a different set of SV in the same samples.
+Skipping preprocessing allows the user to genotype another set of SVs with the same samples.
 
 **Note:** Unless you move the features files to another location they will be replaced!
 
@@ -405,17 +440,24 @@ You may want to skip preprocessing if you are genotyping a different set of SV i
 
 mv sv2_features/ sv2_forestSV_features/
 
-sv2 -i sv2_input.txt -r ALL.wgs.integrated_sv_map_v1.20130502.chr21.sv.genotypes.vcf -pre sv2_preprocessing/ -o sv2_tut_1KGP_1
+sv2 -i sv2_input.txt -r ALL.wgs.integrated_sv_map_v1.20130502.chr21.sv.genotypes.vcf -pre sv2_preprocessing/ -o sv2_tut_1KGP
 
 ```
 
 #### Genotype SV: Skip Feature Extraction
 
-You may want to skip feature extraction if you wish to generate output for a subset of samples. 
+Skipping feature extraction allows the user to combine or subset samples in the final output.
 
 ```
-# subset the input file
-
 head -n 1 sv2_input.txt >sv2_subset.txt
 
 sv2 -i sv2_input.txt -r chr21_forestSV.bed -pre sv2_preprocessing/ -feats sv2_forestSV_features/ -o sv2_tut_forestSV_subset
+
+```
+
+## Troubleshooting
+
+Since SV<sup>2</sup> uses Cython, error messages may be cryptic. A `Segmentation Fault` typically indicates the input files are not formatted correctly. 
+
+For any bugs or errors in SV<sup>2</sup> please contact Danny Antaki <dantaki@ucsd.edu>
+
