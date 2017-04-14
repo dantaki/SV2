@@ -100,8 +100,9 @@ HG00096 | /bam/HG00096.bam | /vcf/HG00096_SNVs.vcf.gz | M
 * VCF format
   * Allele Depth (AD) is required 
   * bgzip and tabix indexed VCF
-* see [Usage](#usage) for more details
-  
+
+Refer to the [User Guide](https://github.com/dantaki/SV2/tree/master/doc#sample-information) for more details. 
+
 ### Variants to genotype < -r >
 * BED format
   * Tab-delimited: first four columns 
@@ -112,7 +113,9 @@ HG00096 | /bam/HG00096.bam | /vcf/HG00096_SNVs.vcf.gz | M
 * VCF format
   * SVTYPE= DEL | DUP
   * Must have END=
- 
+
+Refer to the [User Guide](https://github.com/dantaki/SV2/tree/master/doc#sv-input) for more details. 
+
  ## Output
  
  Output is generated in the current working directory. 
