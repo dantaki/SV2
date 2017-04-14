@@ -16,13 +16,13 @@ Support Vector Structural Variation Genotyper
 ## Getting Started
 #### 1: Download Source Code :floppy_disk:
 ```
-wget http://downloads.sourceforge.net/project/sv2/sv2-1.1.zip # sv2-1.1.tar.gz also available
-unzip sv2-1.1.zip
+wget http://downloads.sourceforge.net/project/sv2/sv2-1.2.zip # sv2-1.2.tar.gz also available
+unzip sv2-1.2.zip
 ```
 #### 2: Configure Environment
 Run `configure.pl` # define install location and paths to FASTA assemblies
 ```
-cd sv2-1.1/
+cd sv2-1.2/
 perl configure.pl # follow the instructions
 ```
 #### 3: Compile from Source 
@@ -140,7 +140,10 @@ HG00096 | /bam/HG00096.bam | /vcf/HG00096_SNVs.vcf.gz | M
     * dantaki@ucsd.edu
     
 ## History
-[gtCNV version 0.1](https://github.com/dantaki/gtCNV/tree/Version-0.1) used in Brander et al. *AJHG* 2016 ([DOI](http://dx.doi.org/10.1016/j.ajhg.2016.02.018) PMID:    27018473)
+
+[SV<sup>2</sup> version 1.1](https://github.com/dantaki/SV2/tree/v1.1) used in Brander, Antaki, Gujral,  et al. *bioRxiv* 2017: [DOI](http://biorxiv.org/content/early/2017/04/04/102327)
+
+[gtCNV version 0.1](https://github.com/dantaki/gtCNV/tree/Version-0.1) used in Brander, Antaki, Gujral,  et al. *AJHG* 2016: [DOI](http://dx.doi.org/10.1016/j.ajhg.2016.02.018) PMID:    27018473
 
 #### Acknowledgements:
 * William Brandler
@@ -172,4 +175,3 @@ SOFTWARE.
 
 ##### Contact
 dantaki@ucsd.edu
-
