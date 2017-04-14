@@ -31,7 +31,8 @@
    * [De Novo Mutation Discovery](#de-novo-mutation-discovery)
 6. [Tutorial](#tutorial)
    * [Overview](#overview)
-   * [Files](#tutorial-files)
+   * [Download](#download-tutorial-files)
+   * [Generate Input](#generate-input)
    * [Genotype](#genotype-sv)
 7. [Troubleshooting](#troubleshooting)
 
@@ -340,8 +341,6 @@ SV<sup>2</sup> provides stringent filters for *de novo* mutation discovery in th
 
 ## Tutorial
 
-**Please allow some time to get the proper tutorial files ready for distribution**
-
 ### Overview
 Run SV<sup>2</sup> to genotype SV called on chromosome 21 in two samples from the [1000Genomes Project](http://www.internationalgenome.org/). 
 
@@ -406,6 +405,8 @@ ls *sv2_input.txt
 # HG01051_sv2_input.txt
 # sv2_input.txt
 ```
+### Genotype SV
+
 #### Standard Usage
 
 ##### Run SV<sup>2</sup> for individual samples
@@ -423,7 +424,7 @@ sv2 -i sv2_input.txt -r chr21_forestSV.bed -o sv2_forestSV
 
 ##### Parallelize by Sample
 
-When given multiple samples, SV<sup>2</sup> can run each sample in parallel, reducing the run time.
+When given multiple samples, SV<sup>2</sup> can run samples in parallel reducing run time.
 
 ```
 sv2 -i sv2_input.txt -r chr21_forestSV.bed -c 2 -o sv2_forestSV
