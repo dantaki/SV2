@@ -187,7 +187,6 @@ Append `export PATH=$SV2_INSTALL_DIR:$PATH` to your `~/.bashrc` if you have not 
 `source ~/.bashrc`
 
 ```
-# test sv2 install
 sv2 --help
 
 usage: sv2 [-h] -i I [-r R] [-c C] [-g G] [-pcrfree] [-s S] [-o O] [-pre PRE]
