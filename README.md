@@ -14,6 +14,7 @@ Support Vector Structural Variation Genotyper
 * [Options](#options)
 * [Input](#input)
 * [Output](#output)
+* [Performance](#performance)
 * [Usage](#usage)
 * [Requirements](#requirements)
 * [Credits](#credits)
@@ -25,6 +26,8 @@ Support Vector Structural Variation Genotyper
 ## Preprint
 
 [bioRxiv](http://biorxiv.org/content/early/2017/03/17/113498) : [doi](https://doi.org/10.1101/113498)
+
+SV2 (support-vector structural-variant genotyper) is a machine learning algorithm for genotyping deletions and tandem duplications from paired-end whole genome sequencing data. SV2 can rapidly integrate variant calls from multiple SV discovery algorithms into a unified callset with [high genotyping accuracy](https://github.com/dantaki/SV2/blob/master/png/sv2_auc.png) and detection of [*de novo* mutations](https://github.com/dantaki/SV2/blob/master/png/sv2_fdr.png).
 
 ![alt text](https://raw.githubusercontent.com/dantaki/SV2/master/png/sv2_flowchart.png "Support Vector Structural Variation Genotyper Work Flow")
 
@@ -120,9 +123,13 @@ HG00096 | /bam/HG00096.bam | /vcf/HG00096_SNVs.vcf.gz | M
  
  For more detail on SV<sup>2</sup> output, please refer to the [User Guide](https://github.com/dantaki/SV2/tree/master/doc#output)
  
-## Usage
+## Performance
 
 ![alt text](https://raw.githubusercontent.com/dantaki/SV2/master/png/sv2_auc.png "Support Vector Structural Variation Genotyper Work Flow")
+
+Please refer to the [preprint](#preprint) for performance details. 
+
+## Usage
 
 * SV<sup>2</sup> is designed for human whole genome short-read sequencing libraries. Given deletion and tandem duplication positions, SV<sup>2</sup> returns a VCF with predicted copy number genotypes.
 * Whole genome alignments from the [1000 Genomes Project](http://www.1000genomes.org/) were used for training. Validated genotypes were obtained from the phase 3 integrated structural variation call set ([DOI:10.1038/nature15394](http://dx.doi.org/10.1038%2Fnature15394); PMID:    26432246).
