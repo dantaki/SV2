@@ -8,18 +8,19 @@ Support Vector Structural Variation Genotyper
 [![DOI](https://zenodo.org/badge/80166279.svg)](https://zenodo.org/badge/latestdoi/80166279)
 
 ## Table of Contents
-1. [Preprint](#preprint)
-2. [Installation](#getting-started)
-3. [User Guide](#user-guide)
-4. [Options](#options)
-5. [Input](#input)
-6. [Usage](#usage)
-7. [Requirements](#requirements)
-8. [Credits](#credits)
-9. [Citing SV<sup>2</sup>](#citing-sv2)
-10. [History](#history)
-11. [License](#license)
-12. [Contact](#contact)
+* [Preprint](#preprint)
+* [Installation](#getting-started)
+* [User Guide](#user-guide)
+* [Options](#options)
+* [Input](#input)
+* [Output](#output)
+* [Usage](#usage)
+* [Requirements](#requirements)
+* [Credits](#credits)
+* [Citing SV<sup>2</sup>](#citing-sv2)
+* [History](#history)
+* [License](#license)
+* [Contact](#contact)
 
 ## Preprint
 
@@ -107,7 +108,17 @@ HG00096 | /bam/HG00096.bam | /vcf/HG00096_SNVs.vcf.gz | M
 * VCF format
   * SVTYPE= DEL | DUP
   * Must have END=
-  
+ 
+ ## Output
+ 
+ Output is generated in the current working directory. 
+ 
+ `sv2_preprocessing/` contains preprocessing output. `sv2_features/` contains feature extraction output. 
+ 
+ `sv2_genotypes/` contains output in tab-delimited BED format and VCF format.
+ 
+ For more detail on SV<sup>2</sup> output, please refer to the [User Guide](https://github.com/dantaki/SV2/tree/master/doc#output)
+ 
 ## Usage
 
 ![alt text](https://raw.githubusercontent.com/dantaki/SV2/master/png/sv2_auc.png "Support Vector Structural Variation Genotyper Work Flow")
