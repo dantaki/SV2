@@ -26,7 +26,10 @@
    * [Genotyping Output](#genotyping-output)
       * [VCF Output](#vcf-output)
       * [BED Output](#bed-output)
-5. [Tutorial](#tutorial)
+5. [Performance](#performance)
+   * [Genotyping Accuracy](#genotyping-accuracy)
+   * [De Novo Mutation Discovery](#de-novo-mutation-discovery)
+6. [Tutorial](#tutorial)
    * [Overview](#overview)
    * [Files](#tutorial-files)
    * [Genotype](#genotype-sv)
@@ -309,6 +312,22 @@ Variants that cannot be genotyped are reported as  `./.`.
 #### BED Output
 
 BED output does not contain filtering information or annotations that are found in the VCF output. Both BED and VCF output are given the same file name, but with different extensions. The BED extension is `.txt`.
+
+## Performance
+
+For details of SV<sup>2</sup> genotyping performance, please refer to the [preprint](http://biorxiv.org/content/early/2017/03/17/113498) : [doi](https://doi.org/10.1101/113498)
+
+### Genotyping Accuracy
+
+![alt text](https://raw.githubusercontent.com/dantaki/SV2/master/png/sv2_auc.png "SV2 Genotyping Accuracy")
+
+SV<sup>2</sup> has superior genotyping accuracy when genotyping the union of SVTyper and Manta SVs. Truth sets were generated from SNV arrays. Please refer to the [preprint](http://biorxiv.org/content/early/2017/03/17/113498) for more details.
+
+### De Novo Mutation Discovery
+
+![alt text](https://raw.githubusercontent.com/dantaki/SV2/master/png/sv2_fdr.png "SV2 De Novo Filters")
+
+SV<sup>2</sup> provides stringent filters for *de novo* mutation discovery in the output VCF. The filters are located in the `INFO` column as `DENOVO_FILTER=`. SV<sup>2</sup> does not call variants as *de novo*, rather SV<sup>2</sup> `DENOVO_FILTER=` is a guide for filtering putative *de novo* mutations. For more details on how *de novo* filters were constructed please refer to the [preprint](http://biorxiv.org/content/early/2017/03/17/113498).
 
 ## Tutorial
 
