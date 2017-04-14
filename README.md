@@ -9,8 +9,8 @@ Support Vector Structural Variation Genotyper
 
 ## Table of Contents
 * [Preprint](#preprint)
-* [Installation](#getting-started)
 * [User Guide](#user-guide)
+* [Installation](#getting-started)
 * [Options](#options)
 * [Input](#input)
 * [Output](#output)
@@ -28,6 +28,10 @@ Support Vector Structural Variation Genotyper
 
 ![alt text](https://raw.githubusercontent.com/dantaki/SV2/master/png/sv2_flowchart.png "Support Vector Structural Variation Genotyper Work Flow")
 
+## [User Guide][UserGuide]
+
+[UserGuide]:doc/README.md
+
 ## Getting Started
 #### 1: Download Source Code :floppy_disk:
 ```
@@ -44,10 +48,6 @@ perl configure.pl # follow the instructions
 ```
 python setup.py install # ignore numpy warnings
 ```
-
-## [User Guide][UserGuide]
-
-[UserGuide]:doc/README.md
 
 ## Options
 `sv2 --help`
