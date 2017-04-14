@@ -16,9 +16,11 @@ Support Vector Structural Variation Genotyper
 6. [Usage](#usage)
 7. [Requirements](#requirements)
 8. [Credits](#credits)
-9. [History](#history)
-10. [License](#license)
-11. [Contact](#contact)
+9. [Citing SV<sup>2</sup>](#citing-sv2)
+10. [History](#history)
+11. [License](#license)
+12. [Contact](#contact)
+
 ## Preprint
 
 [bioRxiv](http://biorxiv.org/content/early/2017/03/17/113498) : [doi](https://doi.org/10.1101/113498)
@@ -153,7 +155,12 @@ HG00096 | /bam/HG00096.bam | /vcf/HG00096_SNVs.vcf.gz | M
 * William Brandler
 * Jonathan Sebat
     * Sebat Lab http://sebatlab.ucsd.edu/index.php/software-data
-    
+
+## Citing SV<sup>2</sup>
+
+For citing SV<sup>2</sup> please refer to the preprint: [bioRxiv](http://biorxiv.org/content/early/2017/03/17/113498) : [doi](https://doi.org/10.1101/113498)
+
+
 ## History
 
 [SV<sup>2</sup> version 1.1](https://github.com/dantaki/SV2/tree/v1.1) used in Brander, Antaki, Gujral,  et al. *bioRxiv* 2017: [DOI](http://biorxiv.org/content/early/2017/04/04/102327)
