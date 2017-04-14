@@ -27,7 +27,7 @@ Support Vector Structural Variation Genotyper
 
 [bioRxiv](http://biorxiv.org/content/early/2017/03/17/113498) : [doi](https://doi.org/10.1101/113498)
 
-SV2 (support-vector structural-variant genotyper) is a machine learning algorithm for genotyping deletions and tandem duplications from paired-end whole genome sequencing data. SV2 can rapidly integrate variant calls from multiple SV discovery algorithms into a unified callset with [high genotyping accuracy](https://github.com/dantaki/SV2/blob/master/png/sv2_auc.png) and detection of [*de novo* mutations](https://github.com/dantaki/SV2/blob/master/png/sv2_fdr.png).
+SV<sup>2</sup> (support-vector structural-variant genotyper) is a machine learning algorithm for genotyping deletions and tandem duplications from paired-end whole genome sequencing data. SV<sup>2</sup> can rapidly integrate variant calls from multiple SV discovery algorithms into a unified callset with [high genotyping accuracy](https://github.com/dantaki/SV2/blob/master/png/sv2_auc.png) and detection of [*de novo* mutations](https://github.com/dantaki/SV2/blob/master/png/sv2_fdr.png).
 
 ![alt text](https://raw.githubusercontent.com/dantaki/SV2/master/png/sv2_flowchart.png "Support Vector Structural Variation Genotyper Work Flow")
 
