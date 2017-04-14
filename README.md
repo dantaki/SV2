@@ -29,6 +29,7 @@ Support Vector Structural Variation Genotyper
 ![alt text](https://raw.githubusercontent.com/dantaki/SV2/master/png/sv2_flowchart.png "Support Vector Structural Variation Genotyper Work Flow")
 
 ## [User Guide][UserGuide]
+[click here :notebook:][UserGuide]
 
 [UserGuide]:doc/README.md
 
@@ -202,5 +203,6 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 
 ## Contact
+:mailbox:
 dantaki@ucsd.edu
 
