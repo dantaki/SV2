@@ -7,6 +7,18 @@ Support Vector Structural Variation Genotyper
 
 [![DOI](https://zenodo.org/badge/80166279.svg)](https://zenodo.org/badge/latestdoi/80166279)
 
+## Table of Contents
+1. [Preprint](#preprint)
+2. [Installation](#getting-started)
+3. [User Guide](#user-guide)
+4. [Options](#options)
+5. [Input](#input)
+6. [Usage](#usage)
+7. [Requirements](#requirements)
+8. [Credits](#credits)
+9. [History](#history)
+10. [License](#license)
+11. [Contact](#contact)
 ## Preprint
 
 [bioRxiv](http://biorxiv.org/content/early/2017/03/17/113498) : [doi](https://doi.org/10.1101/113498)
@@ -30,9 +42,7 @@ perl configure.pl # follow the instructions
 python setup.py install # ignore numpy warnings
 ```
 
-## User Guide
-
-[User Guide][UserGuide]
+## [User Guide][UserGuide]
 
 [UserGuide]:doc/README.md
 
@@ -69,7 +79,7 @@ ls sv2_genotypes/*
     ...
 ```
 *Output VCF comes with gene annotations and other useful statistics*
-## Inputs
+## Input
 ### Sample information < -i >
 Tab-delimited file containing sample information. Gender can also be encoded as 1 for M and 2 for F
 
@@ -116,7 +126,7 @@ HG00096 | /bam/HG00096.bam | /vcf/HG00096_SNVs.vcf.gz | M
 
 ---
 
-### Requirements:
+## Requirements
 * [python 2.7](https://www.python.org/)
   * [cython](https://github.com/cython/cython)
   * [numpy](http://www.numpy.org/)
@@ -134,10 +144,15 @@ HG00096 | /bam/HG00096.bam | /vcf/HG00096_SNVs.vcf.gz | M
 
 ## Credits
 
-#### Author:
+### Author:
 
 * Danny Antaki
     * dantaki@ucsd.edu
+
+### Acknowledgements:
+* William Brandler
+* Jonathan Sebat
+    * Sebat Lab http://sebatlab.ucsd.edu/index.php/software-data
     
 ## History
 
@@ -147,12 +162,7 @@ Previous versions of SV<sup>2</sup> have been implemented in two publications.
 
 [gtCNV version 0.1](https://github.com/dantaki/gtCNV/tree/Version-0.1) used in Brander, Antaki, Gujral,  et al. *AJHG* 2016: [DOI](http://dx.doi.org/10.1016/j.ajhg.2016.02.018) PMID:    27018473
 
-#### Acknowledgements:
-* William Brandler
-* Jonathan Sebat
-    * Sebat Lab http://sebatlab.ucsd.edu/index.php/software-data
-
-### License 
+## License 
 MIT License
 
 Copyright (c) 2017 Danny Antaki
@@ -175,5 +185,5 @@ LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 
-##### Contact
+## Contact
 dantaki@ucsd.edu
