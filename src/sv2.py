@@ -1,4 +1,4 @@
-__version__='1.1'
+__version__='1.2'
 import sys,os,argparse
 from .core import check_in,Bed,check_cnv,errFH,reportTime,preprocess,extract_feats,genotype,annotate
 from argparse import RawTextHelpFormatter
@@ -7,7 +7,7 @@ from glob import glob
 from time import time
 def main():
 	init_time = int(time())
-	splash='\n                       ____\n  _____________   ___ |___ \\\n /   _____/\   \ /   // ___/\n \_____  \  \   Y   //_____)\n /        \  \     /\n/_________/   \___/\nSupport Vector Structural Variation Genotyper\nVersion 1.1        Author: Danny Antaki <dantaki at ucsd dot edu>\n'
+	splash='\n                       ____\n  _____________   ___ |___ \\\n /   _____/\   \ /   // ___/\n \_____  \  \   Y   //_____)\n /        \  \     /\n/_________/   \___/\nSupport Vector Structural Variation Genotyper\nVersion 1.2        Author: Danny Antaki <dantaki at ucsd dot edu>\n'
 	parser = argparse.ArgumentParser(description=splash,formatter_class=RawTextHelpFormatter)
 	parser.add_argument('-i','-in', help='Tab delimited input [ ID, BAM-PATH, VCF-PATH, M/F ]',required=True)
 	parser.add_argument('-r','-cnv', help='SV to genotype. Either in BED or VCF format',type=str)

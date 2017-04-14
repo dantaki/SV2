@@ -576,6 +576,7 @@ class gtVCF():
 		SNP_feats={}
 		HET_feats={}
 		tbx = pysam.TabixFile(self.fh)
+		sex_chrom =['chrX','chrY']
 		for call in sorted_cnv:
 			if master_cnv.get(call)==None: continue
 			(cnv_span,flank_span,windows) = master_cnv[call]
@@ -585,7 +586,7 @@ class gtVCF():
 				c = x[0]
 				normc = c
 				s,e = map(int,(x[1],x[2]))
-				if gender == 'M' and checkPAR('{} {} {}'.format(c,s,e),gen)==True: normc='GENOME' 
+				if c in sex_chrom and gender == 'M' and checkPAR('{} {} {}'.format(c,s,e),gen)==True: normc='GENOME' 
 				norm_cov = snp_cov[(self.iid,normc)]
 				if chrFlag == False: c = c.replace("chr","")
 				for y in tbx.fetch(region='{}:{}-{}'.format(c,int(s)-1,int(e)-1)):
