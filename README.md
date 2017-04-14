@@ -141,6 +141,8 @@ HG00096 | /bam/HG00096.bam | /vcf/HG00096_SNVs.vcf.gz | M
     
 ## History
 
+Previous versions of SV<sup>2</sup> have been implemented in two publications. 
+
 [SV<sup>2</sup> version 1.1](https://github.com/dantaki/SV2/tree/v1.1) used in Brander, Antaki, Gujral,  et al. *bioRxiv* 2017: [DOI](http://biorxiv.org/content/early/2017/04/04/102327)
 
 [gtCNV version 0.1](https://github.com/dantaki/gtCNV/tree/Version-0.1) used in Brander, Antaki, Gujral,  et al. *AJHG* 2016: [DOI](http://dx.doi.org/10.1016/j.ajhg.2016.02.018) PMID:    27018473
