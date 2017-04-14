@@ -127,6 +127,8 @@ HG00096 | /bam/HG00096.bam | /vcf/HG00096_SNVs.vcf.gz | M
 
 ![alt text](https://raw.githubusercontent.com/dantaki/SV2/master/png/sv2_auc.png "Support Vector Structural Variation Genotyper Work Flow")
 
+##### [De novo mutation discovery performance](https://github.com/dantaki/SV2/tree/master/doc#de-novo-mutation-discovery)
+
 Please refer to the [preprint](#preprint) for performance details. 
 
 ## Usage
