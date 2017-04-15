@@ -70,25 +70,7 @@ Flag | Description
 -o \| -out | Output name
 -pre | Preprocessing output directory. *Skips preprocessing*
 -feats | Feature output directory. *Skips feature extraction*
-#### Example
-```
-# genotype SV 
-sv2 -i CEU.in -r sv.vcf -g hg38 -o CEU_sv_genotypes
 
-# genotype a different set of SV while skipping preprocessing
-sv2 -i CEU.in -r sv-2.vcf -g hg38 -o CEU_sv-2_genotypes -pre sv2_preprocessing/
-
-# produce a VCF of one individual skipping feature extraction 
-head -n 1 CEU.in >sub.in
-sv2 -i sub.in -r sv.vcf -g hg38 -o sub_CEU_sv_genotypes -pre sv2_preprocessing/ -feats sv2_features/
-
-# output is in sv2_genotypes/
-ls sv2_genotypes/*
-    CEU_sv_genotypes.txt # Tab-delimited genotypes
-    CEU_sv_genotypes.vcf # VCF formatted genotypes
-    ...
-```
-*Output VCF comes with gene annotations and other useful statistics*
 ## Input
 ### Sample information < -i >
 Tab-delimited file containing sample information. Gender can also be encoded as 1 for M and 2 for F
@@ -127,6 +109,8 @@ Refer to the [User Guide](https://github.com/dantaki/SV2/tree/master/doc#sv-inpu
  
  `sv2_genotypes/` contains output in tab-delimited BED format and VCF format.
  
+ *Output VCF comes with gene annotations and other useful statistics*
+
  For more detail on SV<sup>2</sup> output, please refer to the [User Guide](https://github.com/dantaki/SV2/tree/master/doc#output)
  
 ## Performance
@@ -143,7 +127,7 @@ Please refer to the [preprint](#preprint) for performance details.
 * Whole genome alignments from the [1000 Genomes Project](http://www.1000genomes.org/) were used for training. Validated genotypes were obtained from the phase 3 integrated structural variation call set ([DOI:10.1038/nature15394](http://dx.doi.org/10.1038%2Fnature15394); PMID:    26432246).
 * Features for genotyping include coverage, discordant paired-ends, split-reads, and heterozygous allele depth ratio.
    * BAM files must have supplementary alignment tags (SA).
-   * SNV VCF must contain Allele Depth (AD). SV<sup>2</sup> can accommodate [GATK Haplotype Caller](https://software.broadinstitute.org/gatk/gatkdocs/org_broadinstitute_gatk_tools_walkers_haplotypecaller_HaplotypeCaller.php) and [FreeBayes](https://github.com/ekg/freebayes) VCFs.
+   * SNV VCF must contain Allele Depth (AD/DPR). SV<sup>2</sup> can accommodate [GATK Haplotype Caller](https://software.broadinstitute.org/gatk/gatkdocs/org_broadinstitute_gatk_tools_walkers_haplotypecaller_HaplotypeCaller.php) and [FreeBayes](https://github.com/ekg/freebayes) VCFs.
       * SNV VCF must be compressed and indexed with [bgzip and tabix](http://www.htslib.org/doc/tabix.html)
 * SV<sup>2</sup> operates with a bi-allelic model with a copy number range of 0-4
 * Output is in VCF format.
