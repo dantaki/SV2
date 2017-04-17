@@ -412,7 +412,7 @@ ls *sv2_input.txt
 ##### Run SV<sup>2</sup> for individual samples
 
 ```
-sv2  -i HG00096_sv2_input.txt -r chr21_forestSV.bed -o HG00096_sv2
+sv2 -i HG00096_sv2_input.txt -r chr21_forestSV.bed -o HG00096_sv2
 sv2 -i HG01051_sv2_input.txt -r chr21_forestSV.bed -o HG01051_sv2
 ```
 
