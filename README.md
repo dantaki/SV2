@@ -10,6 +10,7 @@ Support Vector Structural Variation Genotyper
 ## Table of Contents
 * [Preprint](#preprint)
 * [User Guide](#user-guide)
+   * [Tutorial](#tutorial)
 * [Installation](#getting-started)
 * [Options](#options)
 * [Input](#input)
@@ -17,6 +18,7 @@ Support Vector Structural Variation Genotyper
 * [Performance](#performance)
 * [Usage](#usage)
 * [Requirements](#requirements)
+* [Source Files](#source-files)
 * [Credits](#credits)
 * [Citing SV<sup>2</sup>](#citing-sv2)
 * [History](#history)
@@ -35,7 +37,7 @@ SV<sup>2</sup> (support-vector structural-variant genotyper) is a machine learni
 
 [click here :notebook:][UserGuide]
 
-[Tutorial](https://github.com/dantaki/SV2/blob/master/doc/README.md#tutorial)
+### [Tutorial](https://github.com/dantaki/SV2/blob/master/doc/README.md#tutorial)
 
 [UserGuide]:doc/README.md
 
@@ -153,7 +155,13 @@ Please refer to the [preprint](#preprint) for performance details.
 
 *SV<sup>2</sup> has been tested on Linux and MacOS with [bioconda](https://bioconda.github.io/)*
 
----
+## Source Files
+
+[Source Forge](https://sourceforge.net/projects/sv2/files/)
+
+[GitHub](https://github.com/dantaki/SV2/releases/tag/SV2v1.2)
+
+*Please do not use `git clone` on this repository*
 
 ## Credits
 
