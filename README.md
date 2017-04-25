@@ -29,7 +29,7 @@ Support Vector Structural Variation Genotyper
 
 [bioRxiv](http://biorxiv.org/content/early/2017/03/17/113498) : [doi](https://doi.org/10.1101/113498)
 
-SV<sup>2</sup> (support-vector structural-variant genotyper) is a machine learning algorithm for genotyping deletions and tandem duplications from paired-end whole genome sequencing data. SV<sup>2</sup> can rapidly integrate variant calls from multiple SV discovery algorithms into a unified callset with [high genotyping accuracy](https://raw.githubusercontent.com/dantaki/SV2/master/png/sv2_auc.png) and detection of [*de novo* mutations](https://raw.githubusercontent.com/dantaki/SV2/master/png/sv2_fdr.png).
+SV<sup>2</sup> (support-vector structural-variant genotyper) is a machine learning algorithm for genotyping deletions and duplications from paired-end whole genome sequencing data. SV<sup>2</sup> can rapidly integrate variant calls from multiple SV discovery algorithms into a unified callset with [high genotyping accuracy](https://raw.githubusercontent.com/dantaki/SV2/master/png/sv2_auc.png) and detection of [*de novo* mutations](https://raw.githubusercontent.com/dantaki/SV2/master/png/sv2_fdr.png).
 
 ![alt text](https://raw.githubusercontent.com/dantaki/SV2/master/png/sv2_flowchart.png "Support Vector Structural Variation Genotyper Work Flow")
 
@@ -47,6 +47,9 @@ SV<sup>2</sup> (support-vector structural-variant genotyper) is a machine learni
 wget http://downloads.sourceforge.net/project/sv2/sv2-1.2.zip # sv2-1.2.tar.gz also available
 unzip sv2-1.2.zip
 ```
+
+[Source Files](#source-files)
+
 #### 2: Configure Environment
 Run `configure.pl` # define install location and paths to FASTA assemblies
 ```
@@ -117,7 +120,7 @@ Refer to the [User Guide](https://github.com/dantaki/SV2/tree/master/doc#sv-inpu
  
 ## Performance
 
-![alt text](https://raw.githubusercontent.com/dantaki/SV2/master/png/sv2_auc.png "Support Vector Structural Variation Genotyper Work Flow")
+![alt text](https://raw.githubusercontent.com/dantaki/SV2/master/png/sv2_auc.png "Genotyping ROC curve")
 
 ##### [De novo mutation discovery performance](https://github.com/dantaki/SV2/tree/master/doc#de-novo-mutation-discovery)
 
@@ -125,7 +128,7 @@ Please refer to the [preprint](#preprint) for performance details.
 
 ## Usage
 
-* SV<sup>2</sup> is designed for human whole genome short-read sequencing libraries. Given deletion and tandem duplication positions, SV<sup>2</sup> returns a VCF with predicted copy number genotypes.
+* SV<sup>2</sup> is designed for human whole genome short-read sequencing libraries. Given deletion and duplication positions, SV<sup>2</sup> returns a VCF with predicted copy number genotypes.
 * Whole genome alignments from the [1000 Genomes Project](http://www.1000genomes.org/) were used for training. Validated genotypes were obtained from the phase 3 integrated structural variation call set ([DOI:10.1038/nature15394](http://dx.doi.org/10.1038%2Fnature15394); PMID:    26432246).
 * Features for genotyping include coverage, discordant paired-ends, split-reads, and heterozygous allele depth ratio.
    * BAM files must have supplementary alignment tags (SA).
