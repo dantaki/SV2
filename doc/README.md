@@ -38,7 +38,7 @@
 
 ## Introduction
 
-SV<sup>2</sup> (support-vector structural-variant genotyper) is a machine learning algorithm for genotyping deletions and tandem duplications from paired-end whole genome sequencing data. SV<sup>2</sup> can rapidly integrate variant calls from multiple SV discovery algorithms into a unified callset with high genotyping accuracy and detection of *de novo* mutations. 
+SV<sup>2</sup> (support-vector structural-variant genotyper) is a machine learning algorithm for genotyping deletions and duplications from paired-end whole genome sequencing data. SV<sup>2</sup> can rapidly integrate variant calls from multiple SV discovery algorithms into a unified callset with high genotyping accuracy and detection of *de novo* mutations. 
 
 SV<sup>2</sup> is an open source software written in Python/Cython that exploits four features of SV: read depth, discordant paired-ends, split-reads, and heterozygous allele depth in a supervised support vector machine classifier. 
 
@@ -253,7 +253,7 @@ When defining a VCF for a given sample, the sample identifier in the VCF header 
 
 `[-r|-cnv] SV_LIST` 
 
-SV<sup>2</sup> requires either a BED or VCF file of deletions and tandem duplications.
+SV<sup>2</sup> requires either a BED or VCF file of deletions and duplications.
 
 #### BED Input
 
@@ -349,7 +349,7 @@ Included in the tutorial are down-sampled (10%) BAM files aligned using [BWA-MEM
 
 Also included are SNV calls produced with [GATK Haplotype Caller](https://software.broadinstitute.org/gatk/gatkdocs/org_broadinstitute_gatk_tools_walkers_haplotypecaller_HaplotypeCaller.php). The VCFs are [bgzipped and tabix indexed](http://www.htslib.org/doc/tabix.html). SNV calls were generated using high coverage alignments not the subsampled alignments.
  
-[ForestSV](https://sites.google.com/site/sebatlab/software-data) deletion and tandem duplication predictions are provided in BED format. 
+[ForestSV](https://sites.google.com/site/sebatlab/software-data) deletion and duplication predictions are provided in BED format. 
 
 [1000 Genomes Phase 3 integrated SV](http://ftp.1000genomes.ebi.ac.uk/vol1/ftp/phase3/integrated_sv_map) calls are included in VCF format. 
 
