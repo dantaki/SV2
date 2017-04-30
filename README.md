@@ -124,7 +124,7 @@ Refer to the [User Guide](https://github.com/dantaki/SV2/tree/master/doc#sv-inpu
 
 ![alt text](https://raw.githubusercontent.com/dantaki/SV2/master/png/sv2_auc.png "Genotyping ROC curve")
 
-##### [Performance of *de novo* mutations](https://github.com/dantaki/SV2/tree/master/doc#de-novo-mutation-discovery)
+##### [Performance of *de novo* mutations](https://github.com/dantaki/SV2/blob/master/doc/README.md#de-novo-mutations)
 
 Please refer to the [preprint](#preprint) for performance details. 
 
