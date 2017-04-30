@@ -56,7 +56,7 @@ Run `configure.pl` # define install location and paths to FASTA assemblies
 cd sv2-1.2/
 perl configure.pl # follow the instructions
 ```
-[Manually Configure (without Perl5)](https://github.com/dantaki/SV2/blob/master/doc/README.md#configure-without-perl-5)
+> Alternatively, [manually configure (without Perl5)](https://github.com/dantaki/SV2/blob/master/doc/README.md#configure-without-perl-5)
 
 #### 3: Compile and Install from Source 
 ```
