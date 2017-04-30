@@ -28,7 +28,7 @@
       * [BED Output](#bed-output)
 5. [Performance](#performance)
    * [Genotyping Accuracy](#genotyping-accuracy)
-   * [De Novo Mutation Discovery](#de-novo-mutation-discovery)
+   * [*De Novo* Mutations](#de-novo-mutations)
 6. [Tutorial](#tutorial)
    * [Overview](#overview)
    * [Download](#download-tutorial-files)
@@ -332,7 +332,7 @@ For details of SV<sup>2</sup> genotyping performance, please refer to the [prepr
 
 SV<sup>2</sup> has superior genotyping accuracy when genotyping the union of SVTyper and Manta SVs. Truth sets were generated from SNV arrays. Please refer to the [preprint](http://biorxiv.org/content/early/2017/03/17/113498) for more details.
 
-### De Novo Mutation Discovery
+### *De Novo* Mutations
 
 ![alt text](https://raw.githubusercontent.com/dantaki/SV2/master/png/sv2_fdr.png "SV2 De Novo Filters")
 
