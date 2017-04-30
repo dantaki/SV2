@@ -42,13 +42,13 @@ SV<sup>2</sup> (support-vector structural-variant genotyper) is a machine learni
 [UserGuide]:doc/README.md
 
 ## Getting Started
-#### 1: Download Source Code :floppy_disk:
+#### 1: Download Source Files :floppy_disk:
 ```
 wget http://downloads.sourceforge.net/project/sv2/sv2-1.2.zip # sv2-1.2.tar.gz also available
 unzip sv2-1.2.zip
 ```
 
-[Source Files](#source-files)
+> [Source Files](#source-files)
 
 #### 2: Configure Environment
 Run `configure.pl` # define install location and paths to FASTA assemblies
