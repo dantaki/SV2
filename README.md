@@ -48,7 +48,7 @@ wget http://downloads.sourceforge.net/project/sv2/sv2-1.2.zip # sv2-1.2.tar.gz a
 unzip sv2-1.2.zip
 ```
 
-> [Source Files](#source-files)
+> [Source Files :floppy_disk:](#source-files)
 
 #### 2: Configure Environment
 Run `configure.pl` # define install location and paths to FASTA assemblies
