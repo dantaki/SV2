@@ -153,6 +153,7 @@ Please refer to the [preprint](#preprint) for performance details.
   * [pandas](http://pandas.pydata.org/)
   * [pybedtools](https://daler.github.io/pybedtools/)
   * [pysam 0.9+](https://github.com/pysam-developers/pysam)
+  * [scikit-learn v0.17](http://scikit-learn.org/)
 
 * [bedtools 2.25.0](https://github.com/arq5x/bedtools2/releases) or later
 
