@@ -245,7 +245,7 @@ cdef gc_cnv(cnv,master_cnv,gen):
 	for call in cnv:
 		if master_cnv.get(call)==None: continue
 		cnvs = master_cnv[call][0]
-		if chrFlag == False: cnvs = [tuple(map(lambda y: str.replace(y,'chr',''),x)) for x in cnvs]
+		if chrFlag == False: cnvs = [tuple(map(lambda y: str.replace(str(y),'chr',''),x)) for x in cnvs]
 		GC_content = int(5 * round(float(GC(pbed.BedTool(cnvs).nucleotide_content(fi=FASTA)))/5))
 		cnv_gc[call]=GC_content
 	return cnv_gc
