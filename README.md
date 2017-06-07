@@ -47,6 +47,8 @@ SV<sup>2</sup> (support-vector structural-variant genotyper) is a machine learni
 
 ## Installation 
 
+SV<sup>2</sup> can be installed with `pip install` or can be manually installed from source. 
+
 ### Install with `pip`
 
 ```
