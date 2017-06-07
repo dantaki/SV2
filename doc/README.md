@@ -7,10 +7,9 @@
    * [Genotyping](#genotyping)
 2. [Installation](#installation)
    * [Prerequisites](#prerequisites)
+   * [`pip` install](#pip-install)
+   * [Manual Install](#manual-install)
    * [Download](#download)
-   * [Configure](#configure)
-      * [Perl 5](#configure-with-perl-5)
-      * [Without Perl 5](#configure-without-perl-5)
    * [Compile and Install](#compile-and-install)
 3. [Input](#input)
    * [Sample Information](#sample-information)
@@ -112,67 +111,23 @@ Each classifier, with the exception of Duplication SNV implements depth of cover
 
 * Optional (for configuration): [Perl 5](http://dev.perl.org/perl5/)
 
-### Download
-
-#### .zip
-```
-wget http://downloads.sourceforge.net/project/sv2/sv2-1.2.zip
-unzip sv2-1.2.zip
-```
-#### .tar.gz
-```
-wget http://downloads.sourceforge.net/project/sv2/sv2-1.2.tar.gz
-tar xvzf sv2-1.2.tar.gz
-```
-
-### Configure 
-
-Below are two methods for generating the config files. [Configure with Perl 5](#configure-with-perl-5) is recommended. 
-
-The config files contain the paths of the install directory and the hg19/hg38 FASTA files. One FASTA file is required for SV<sup>2</sup>.
-
 * [hg38 FASTA](http://ftp.1000genomes.ebi.ac.uk/vol1/ftp/technical/reference/GRCh38_reference_genome/GRCh38_full_analysis_set_plus_decoy_hla.fa)
 
 * [hg19 FASTA](http://ftp.1000genomes.ebi.ac.uk/vol1/ftp/technical/reference/human_g1k_v37.fasta.gz)
 
+### Manual Install
+
+> [Source Files :floppy_disk:](#source-files)
+
 ```
+wget http://downloads.sourceforge.net/project/sv2/sv2-1.2.zip # sv2-1.2.tar.gz also available
+unzip sv2-1.2.zip
 cd sv2-1.2/
+
+python setup.py install [--prefix <PYTHONPATH>]
 ```
-
-#### Configure with Perl 5
-
-```
-perl configure.pl # follow the instructions
-```
-
-#### Configure without Perl 5
-
-The config file is located in `sv2-1.2/src/config/sv2.ini`. Edit this file to include the paths of FASTA files and the installation directory. 
-
-```
-# src/config/sv2.ini
-
-[FASTA_PATHS]
-hg19=None
-hg38=/home/usr/fasta/GRCh38_full_analysis_set_plus_decoy_hla.fa
-[INSTALL_DIR]
-sv2_home=/home/usr/bin/sv2 
-
-# the last directory for [INSTALL_DIR] should be 'sv2'
-```
-
-Append the following lines to the python setup config file located here: `sv2-1.2/setup.cfg`
-
-**Note:** the directories must be the same as [INSTALL_DIR] in `src/config/sv2.ini` 
-
-```
-# append to setup.cfg under [install]
-
-install_lib=/home/usr/bin/sv2
-install_scripts=/home/usr/bin/sv2
-```
-
-### Compile and Install
+* define `--prefix <PYTHONPATH>` for local installation
+* ignore numpy compilation warnings
 
 ```
 python setup.py install # ignore numpy warnings

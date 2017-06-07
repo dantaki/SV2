@@ -13,9 +13,7 @@ Support Vector Structural Variation Genotyper
 * [User Guide](#user-guide)
    * [Tutorial](#tutorial)
 * [Installation](#installation)
-  * [Install with `pip`](#install-with-pip)
-  * [Manual Install](#manual-install)
-  * [Configure SV<sup>2</sup>](#configure-sv2)
+* [Configure SV<sup>2</sup>](#configure-sv2)
 * [Options](#options)
 * [Input](#input)
 * [Output](#output)
@@ -47,29 +45,13 @@ SV<sup>2</sup> (support-vector structural-variant genotyper) is a machine learni
 
 ## Installation 
 
-SV<sup>2</sup> can be installed with `pip install` or can be manually installed from source. 
-
-### Install with `pip`
+SV<sup>2</sup> can be installed with `pip install` or can be [manually installed from source]. 
 
 ```
 pip install http://downloads.sourceforge.net/project/sv2/sv2-1.2.tar.gz
 ```
 
-### Manual Install
-
-> [Source Files :floppy_disk:](#source-files)
-
-```
-wget http://downloads.sourceforge.net/project/sv2/sv2-1.2.zip # sv2-1.2.tar.gz also available
-unzip sv2-1.2.zip
-cd sv2-1.2/
-
-python setup.py install [--prefix <PYTHONPATH>] 
-```
-* define `--prefix <PYTHONPATH>` for local installation 
-* ignore numpy compilation warnings
-
-### Configure SV<sup>2</sup>
+## Configure SV<sup>2</sup>
 
 ```
 sv2 -hg19 <hg19.fasta> [-hg38 <hg38.fasta>] 
