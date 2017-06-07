@@ -109,11 +109,14 @@ Each classifier, with the exception of Duplication SNV implements depth of cover
 
 * [bedtools 2.25.0](https://github.com/arq5x/bedtools2/releases) or later
 
-* Optional (for configuration): [Perl 5](http://dev.perl.org/perl5/)
 
-* [hg38 FASTA](http://ftp.1000genomes.ebi.ac.uk/vol1/ftp/technical/reference/GRCh38_reference_genome/GRCh38_full_analysis_set_plus_decoy_hla.fa)
+### Install with `pip`
 
-* [hg19 FASTA](http://ftp.1000genomes.ebi.ac.uk/vol1/ftp/technical/reference/human_g1k_v37.fasta.gz)
+*Recommended*
+
+```
+pip install http://downloads.sourceforge.net/project/sv2/sv2-1.2.tar.gz
+```
 
 ### Manual Install
 
@@ -129,17 +132,8 @@ python setup.py install [--prefix <PYTHONPATH>]
 * define `--prefix <PYTHONPATH>` for local installation
 * ignore numpy compilation warnings
 
-```
-python setup.py install # ignore numpy warnings
-```
-
 #### Check Installation
 
-Append `export PATH=$SV2_INSTALL_DIR:$PATH` to your `~/.bashrc` if you have not already. 
-
-**Note:** `$SV2_INSTALL_DIR` is the install path defined in the config files. For this example, append `export PATH=/home/usr/bin/sv2:$PATH` to `~/.bashrc`
-
-`source ~/.bashrc`
 
 ```
 sv2 --help
@@ -170,6 +164,18 @@ optional arguments:
 ```
 
 If you get this error: `Error detail: Resource temporarily unavailable` there is not enough memory to run SV<sup>2</sup> in your shell.
+
+## Configure 
+
+SV<sup>2</sup> requires one FASTA file to run. 
+
+* [hg19 FASTA](http://ftp.1000genomes.ebi.ac.uk/vol1/ftp/technical/reference/human_g1k_v37.fasta.gz)
+
+* [hg38 FASTA](http://ftp.1000genomes.ebi.ac.uk/vol1/ftp/technical/reference/GRCh38_reference_genome/GRCh38_full_analysis_set_plus_decoy_hla.fa)
+
+```
+sv2 -hg19 <hg19.fasta> -hg38 <hg38.fasta> 
+```
 
 ## Input
 
