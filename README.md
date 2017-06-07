@@ -8,16 +8,23 @@ Support Vector Structural Variation Genotyper
 [![DOI](https://zenodo.org/badge/80166279.svg)](https://zenodo.org/badge/latestdoi/80166279) [![Docker Automated buil](https://img.shields.io/docker/automated/jrottenberg/ffmpeg.svg)](https://hub.docker.com/r/dantaki/sv2/)
 
 ## Table of Contents
+
 * [Preprint](#preprint)
 * [User Guide](#user-guide)
    * [Tutorial](#tutorial)
-* [Installation](#getting-started)
+
+* [Installation](#installation)
+  * [Install with `pip`](#install-with-pip)
+  * [Manual Install](#manual-install)
+  * [Configure SV<sup>2</sup>](#configure-sv2)
+
 * [Options](#options)
 * [Input](#input)
 * [Output](#output)
 * [Performance](#performance)
 * [Usage](#usage)
 * [Requirements](#requirements)
+
 * [Source Files](#source-files)
 * [Credits](#credits)
 * [Citing SV<sup>2</sup>](#citing-sv2)
@@ -41,22 +48,29 @@ SV<sup>2</sup> (support-vector structural-variant genotyper) is a machine learni
 
 [UserGuide]:doc/README.md
 
-## Getting Started
-#### 1: Download Source Files :floppy_disk:
+## Installation 
+
+### Install with `pip`
+
 ```
-wget http://downloads.sourceforge.net/project/sv2/sv2-1.2.zip # sv2-1.2.tar.gz also available
-unzip sv2-1.2.zip
+pip install http://downloads.sourceforge.net/project/sv2/sv2-1.2.tar.gz
 ```
+
+### Manual Install
 
 > [Source Files :floppy_disk:](#source-files)
 
-#### 2: Compile and Install from Source 
 ```
+wget http://downloads.sourceforge.net/project/sv2/sv2-1.2.zip # sv2-1.2.tar.gz also available
+unzip sv2-1.2.zip
 cd sv2-1.2/
-python setup.py install # ignore numpy warnings
-```
 
-#### 3: Configure SV<sup>2</sup>
+python setup.py install [--prefix <PYTHONPATH>] 
+```
+* define `--prefix <PYTHONPATH>` for local installation 
+* ignore numpy compilation warnings
+
+### Configure SV<sup>2</sup>
 
 ```
 sv2 -hg19 <hg19.fasta> [-hg38 <hg38.fasta>] 
