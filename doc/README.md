@@ -184,7 +184,7 @@ If you get this error: `Error detail: Resource temporarily unavailable` there is
 
 The SV<sup>2</sup> command requires two input files: sample information and a list of SVs to genotype. The sample information input file contains paths to BAM and VCF files. 
 
-A FASTA file for hg19 or hg38 is required for SV<sup>2</sup> to run. The SV<sup>2</sup> [config](#configure) files contain the paths to the hg19 and hg38 FASTA.  
+A FASTA file for hg19 or hg38 is required for SV<sup>2</sup> to run. Refer to the [config](#configure) section for details.  
 
 ### Sample Information
 
@@ -238,11 +238,13 @@ SV<sup>2</sup> only supports uncompressed VCF files. VCF files must contain both
 
 ### FASTA
 
-SV<sup>2</sup> requires a FASTA file in either hg19 (GRCh37) or hg38 for GC content correction. The full paths of the FASTA files are supplied during [configuration](#configure). The config file is located in `$SV2_INSTALL_PATH/sv2/src/config/sv2.ini`
+SV<sup>2</sup> requires a FASTA file in either hg19 (GRCh37) or hg38 for GC content correction. 
  
 * [hg38 FASTA](http://ftp.1000genomes.ebi.ac.uk/vol1/ftp/technical/reference/GRCh38_reference_genome/GRCh38_full_analysis_set_plus_decoy_hla.fa)
 
 * [hg19 FASTA](http://ftp.1000genomes.ebi.ac.uk/vol1/ftp/technical/reference/human_g1k_v37.fasta.gz)
+
+Configure SV<sup>2</sup> with `sv2 -hg19 <hg19.fasta> -hg38 <hg38.fasta>`
 
 ## Output
 
