@@ -7,7 +7,7 @@
    * [Genotyping](#genotyping)
 2. [Installation](#installation)
    * [Prerequisites](#prerequisites)
-   * [`pip` install](#pip-install)
+   * [`pip` install](#install-with-pip)
    * [Manual Install](#manual-install)
    * [Configure](#configure)
 3. [Input](#input)
@@ -319,9 +319,13 @@ A hg19 FASTA file is required to complete this tutorial.
 wget http://ftp.1000genomes.ebi.ac.uk/vol1/ftp/technical/reference/human_g1k_v37.fasta.gz
 gunzip human_g1k_v37.fasta.gz
 
-# put the full path of the FASTA file in the sv2 config file under [FASTA_PATHS] hg19=
-# this is typically done during the configure stage
+# index FASTA
+samtools faidx human_g1k_v37.fasta
+
+# configure SV<sup>2</sup>
+sv2 -hg19 human_g1k_v37.fasta
 ``` 
+
 **Ensure you have properly [installed](#installation) and [tested](#check-installation) SV<sup>2</sup> before starting the tutorial.**
 
 ### Download Tutorial Files
@@ -419,6 +423,8 @@ sv2 -i sv2_input.txt -r chr21_forestSV.bed -pre sv2_preprocessing/ -feats sv2_fo
 ## Troubleshooting
 
 Since SV<sup>2</sup> uses Cython, error messages may be cryptic. A `Segmentation Fault` typically indicates the input files are not formatted correctly. 
+
+If you encounter this error: `UserWarning: Trying to unpickle estimator SVC from version pre-0.18 when using version 0.18.1. This might lead to breaking code or invalid results. Use at your own risk.`, install scikit-learn v0.17 `pip install scikit-learn==0.17`
 
 For any bugs or errors in SV<sup>2</sup> please contact Danny Antaki <dantaki@ucsd.edu>
 

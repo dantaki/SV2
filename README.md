@@ -13,13 +13,13 @@ Support Vector Structural Variation Genotyper
 * [User Guide](#user-guide)
    * [Tutorial](#tutorial)
 * [Installation](#installation)
+   * [Requirements](#requirements)
 * [Configure SV<sup>2</sup>](#configure-sv2)
 * [Options](#options)
 * [Input](#input)
 * [Output](#output)
 * [Performance](#performance)
 * [Usage](#usage)
-* [Requirements](#requirements)
 * [Source Files](#source-files)
 * [Credits](#credits)
 * [Citing SV<sup>2</sup>](#citing-sv2)
@@ -45,7 +45,24 @@ SV<sup>2</sup> (support-vector structural-variant genotyper) is a machine learni
 
 ## Installation 
 
-SV<sup>2</sup> can be installed with `pip install` or can be [manually installed from source]. 
+SV<sup>2</sup> can be installed with `pip install` or can be [manually installed from source](https://github.com/dantaki/SV2/tree/master/doc#manual-install). 
+
+### Requirements
+* [python 2.7](https://www.python.org/)
+  * [cython](https://github.com/cython/cython)
+  * [numpy](http://www.numpy.org/)
+  * [pandas](http://pandas.pydata.org/)
+  * [pybedtools](https://daler.github.io/pybedtools/)
+  * [pysam 0.9+](https://github.com/pysam-developers/pysam)
+  * [scikit-learn v0.17](http://scikit-learn.org/)
+
+* [bedtools 2.25.0](https://github.com/arq5x/bedtools2/releases) or later
+
+*SV<sup>2</sup> requires python 2.7*
+
+*SV<sup>2</sup> has been tested on Linux and MacOS with [bioconda](https://bioconda.github.io/)*
+
+### Install with `pip`
 
 ```
 pip install http://downloads.sourceforge.net/project/sv2/sv2-1.2.tar.gz
@@ -108,7 +125,7 @@ Refer to the [User Guide](https://github.com/dantaki/SV2/tree/master/doc#sample-
 
 Refer to the [User Guide](https://github.com/dantaki/SV2/tree/master/doc#sv-input) for more details. 
 
- ## Output
+## Output
  
  Output is generated in the current working directory. 
  
@@ -145,21 +162,6 @@ Please refer to the [preprint](#preprint) for performance details.
 * SVs with estimated autosome copy number >10 cannot be genotyped. 
 
 ---
-
-## Requirements
-* [python 2.7](https://www.python.org/)
-  * [cython](https://github.com/cython/cython)
-  * [numpy](http://www.numpy.org/)
-  * [pandas](http://pandas.pydata.org/)
-  * [pybedtools](https://daler.github.io/pybedtools/)
-  * [pysam 0.9+](https://github.com/pysam-developers/pysam)
-  * [scikit-learn v0.17](http://scikit-learn.org/)
-
-* [bedtools 2.25.0](https://github.com/arq5x/bedtools2/releases) or later
-
-*SV<sup>2</sup> requires python 2.7*
-
-*SV<sup>2</sup> has been tested on Linux and MacOS with [bioconda](https://bioconda.github.io/)*
 
 ## Source Files
 
