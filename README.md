@@ -50,24 +50,24 @@ unzip sv2-1.2.zip
 
 > [Source Files :floppy_disk:](#source-files)
 
-#### 2: Configure Environment
-Run `configure.pl` # define install location and paths to FASTA assemblies
+#### 2: Compile and Install from Source 
 ```
 cd sv2-1.2/
-perl configure.pl # follow the instructions
-```
-> Alternatively, [manually configure (without Perl5)](https://github.com/dantaki/SV2/blob/master/doc/README.md#configure-without-perl-5)
-
-#### 3: Compile and Install from Source 
-```
 python setup.py install # ignore numpy warnings
 ```
+
+#### 3: Configure SV<sup>2</sup>
+
+```
+sv2 -hg19 <hg19.fasta> [-hg38 <hg38.fasta>] 
+```
+SV<sup>2</sup> requires one FASTA file to run.
 
 ## Options
 `sv2 --help`
 
-Flag | Description
---- | -------------
+Genotyping Option | Description
+----------------- | -------------
 -i \| -in | Tab-delimited input [ID, BAM path, VCF path, Gender]
 -r \| -cnv | SV to genotype. BED or VCF
 -c \| -cpu | Parallelize sample-wise. 1 per CPU 
@@ -77,6 +77,11 @@ Flag | Description
 -o \| -out | Output name
 -pre | Preprocessing output directory. *Skips preprocessing*
 -feats | Feature output directory. *Skips feature extraction*
+
+| Configure Option | Description |
+| ---------------- | ---------- |
+| -hg19 | hg19 FASTA file | 
+| -hg38 | hg38 FASTA file |
 
 ## Input
 ### Sample information < -i >

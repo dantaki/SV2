@@ -153,11 +153,36 @@ def reportTime(init_time,s):
 	s = ' '+s+' <time elapsed: {}>'.format(timedelta(seconds=int(time())-init_time))
 	for x in range(len(s)+2): f.append('-')
 	print ''.join(f)+'\n'+s+'\n'+''.join(f)
+def writeConfig(hg19,hg38):
+	cfg = get_path()+'/config/sv2.ini'
+	conf = ConfigParser()
+	if not os.path.isfile(cfg):
+		cfgfile = open(cfg,'w')
+		conf.add_section('FASTA_PATHS')
+		conf.set('FASTA_PATHS','hg19',hg19)
+		conf.set('FASTA_PATHS','hg38',hg38)
+		conf.write(cfgfile)
+		cfgfile.close()
+	else: 
+		conf.read(cfg)
+		if hg19 != None:
+			if not os.path.isfile(hg19): errFH(hg19)
+			conf.set('FASTA_PATHS','hg19',hg19)
+		if hg38 != None:
+			if not os.path.isfile(hg38): errFH(hg38)
+			conf.set('FASTA_PATHS','hg38',hg38)
+		with open(cfg,'w') as cfgfile: conf.write(cfgfile) 
+def checkConfig():
+	cfg = get_path()+'/config/sv2.ini'
+	if not os.path.isfile(cfg): errFH(cfg)
+	conf = ConfigParser()
+	conf.read(cfg)
+	if not os.path.isfile(conf.get('FASTA_PATHS','hg19')) and not os.path.isfile(conf.get('FASTA_PATHS','hg38')): 
+		sys.stderr.write('FATAL ERROR: FASTA NOT SPECIFIED\n\nSV2 requires a FASTA file. Run the configuration command:\n\nsv2 -hg19 <hg19.fasta> -hg38 <hg38.fasta>\n')
+		sys.exit(1)
 cdef fasta_config(gen):
 	cfg = get_path()+'/config/sv2.ini'
-	if not os.path.isfile(cfg):
-		sys.stderr.write('ERROR {} NOT FOUND\n'.format(cfg))
-		sys.exit(1)
+	if not os.path.isfile(cfg): errFH(cfg)
 	conf = ConfigParser()
 	conf.read(cfg)
 	return conf.get('FASTA_PATHS',gen)

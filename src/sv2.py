@@ -1,6 +1,6 @@
 __version__='1.2'
 import sys,os,argparse
-from .core import check_in,Bed,check_cnv,errFH,reportTime,preprocess,extract_feats,genotype,annotate
+from .core import writeConfig,checkConfig,check_in,Bed,check_cnv,errFH,reportTime,preprocess,extract_feats,genotype,annotate
 from argparse import RawTextHelpFormatter
 from multiprocessing import Pool
 from glob import glob
@@ -9,15 +9,19 @@ def main():
 	init_time = int(time())
 	splash='\n                       ____\n  _____________   ___ |___ \\\n /   _____/\   \ /   // ___/\n \_____  \  \   Y   //_____)\n /        \  \     /\n/_________/   \___/\nSupport Vector Structural Variation Genotyper\nVersion 1.2        Author: Danny Antaki <dantaki at ucsd dot edu>\n'
 	parser = argparse.ArgumentParser(description=splash,formatter_class=RawTextHelpFormatter)
-	parser.add_argument('-i','-in', help='Tab delimited input [ ID, BAM-PATH, VCF-PATH, M/F ]',required=True)
-	parser.add_argument('-r','-cnv', help='SV to genotype. Either in BED or VCF format',type=str)
-	parser.add_argument('-c','-cpu', help='Parallelize sample-wise. 1 per cpu',required=False,default=1,type=int)
-	parser.add_argument('-g','-genome',  help='Reference genome build [ hg19, hg38 ]',required=False,default='hg19',type=str)
-	parser.add_argument('-pcrfree',  help='GC content normalization for PCR free libraries',required=False,default=False,action="store_true")
-	parser.add_argument('-s','-seed', help='Preprocessing: integer seed for genome shuffling',required=False,default=42,type=int)
-	parser.add_argument('-o','-out', help='output',required=False,default="sv2_genotypes.vcf",type=str)
-	parser.add_argument('-pre', help='Preprocessing output directory',required=False,default=None)
-	parser.add_argument('-feats', help='Feature output directory',required=False,default=None)
+	genoArgs = parser.add_argument_group('genotype arguments')
+	configArgs = parser.add_argument_group('configure arguments')
+	genoArgs.add_argument('-i','-in', help='Tab delimited input [ ID, BAM-PATH, VCF-PATH, M/F ]')
+	genoArgs.add_argument('-r','-cnv', help='SV to genotype. Either in BED or VCF format',type=str)
+	genoArgs.add_argument('-c','-cpu', help='Parallelize sample-wise. 1 per cpu',required=False,default=1,type=int)
+	genoArgs.add_argument('-g','-genome',  help='Reference genome build [ hg19, hg38 ]',required=False,default='hg19',type=str)
+	genoArgs.add_argument('-pcrfree',  help='GC content normalization for PCR free libraries',required=False,default=False,action="store_true")
+	genoArgs.add_argument('-s','-seed', help='Preprocessing: integer seed for genome shuffling',required=False,default=42,type=int)
+	genoArgs.add_argument('-o','-out', help='output',required=False,default="sv2_genotypes.vcf",type=str)
+	genoArgs.add_argument('-pre', help='Preprocessing output directory',required=False,default=None)
+	genoArgs.add_argument('-feats', help='Feature extraction output directory',required=False,default=None)
+	configArgs.add_argument('-hg19',default=None,help='hg19 FASTA',required=False)
+	configArgs.add_argument('-hg38',default=None,help='hg38 FASTA',required=False)	
 	args = parser.parse_args()
 	infh = args.i
 	bed = args.r
@@ -28,12 +32,18 @@ def main():
 	seed = args.s
 	predir= args.pre
 	featsdir = args.feats
+	conf_hg19 = args.hg19
+	conf_hg38 = args.hg38
 	preprocess_files={}
 	feats_files={}
 	gens = ['hg19','hg38']
 	if gen not in gens: 
 		sys.stderr.write('ERROR -g must be either hg19 or hg38. NOT {}\n'.format(gen))
 		sys.exit(1)
+	if conf_hg19 != None or conf_hg38 != None: 
+		writeConfig(conf_hg19,conf_hg38)
+		sys.exit(0)
+	checkConfig()
 	bam_dict,vcf_dict,gender_dict=check_in(infh)
 	raw,cnv=check_cnv(Bed(bed),gen)
 	ofh = ofh.replace('.txt','.vcf').replace('.out','.vcf')
