@@ -12,19 +12,16 @@ Support Vector Structural Variation Genotyper
 * [Preprint](#preprint)
 * [User Guide](#user-guide)
    * [Tutorial](#tutorial)
-
 * [Installation](#installation)
   * [Install with `pip`](#install-with-pip)
   * [Manual Install](#manual-install)
   * [Configure SV<sup>2</sup>](#configure-sv2)
-
 * [Options](#options)
 * [Input](#input)
 * [Output](#output)
 * [Performance](#performance)
 * [Usage](#usage)
 * [Requirements](#requirements)
-
 * [Source Files](#source-files)
 * [Credits](#credits)
 * [Citing SV<sup>2</sup>](#citing-sv2)
