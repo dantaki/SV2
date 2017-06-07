@@ -147,10 +147,8 @@ sv2 -hg19 <hg19.fasta> -hg38 <hg38.fasta>
 
 
 ```
-sv2 --help
-
-usage: sv2 [-h] -i I [-r R] [-c C] [-g G] [-pcrfree] [-s S] [-o O] [-pre PRE]
-           [-feats FEATS]
+usage: sv2 [-h] [-i I] [-r R] [-c C] [-g G] [-pcrfree] [-s S] [-o O]
+           [-pre PRE] [-feats FEATS] [-hg19 HG19] [-hg38 HG38]
 
                        ____
   _____________   ___ |___ \
@@ -163,6 +161,8 @@ Version 1.2        Author: Danny Antaki <dantaki at ucsd dot edu>
 
 optional arguments:
   -h, --help       show this help message and exit
+
+genotype arguments:
   -i I, -in I      Tab delimited input [ ID, BAM-PATH, VCF-PATH, M/F ]
   -r R, -cnv R     SV to genotype. Either in BED or VCF format
   -c C, -cpu C     Parallelize sample-wise. 1 per cpu
@@ -171,7 +171,11 @@ optional arguments:
   -s S, -seed S    Preprocessing: integer seed for genome shuffling
   -o O, -out O     output
   -pre PRE         Preprocessing output directory
-  -feats FEATS     Feature output directory
+  -feats FEATS     Feature extraction output directory
+
+configure arguments:
+  -hg19 HG19       hg19 FASTA
+  -hg38 HG38       hg38 FASTA
 ```
 
 If you get this error: `Error detail: Resource temporarily unavailable` there is not enough memory to run SV<sup>2</sup> in your shell.
