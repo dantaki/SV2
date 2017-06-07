@@ -9,8 +9,7 @@
    * [Prerequisites](#prerequisites)
    * [`pip` install](#pip-install)
    * [Manual Install](#manual-install)
-   * [Download](#download)
-   * [Compile and Install](#compile-and-install)
+   * [Configure](#configure)
 3. [Input](#input)
    * [Sample Information](#sample-information)
       * [BAM](#bam)
@@ -106,7 +105,7 @@ Each classifier, with the exception of Duplication SNV implements depth of cover
   * [pandas](http://pandas.pydata.org/)
   * [pybedtools](https://daler.github.io/pybedtools/)
   * [pysam 0.9+](https://github.com/pysam-developers/pysam)
-
+  * [scikit-learn 0.17](http://scikit-learn.org)
 * [bedtools 2.25.0](https://github.com/arq5x/bedtools2/releases) or later
 
 
@@ -132,7 +131,19 @@ python setup.py install [--prefix <PYTHONPATH>]
 * define `--prefix <PYTHONPATH>` for local installation
 * ignore numpy compilation warnings
 
-#### Check Installation
+### Configure
+
+SV<sup>2</sup> requires one FASTA file to run.
+
+* [hg19 FASTA](http://ftp.1000genomes.ebi.ac.uk/vol1/ftp/technical/reference/human_g1k_v37.fasta.gz)
+
+* [hg38 FASTA](http://ftp.1000genomes.ebi.ac.uk/vol1/ftp/technical/reference/GRCh38_reference_genome/GRCh38_full_analysis_set_plus_decoy_hla.fa)
+
+```
+sv2 -hg19 <hg19.fasta> -hg38 <hg38.fasta>
+```
+
+### Check Installation
 
 
 ```
@@ -164,18 +175,6 @@ optional arguments:
 ```
 
 If you get this error: `Error detail: Resource temporarily unavailable` there is not enough memory to run SV<sup>2</sup> in your shell.
-
-## Configure 
-
-SV<sup>2</sup> requires one FASTA file to run. 
-
-* [hg19 FASTA](http://ftp.1000genomes.ebi.ac.uk/vol1/ftp/technical/reference/human_g1k_v37.fasta.gz)
-
-* [hg38 FASTA](http://ftp.1000genomes.ebi.ac.uk/vol1/ftp/technical/reference/GRCh38_reference_genome/GRCh38_full_analysis_set_plus_decoy_hla.fa)
-
-```
-sv2 -hg19 <hg19.fasta> -hg38 <hg38.fasta> 
-```
 
 ## Input
 
