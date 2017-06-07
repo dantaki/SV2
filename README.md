@@ -5,7 +5,7 @@ Support Vector Structural Variation Genotyper
 
 *A genotyper for the rest of us*
 
-[![DOI](https://zenodo.org/badge/80166279.svg)](https://zenodo.org/badge/latestdoi/80166279)
+[![DOI](https://zenodo.org/badge/80166279.svg)](https://zenodo.org/badge/latestdoi/80166279) [![Docker Automated buil](https://img.shields.io/docker/automated/jrottenberg/ffmpeg.svg)](https://hub.docker.com/r/dantaki/sv2/)
 
 ## Table of Contents
 * [Preprint](#preprint)
