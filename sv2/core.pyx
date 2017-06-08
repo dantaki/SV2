@@ -1325,7 +1325,7 @@ def annotate(raw,genos,gen,REF,NON,GQ,OFH,sex,hemi,FILT,DNMFILT):
 	GTed={}
 	refcnt={}
 	males = [k for k in sex if sex[k] == 'M']
-	IID = list(set([x[5] for x in genos]))
+	IID = list(set([str(x[5]) for x in genos]))
 	IID.sort(key=str.lower)
 	cnv=pbed.BedTool(list(set([(x[0],x[1],x[2]) for x in raw]))).sort()
 	cyto=cytobandOverlap(cnv,gen)
