@@ -827,7 +827,7 @@ cdef dnmFilter(NON,REF,PEF,CLF):
 			if sz < 5000 and ref >= 18 and non >= 18: passflag=1
 			elif 5000 <= sz < 100000 and ref >= 15 and non >= 10: passflag=1
 			elif sz >= 100000 and ref >= 13 and non >= 10: passflag=1
-		elif 'DEL= Male_Sex_Chrom' in clf and non>=8 and ref>=8: passflag=1
+		elif 'DEL_Male_Sex_Chrom' in clf and non>=8 and ref>=8: passflag=1
 		elif 'DUP_Male_Sex_Chrom' in clf and sz>=5000 and ref>=10 and non>=10: passflag=1
 		k=(x[0],x[1],x[2],x[3])
 		if FILT.get(k)==None: FILT[k]=[passflag]
