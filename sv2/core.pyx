@@ -1343,6 +1343,7 @@ def annotate(raw,genos,gen,REF,NON,GQ,OFH,sex,hemi,FILT,DNMFILT):
 				if refcnt.get(k)==None: refcnt[k]=1
 				else: refcnt[k]+=1
 			for y in x[13].split('/'):
+				if y == '.': continue 
 				if AF.get(k)==None: AF[k]=[int(y),1]
 				else: AF[k]=[AF[k][0]+int(y),AF[k][1]+1]
 			if '1' in x[13]:
