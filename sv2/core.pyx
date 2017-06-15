@@ -211,7 +211,7 @@ cdef annot_toList(cnv):
 	return cnv_list
 cdef filter_calls(cnv,gen):
 	cdef unsigned int tag
-	"""add unique annotation to each CNV"""
+	"""add unique annotation to each SV"""
 	tag = 1
 	annot_cnv=[]
 	cnv_dict={}
@@ -235,7 +235,7 @@ cdef filter_calls(cnv,gen):
 	masked_end_flank=annot_toList(end_flank500bp.subtract(pbed.BedTool(get_path()+'/resources/'+gen+'_unmapped.bed.gz')))
 	"""take the union of the two masked call sets"""
 	if len(masked_cnv) == 0:
-		sys.stderr.write('ERROR: CNVs completed masked by excluded regions\n')
+		sys.stderr.write('ERROR: SVs completed masked by excluded regions\n')
 		sys.exit(1)
 	cnv_tag = list(zip(*masked_cnv)[4])
 	passed_tag = list(set(cnv_tag))
@@ -291,7 +291,7 @@ cdef MAD(a, double c=0.6745): return np.around(np.median(np.fabs(a-np.median(a))
 cdef normalize_chr_cov(double read_count, double chr_size, read_length): return np.around( (read_count/chr_size)*np.median(read_length),decimals=2)
 cdef normalize_coverage(double read_count, double span, double chr_cov, double read_length): return (((read_count/span)*read_length)/chr_cov)
 cdef count_reads(cnv_list,bam,ci,chrFlag):
-	"""count reads within CNV span for coverage estimation"""
+	"""count reads within SV span for coverage estimation"""
 	cdef unsigned int read_count
 	cdef unsigned int bp_span
 	read_count=0
@@ -319,7 +319,7 @@ cdef count_reads(cnv_list,bam,ci,chrFlag):
 			read_count+=1
 	return(read_count,bp_span)
 cdef depth_of_coverage(cnv_list,bamfh,chrFlag,read_length):
-	"""return median depth of coverage for CNV <= 1kb"""
+	"""return median depth of coverage for SV <= 1kb"""
 	pos_doc={}
 	for (c,s,e) in cnv_list:
 		if chrFlag == False: c = c.replace('chr','')
@@ -1436,7 +1436,7 @@ def annotate(raw,genos,gen,REF,NON,GQ,OFH,sex,hemi,FILT,DNMFILT):
 	VCFHEAD=[	'##fileformat=VCFv4.1',
 			'##fileDate={}'.format(date[0]),
 			'##reference={}'.format(fasta_config(gen)),
-			'##GTCNV_CMD="{}"'.format(' '.join(map(str,sys.argv[:]))),
+			'##SV2_CMD="{}"'.format(' '.join(map(str,sys.argv[:]))),
 			'##INFO=<ID=END,Number=1,Type=Integer,Description="End position of structural variant">',
 			'##INFO=<ID=SVTYPE,Number=1,Type=String,Description="Type of structural variant">',
 			'##INFO=<ID=SVLEN,Number=1,Type=Integer,Description="Difference in length between REF and ALT alleles">',
