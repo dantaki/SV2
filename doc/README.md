@@ -52,7 +52,7 @@ SV<sup>2</sup> preprocessing records the median coverage, insert size, read leng
  
 ### Feature Extraction
 
-Before feature extraction, a mask is applied to SV regions. The mask includes segmental duplications, short tandem-repeats, centromeres, telomeres, and unmappable regions and is included here `$SV2_INSTALL_DIR/sv2/src/resources/annotation_files/hg*flags.bed.gz`. The genome mask with merged positions is located here `$SV@_INSTALL_DIR/sv2/src/resources/hg*_unmapped.bed.gz`. SV calls that completely overlap masked elements cannot be genotyped and are represented as `./.` in the output VCF.
+Before feature extraction, a mask is applied to SV regions. The mask includes segmental duplications, short tandem-repeats, centromeres, telomeres, and unmappable regions and is included here `$SV2_INSTALL_DIR/sv2/src/resources/annotation_files/hg*flags.bed.gz`. The genome mask with merged positions is located here `$SV2_INSTALL_DIR/sv2/src/resources/hg*_unmapped.bed.gz`. SV calls that completely overlap masked elements cannot be genotyped and are represented as `./.` in the output VCF.
 
 SV<sup>2</sup> genotypes using four features of SV: depth of coverage, discordant paired-end, split-reads, and heterozygous allele depth. [Feature extraction output](#feature-output) is located in `sv2_features/` in the current working directory. If feature extraction has completed and a VCF of multiple samples is desired, supplying the option `-feats sv2_features/` to the SV<sup>2</sup> command with skip feature extraction. 
 
