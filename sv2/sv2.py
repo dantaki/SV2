@@ -1,4 +1,4 @@
-__version__='1.2'
+__version__='1.3'
 import sys,os,argparse
 from .core import writeConfig,checkConfig,check_in,Bed,check_cnv,errFH,reportTime,preprocess,extract_feats,genotype,annotate
 from argparse import RawTextHelpFormatter
@@ -7,7 +7,7 @@ from glob import glob
 from time import time
 def main():
 	init_time = int(time())
-	splash='\n                       ____\n  _____________   ___ |___ \\\n /   _____/\   \ /   // ___/\n \_____  \  \   Y   //_____)\n /        \  \     /\n/_________/   \___/\nSupport Vector Structural Variation Genotyper\nVersion 1.2        Author: Danny Antaki <dantaki at ucsd dot edu>\n'
+	splash='\n                       ____\n  _____________   ___ |___ \\\n /   _____/\   \ /   // ___/\n \_____  \  \   Y   //_____)\n /        \  \     /\n/_________/   \___/\nSupport Vector Structural Variation Genotyper\nVersion 1.3        Author: Danny Antaki <dantaki at ucsd dot edu>\n'
 	parser = argparse.ArgumentParser(description=splash,formatter_class=RawTextHelpFormatter)
 	genoArgs = parser.add_argument_group('genotype arguments')
 	configArgs = parser.add_argument_group('configure arguments')
@@ -16,6 +16,7 @@ def main():
 	genoArgs.add_argument('-c','-cpu', help='Parallelize sample-wise. 1 per cpu',required=False,default=1,type=int)
 	genoArgs.add_argument('-g','-genome',  help='Reference genome build [ hg19, hg38 ]',required=False,default='hg19',type=str)
 	genoArgs.add_argument('-pcrfree',  help='GC content normalization for PCR free libraries',required=False,default=False,action="store_true")
+	genoArgs.add_argument('-M', help='bwa mem -M compatibility. Split-reads flagged as secondary instead of supplementary',default=False,required=False,action="store_true")
 	genoArgs.add_argument('-s','-seed', help='Preprocessing: integer seed for genome shuffling',required=False,default=42,type=int)
 	genoArgs.add_argument('-o','-out', help='output',required=False,default="sv2_genotypes.vcf",type=str)
 	genoArgs.add_argument('-pre', help='Preprocessing output directory',required=False,default=None)
@@ -28,6 +29,7 @@ def main():
 	cores = args.c
 	gen = args.g
 	pcrfree = args.pcrfree
+	legacyM = args.M
 	ofh = args.o
 	seed = args.s
 	predir= args.pre
@@ -93,7 +95,7 @@ def main():
 				prefh = preprocess_files[bam_id]
 				gtofh = bam_id+'_sv2_features.txt'
 				feats_files[bam_id]=os.getcwd()+'/sv2_features/'+gtofh
-				pool.apply_async(extract_feats, args=(bam_id,bam_dict[bam_id],vcf_dict[bam_id],cnv,prefh,gender_dict[bam_id],gtofh,gen,pcrfree) )
+				pool.apply_async(extract_feats, args=(bam_id,bam_dict[bam_id],vcf_dict[bam_id],cnv,prefh,gender_dict[bam_id],gtofh,gen,pcrfree,legacyM) )
 			pool.close()
 			pool.join()
 		else:
@@ -104,7 +106,7 @@ def main():
 				prefh = preprocess_files[bam_id]
 				gtofh = bam_id+'_sv2_features.txt'
 				feats_files[bam_id]=os.getcwd()+'/sv2_features/'+gtofh
-				extract_feats(bam_id,bam_dict[bam_id],vcf_dict[bam_id],cnv,prefh,gender_dict[bam_id],gtofh,gen,pcrfree)
+				extract_feats(bam_id,bam_dict[bam_id],vcf_dict[bam_id],cnv,prefh,gender_dict[bam_id],gtofh,gen,pcrfree,legacyM)
 	else: 
 		if not featsdir.endswith('/'): featsdir=featsdir+'/'
 		if not os.path.isdir(featsdir): errFH(featsdir)

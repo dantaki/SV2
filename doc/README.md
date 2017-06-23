@@ -114,7 +114,7 @@ Each classifier, with the exception of Duplication SNV implements depth of cover
 *Recommended*
 
 ```
-pip install http://downloads.sourceforge.net/project/sv2/sv2-1.2.tar.gz
+pip install http://downloads.sourceforge.net/project/sv2/sv2-1.3.tar.gz
 ```
 
 ### Manual Install
@@ -122,9 +122,9 @@ pip install http://downloads.sourceforge.net/project/sv2/sv2-1.2.tar.gz
 > [Source Files :floppy_disk:](#source-files)
 
 ```
-wget http://downloads.sourceforge.net/project/sv2/sv2-1.2.zip # sv2-1.2.tar.gz also available
-unzip sv2-1.2.zip
-cd sv2-1.2/
+wget http://downloads.sourceforge.net/project/sv2/sv2-1.3.zip # sv2-1.3.tar.gz also available
+unzip sv2-1.3.zip
+cd sv2-1.3/
 
 python setup.py install [--prefix <PYTHONPATH>]
 ```
@@ -145,9 +145,10 @@ sv2 -hg19 <hg19.fasta> -hg38 <hg38.fasta>
 
 ### Check Installation
 
-
 ```
-usage: sv2 [-h] [-i I] [-r R] [-c C] [-g G] [-pcrfree] [-s S] [-o O]
+$ sv2 -help 
+
+usage: sv2 [-h] [-i I] [-r R] [-c C] [-g G] [-pcrfree] [-M] [-s S] [-o O]
            [-pre PRE] [-feats FEATS] [-hg19 HG19] [-hg38 HG38]
 
                        ____
@@ -157,7 +158,7 @@ usage: sv2 [-h] [-i I] [-r R] [-c C] [-g G] [-pcrfree] [-s S] [-o O]
  /        \  \     /
 /_________/   \___/
 Support Vector Structural Variation Genotyper
-Version 1.2        Author: Danny Antaki <dantaki at ucsd dot edu>
+Version 1.3        Author: Danny Antaki <dantaki at ucsd dot edu>
 
 optional arguments:
   -h, --help       show this help message and exit
@@ -168,6 +169,7 @@ genotype arguments:
   -c C, -cpu C     Parallelize sample-wise. 1 per cpu
   -g G, -genome G  Reference genome build [ hg19, hg38 ]
   -pcrfree         GC content normalization for PCR free libraries
+  -M               bwa mem -M compatibility. Split-reads flagged as secondary instead of supplementary
   -s S, -seed S    Preprocessing: integer seed for genome shuffling
   -o O, -out O     output
   -pre PRE         Preprocessing output directory
@@ -382,14 +384,16 @@ ls *sv2_input.txt
 ##### Run SV<sup>2</sup> for individual samples
 
 ```
-sv2 -i HG00096_sv2_input.txt -r chr21_forestSV.bed -o HG00096_sv2
-sv2 -i HG01051_sv2_input.txt -r chr21_forestSV.bed -o HG01051_sv2
+sv2 -i HG00096_sv2_input.txt -r chr21_forestSV.bed -M -o HG00096_sv2
+sv2 -i HG01051_sv2_input.txt -r chr21_forestSV.bed -M -o HG01051_sv2
 ```
+
+**Note**: since the BAM files were generated with the legacy `-M` option that flags split-reads as secondary, supply the `-M` flag to SV<sup>2</sup>
 
 ##### Run SV<sup>2</sup> for multiple samples
 
 ```
-sv2 -i sv2_input.txt -r chr21_forestSV.bed -o sv2_forestSV
+sv2 -i sv2_input.txt -r chr21_forestSV.bed -M -o sv2_forestSV
 ```
 
 ##### Parallelize by Sample
@@ -397,7 +401,7 @@ sv2 -i sv2_input.txt -r chr21_forestSV.bed -o sv2_forestSV
 When given multiple samples, SV<sup>2</sup> can run samples in parallel reducing run time.
 
 ```
-sv2 -i sv2_input.txt -r chr21_forestSV.bed -c 2 -o sv2_forestSV
+sv2 -i sv2_input.txt -r chr21_forestSV.bed -M -c 2 -o sv2_forestSV
 ```
 
 #### Genotype SV: Skip Preprocessing
@@ -411,7 +415,7 @@ Skipping preprocessing allows the user to genotype another set of SVs with the s
 
 mv sv2_features/ sv2_forestSV_features/
 
-sv2 -i sv2_input.txt -r ALL.wgs.integrated_sv_map_v1.20130502.chr21.sv.genotypes.vcf -pre sv2_preprocessing/ -o sv2_tut_1KGP
+sv2 -i sv2_input.txt -r ALL.wgs.integrated_sv_map_v1.20130502.chr21.sv.genotypes.vcf -M -pre sv2_preprocessing/ -o sv2_tut_1KGP
 
 ```
 
@@ -422,7 +426,7 @@ Skipping feature extraction allows the user to combine or subset samples in the 
 ```
 head -n 1 sv2_input.txt >sv2_subset.txt
 
-sv2 -i sv2_input.txt -r chr21_forestSV.bed -pre sv2_preprocessing/ -feats sv2_forestSV_features/ -o sv2_tut_forestSV_subset
+sv2 -i sv2_input.txt -r chr21_forestSV.bed -pre sv2_preprocessing/ -feats sv2_forestSV_features/ -M -o sv2_tut_forestSV_subset
 
 ```
 

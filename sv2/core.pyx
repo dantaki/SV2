@@ -290,7 +290,7 @@ cdef GC(nuc):
 cdef MAD(a, double c=0.6745): return np.around(np.median(np.fabs(a-np.median(a))/c),decimals=3)
 cdef normalize_chr_cov(double read_count, double chr_size, read_length): return np.around( (read_count/chr_size)*np.median(read_length),decimals=2)
 cdef normalize_coverage(double read_count, double span, double chr_cov, double read_length): return (((read_count/span)*read_length)/chr_cov)
-cdef count_reads(cnv_list,bam,ci,chrFlag):
+cdef count_reads(cnv_list,bam,ci,chrFlag,legacyM):
 	"""count reads within SV span for coverage estimation"""
 	cdef unsigned int read_count
 	cdef unsigned int bp_span
@@ -309,7 +309,7 @@ cdef count_reads(cnv_list,bam,ci,chrFlag):
 			   or read.is_proper_pair == False
 			   or read.is_qcfail == True
 			   or read.mapping_quality < 10
-			   or read.is_secondary
+			   or ( (read.is_secondary and legacyM == True) or (read.is_supplementary and legacyM == False) )
 			   or read.is_unmapped
 			   or read.mate_is_unmapped
 			   or read.is_duplicate
@@ -349,23 +349,26 @@ cdef is_discordant(read,windows,ci,matepos):
 			return True
 		else:
 			return False
-cdef is_split(read,windows,c):
+cdef is_split(read,windows,c,legacyM):
 	"""returns True if read is split"""
 	((s1,e1),(s2,e2)) = windows
-	if read.is_secondary == True:
-		second_align = read.get_tag("SA").split(',')
-		if second_align[0] != c:
-			"""return False if maps to other chromosome"""
-			return False
+	second_align=[]
+	if legacyM == True:
+		if read.is_secondary == True: second_align = read.get_tag("SA").split(',')
+	else: 
+		if read.is_supplementary == True: second_align = read.get_tag("SA").split(',')
+	if len(second_align) == 0: return False
+	else: 
+		if second_align[0] != c: return False
 		else:
 			second_align[1] = int(second_align[1])
 			if ( ((int(s1) <= read.pos+1 <= int(e1)) and (int(s2) <= second_align[1] <= int(e2)))
 			 or ((int(s2) <= read.pos+1 <= int(e2)) and (int(s1) <= second_align[1] <= int(e1)))):
-				"""secondary alignment must be near the opposite breakpoint of the primary alignment"""
+				"""supplementary/secondary alignment must be near the opposite breakpoint of the primary alignment"""
 				return True
 			else:
 				return False
-cdef discordant_split_cnv(flank_list,bam,size,ci,windows,chrFlag):
+cdef discordant_split_cnv(flank_list,bam,size,ci,windows,chrFlag,legacyM):
 	"""count discordant paired ends and split reads"""
 	cdef unsigned int discordant_count
 	cdef unsigned int split_count
@@ -390,10 +393,10 @@ cdef discordant_split_cnv(flank_list,bam,size,ci,windows,chrFlag):
 				else:
 					mate_pos = read.pnext
 					if is_discordant(read,windows,ci,mate_pos) == True: discordant_count+=1
-					if is_split(read,windows,c)  == True: split_count+=1
+					if is_split(read,windows,c,legacyM)  == True: split_count+=1
 					if (read.is_proper_pair
 					and read.mapping_quality >= 10
-					and not read.is_secondary
+					and ( (not read.is_secondary and legacyM == True) or (not read.is_supplementary and legacyM == False) ) 
 					and abs(read.tlen) < ci):
 						concordant_count+=1
 					else: continue
@@ -657,7 +660,7 @@ class Prepro(object):
 		self.insert_mad=mad
 		self.read_len=read_length
 		self.snp_cov=snp_cov
-def extract_feats(iid,bamfh,vcffh,cnv,prefh,gender,out,gen,pcrfree):
+def extract_feats(iid,bamfh,vcffh,cnv,prefh,gender,out,gen,pcrfree,legacyM):
 	master_cnv = filter_calls(cnv,gen)
 	gc_dict = gc_norm(pcrfree)
 	cnv_gc=gc_cnv(cnv,master_cnv,gen)
@@ -682,10 +685,10 @@ def extract_feats(iid,bamfh,vcffh,cnv,prefh,gender,out,gen,pcrfree):
 		(cnv_span,flank_span,windows) = master_cnv[call]
 		size = int(e)-int(s)+1
 		ci = insert_size+(5*insert_mad)
-		discordant,split,concordant = discordant_split_cnv(flank_span,bam,size,ci,windows,chrFlag)
+		discordant,split,concordant = discordant_split_cnv(flank_span,bam,size,ci,windows,chrFlag,legacyM)
 		if size > 1000:
 			"""read count coverage estimation"""
-			(read_count,bp_span) = count_reads(cnv_span,bam,ci,chrFlag)
+			(read_count,bp_span) = count_reads(cnv_span,bam,ci,chrFlag,legacyM)
 			cov=float('nan')
 			normc=c
 			if gender == 'M' and checkPAR('{} {} {}'.format(c,s,e),gen)== True: normc='GENOME'

@@ -65,7 +65,7 @@ SV<sup>2</sup> can be installed with `pip install` or can be [manually installed
 ### Install with `pip`
 
 ```
-pip install http://downloads.sourceforge.net/project/sv2/sv2-1.2.tar.gz
+pip install http://downloads.sourceforge.net/project/sv2/sv2-1.3.tar.gz
 ```
 
 ## Configure SV<sup>2</sup>
@@ -85,6 +85,7 @@ Genotyping Option | Description
 -c \| -cpu | Parallelize sample-wise. 1 per CPU 
 -g \| -genome | Reference genome build [hg19, hg38]. Default: hg19
 -pcrfree | GC content normalization for PCR-free libraries
+-M | bwa mem -M compatibility. Split-reads flagged as secondary instead of supplementary
 -s \| -seed | Random seed for genome shuffling in preprocessing. Default: 42
 -o \| -out | Output name
 -pre | Preprocessing output directory. *Skips preprocessing*
