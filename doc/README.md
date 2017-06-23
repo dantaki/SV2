@@ -388,7 +388,7 @@ sv2 -i HG00096_sv2_input.txt -r chr21_forestSV.bed -M -o HG00096_sv2
 sv2 -i HG01051_sv2_input.txt -r chr21_forestSV.bed -M -o HG01051_sv2
 ```
 
-**Note**: since the BAM files were generated with the legacy `-M` option that flags split-reads as secondary, supply the `-M` flag to SV<sup>2</sup>
+**Note**: since the BAM files were algined with bwa mem with the legacy `-M` option that flags split-reads as secondary, supply the `-M` flag to SV<sup>2</sup>
 
 ##### Run SV<sup>2</sup> for multiple samples
 
