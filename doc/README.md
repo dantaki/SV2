@@ -158,7 +158,7 @@ usage: sv2 [-h] [-i I] [-r R] [-c C] [-g G] [-pcrfree] [-M] [-s S] [-o O]
  /        \  \     /
 /_________/   \___/
 Support Vector Structural Variation Genotyper
-Version 1.3        Author: Danny Antaki <dantaki at ucsd dot edu>
+Version 1.3.1    Author: Danny Antaki <dantaki@ucsd.edu>    github.com/dantaki/SV2
 
 optional arguments:
   -h, --help       show this help message and exit

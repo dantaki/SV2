@@ -7,7 +7,7 @@ from glob import glob
 from time import time
 def main():
 	init_time = int(time())
-	splash='\n                       ____\n  _____________   ___ |___ \\\n /   _____/\   \ /   // ___/\n \_____  \  \   Y   //_____)\n /        \  \     /\n/_________/   \___/\nSupport Vector Structural Variation Genotyper\nVersion 1.3        Author: Danny Antaki <dantaki at ucsd dot edu>\n'
+	splash='\n                       ____\n  _____________   ___ |___ \\\n /   _____/\   \ /   // ___/\n \_____  \  \   Y   //_____)\n /        \  \     /\n/_________/   \___/\nSupport Vector Structural Variation Genotyper\nVersion 1.3.1    Author: Danny Antaki <dantaki@ucsd.edu>    github.com/dantaki/SV2\n\n'
 	parser = argparse.ArgumentParser(description=splash,formatter_class=RawTextHelpFormatter)
 	genoArgs = parser.add_argument_group('genotype arguments')
 	configArgs = parser.add_argument_group('configure arguments')
