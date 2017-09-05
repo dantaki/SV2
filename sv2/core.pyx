@@ -70,16 +70,17 @@ def Bed(fh):
 		with open(fh) as f:
 			for l in f:
 				if l.startswith('#'): continue
-				s=0
-				e=0
+				s,e=0,0
 				r=l.rstrip().split('\t')
-				c=str(r[0])
-				s=int(r[1])
-				e=int(r[2])
-				if s<=0 or s>=e or e<=0: continue
-				cl=r[3]
-				if not c.startswith('chr'): c='chr'+c	
-				if checkCall(cl)==True: cnv.append((c,s,e,cl))
+				if len(r)==1: r=l.rstrip().split(' ')
+				if len(r)==1: sys.stderr.write('WARNING: {} NOT FORMATTED CORRECTLY. BED ENTRIES ARE REQUIRED TO BE TAB OR SPACE DELIMITED\n'.format(l))
+				elif len(r)<4: sys.stderr.write('WARNING: {} NOT FORMATTED CORRECTLY. BED ENTRIES ARE REQUIRED TO HAVE AT LEAST 4 ELEMENTS <chrom   start   end   svtype>\n'.format(l))
+				else:
+					c,s,e = str(r[0]),int(r[1]),int(r[2])
+					if s<=0 or s>=e or e<=0: continue
+					cl=r[3]
+					if not c.startswith('chr'): c='chr'+c	
+					if checkCall(cl)==True: cnv.append((c,s,e,cl))
 	scnv=[]
 	for x in pbed.BedTool(cnv).sort():
 		(c,ss,ee,cl) = x
@@ -105,8 +106,7 @@ def check_in(fh):
 	with open(fh) as f:
 		for l in f:
 			r = l.rstrip('\n').split('\t')
-			if len(r) != 4:
-				print 'WARNING: {} not formatted correctly! Please refer to the documentation at www.github.com/dantaki/SV2\n'.format(l)
+			if len(r) != 4: sys.stderr.write('WARNING: {} not formatted correctly! Please refer to the documentation at www.github.com/dantaki/SV2\n'.format(l))
 			else:
 				(iid,bamfh,vcffh,sx) = r
 				if not os.path.isfile(bamfh): errFH(bamfh)
@@ -114,7 +114,7 @@ def check_in(fh):
 				if sx == '1': sx = 'M'
 				if sx == '2': sx = 'F'
 				if sx not in genders:
-					sys.stderr.write('WARNING: {} not an accepted gender. Accepted genders: 1|M 2|F>\n')
+					sys.stderr.write('WARNING: {} not an accepted gender. Accepted genders: 1|M 2|F\n')
 					sys.exit(1)
 				bams[iid]=bamfh
 				vcfs[iid]=vcffh
