@@ -115,7 +115,7 @@ Refer to the [User Guide](https://github.com/dantaki/SV2/tree/master/doc#sample-
 
 ### Variants to genotype < -r >
 * BED format
-  * Tab-delimited: first four columns 
+  * Tab or Space Delimited: first four columns 
     * Chromosome
     * Start
     * End

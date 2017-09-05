@@ -223,7 +223,7 @@ SV<sup>2</sup> requires either a BED or VCF file of deletions and duplications.
 
 #### BED Input
 
-BED files must be tab-delimited with at least four columns, extra columns are ignored. SV type must be contain either `DEL` or `DUP`.
+BED files must be either space or tab delimited with at least four columns, extra columns are ignored. SV type must be contain either `DEL` or `DUP`.
 
 The first four columns must be formatted in this order below,
 
@@ -232,7 +232,7 @@ CHROM | START | END | SV TYPE
 chr1 | 100 | 200 | DEL
 chr1 | 500 | 1000 | DUP
 
-Failure to format this file correctly will result in a `Segmentation Fault`.
+Failure to format this file correctly will result in a warning or Segmentation Fault. See [Troubleshooting](#troubleshooting)
 
 #### VCF Input
 
