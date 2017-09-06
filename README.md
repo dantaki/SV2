@@ -43,7 +43,7 @@ SV<sup>2</sup> (support-vector structural-variant genotyper) is a machine learni
 
 ## Installation 
 
-SV<sup>2</sup> can be installed with `pip install` or can be [manually installed from source](https://github.com/dantaki/SV2/tree/master/doc#manual-install). 
+SV<sup>2</sup> can be installed with `pip install` or can be [manually installed from source](https://github.com/dantaki/SV2/wiki/installation#manual-install). 
 
 ### Requirements
 * [python 2.7](https://www.python.org/)
@@ -140,7 +140,7 @@ Refer to the [User Guide](https://github.com/dantaki/SV2/wiki/input#sv-input) fo
 
 ![alt text](https://raw.githubusercontent.com/dantaki/SV2/master/png/sv2_auc.png "Genotyping ROC curve")
 
-##### [Performance of *de novo* mutations](https://github.com/dantaki/SV2/blob/master/doc/README.md#de-novo-mutations)
+##### [Performance of *de novo* mutations](https://github.com/dantaki/SV2/wiki/performance#de-novo-mutations)
 
 Please refer to the [preprint](#preprint) for performance details. 
 
