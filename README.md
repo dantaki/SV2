@@ -35,9 +35,9 @@ SV<sup>2</sup> (support-vector structural-variant genotyper) is a machine learni
 
 ![alt text](https://raw.githubusercontent.com/dantaki/SV2/master/png/sv2_flowchart.png "Support Vector Structural Variation Genotyper Work Flow")
 
-## [User Guide][https://github.com/dantaki/SV2/wiki]
+## [User Guide](https://github.com/dantaki/SV2/wiki)
 
-[click here :notebook:][https://github.com/dantaki/SV2/wiki]
+[click here :notebook:](https://github.com/dantaki/SV2/wiki)
 
 ### [Tutorial](https://github.com/dantaki/SV2/wiki/tutorial)
 
