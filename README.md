@@ -35,13 +35,11 @@ SV<sup>2</sup> (support-vector structural-variant genotyper) is a machine learni
 
 ![alt text](https://raw.githubusercontent.com/dantaki/SV2/master/png/sv2_flowchart.png "Support Vector Structural Variation Genotyper Work Flow")
 
-## [User Guide][UserGuide]
+## [User Guide][https://github.com/dantaki/SV2/wiki]
 
-[click here :notebook:][UserGuide]
+[click here :notebook:][https://github.com/dantaki/SV2/wiki]
 
-### [Tutorial](https://github.com/dantaki/SV2/blob/master/doc/README.md#tutorial)
-
-[UserGuide]:doc/README.md
+### [Tutorial](https://github.com/dantaki/SV2/wiki/tutorial)
 
 ## Installation 
 
@@ -111,7 +109,7 @@ HG00096 | /bam/HG00096.bam | /vcf/HG00096_SNVs.vcf.gz | M
   * Allele Depth (AD) is required 
   * bgzip and tabix indexed VCF
 
-Refer to the [User Guide](https://github.com/dantaki/SV2/tree/master/doc#sample-information) for more details. 
+Refer to the [User Guide](https://github.com/dantaki/SV2/wiki/input#sample-information) for more details. 
 
 ### Variants to genotype < -r >
 * BED format
@@ -124,7 +122,7 @@ Refer to the [User Guide](https://github.com/dantaki/SV2/tree/master/doc#sample-
   * SVTYPE= DEL | DUP
   * Must have END=
 
-Refer to the [User Guide](https://github.com/dantaki/SV2/tree/master/doc#sv-input) for more details. 
+Refer to the [User Guide](https://github.com/dantaki/SV2/wiki/input#sv-input) for more details. 
 
 ## Output
  
@@ -136,7 +134,7 @@ Refer to the [User Guide](https://github.com/dantaki/SV2/tree/master/doc#sv-inpu
  
  *Output VCF comes with gene annotations and other useful statistics*
 
- For more detail on SV<sup>2</sup> output, please refer to the [User Guide](https://github.com/dantaki/SV2/tree/master/doc#output)
+ For more detail on SV<sup>2</sup> output, please refer to the [User Guide](https://github.com/dantaki/SV2/wiki/output)
  
 ## Performance
 
