@@ -135,7 +135,7 @@ Refer to the [User Guide](https://github.com/dantaki/SV2/wiki/input#sv-input) fo
 
 SV<sup>2</sup> provides the option to merge SV calls. By default this option is off. 
 
-[Details found in the User Guide](https://github.com/dantaki/SV2/wiki/Output#merging-svs)
+Details found in the [User Guide](https://github.com/dantaki/SV2/wiki/Output#merging-svs)
 
 ```
 # merge SV after genotyping
