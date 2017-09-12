@@ -5,31 +5,30 @@ Support Vector Structural Variation Genotyper
 
 *A genotyper for the rest of us*
 
-[![DOI](https://zenodo.org/badge/80166279.svg)](https://zenodo.org/badge/latestdoi/80166279) [![Docker Automated buil](https://img.shields.io/docker/automated/jrottenberg/ffmpeg.svg)](https://hub.docker.com/r/dantaki/sv2/)
+[![DOI](https://zenodo.org/badge/80166279.svg)](https://zenodo.org/badge/latestdoi/80166279)
 
 ## Table of Contents
 
 * [Preprint](#preprint)
 * [User Guide](#user-guide)
    * [Tutorial](#tutorial)
-* [Installation](#installation)
+* [Getting Started](#getting-started)
+   * [Installation](#installation)
    * [Requirements](#requirements)
-* [Configure SV<sup>2</sup>](#configure-sv2)
-* [Options](#options)
+   * [Configure SV<sup>2</sup>](#configure-sv2)
+   * [Options](#options)
 * [Input](#input)
 * [Output](#output)
+* [Training](#training)
 * [Performance](#performance)
 * [Usage](#usage)
-* [Source Files](#source-files)
 * [Credits](#credits)
 * [Citing SV<sup>2</sup>](#citing-sv2)
 * [History](#history)
 * [License](#license)
 * [Contact](#contact)
 
-## Preprint
-
-[bioRxiv](http://biorxiv.org/content/early/2017/03/17/113498) : [doi](https://doi.org/10.1101/113498)
+## [Preprint](http://biorxiv.org/content/early/2017/03/17/113498) : [doi](https://doi.org/10.1101/113498)
 
 SV<sup>2</sup> (support-vector structural-variant genotyper) is a machine learning algorithm for genotyping deletions and duplications from paired-end whole genome sequencing data. SV<sup>2</sup> can rapidly integrate variant calls from multiple SV discovery algorithms into a unified callset with [high genotyping accuracy](https://raw.githubusercontent.com/dantaki/SV2/master/png/sv2_auc.png) and detection of [*de novo* mutations](https://raw.githubusercontent.com/dantaki/SV2/master/png/sv2_fdr.png).
 
@@ -41,9 +40,16 @@ SV<sup>2</sup> (support-vector structural-variant genotyper) is a machine learni
 
 ### [Tutorial](https://github.com/dantaki/SV2/wiki/tutorial)
 
-## Installation 
+## Getting Started
 
-SV<sup>2</sup> can be installed with `pip install` or can be [manually installed from source](https://github.com/dantaki/SV2/wiki/installation#manual-install). 
+### [Installation](https://github.com/dantaki/SV2/wiki/installation)
+
+*Recommended* [Install with `pip`](https://github.com/dantaki/SV2/wiki/installation#install-with-pip)
+
+```
+pip install http://downloads.sourceforge.net/project/sv2/sv2-1.3.tar.gz
+```
+*Advanced users:* SV<sup>2</sup> can be [manually installed from source](https://github.com/dantaki/SV2/wiki/installation#manual-install). 
 
 ### Requirements
 * [python 2.7](https://www.python.org/)
@@ -56,46 +62,51 @@ SV<sup>2</sup> can be installed with `pip install` or can be [manually installed
 
 * [bedtools 2.25.0](https://github.com/arq5x/bedtools2/releases) or later
 
-*SV<sup>2</sup> requires python 2.7*
+### [Configure SV<sup>2</sup>](https://github.com/dantaki/SV2/wiki/installation#configure)
 
-*SV<sup>2</sup> has been tested on Linux and MacOS with [bioconda](https://bioconda.github.io/)*
-
-### Install with `pip`
-
-```
-pip install http://downloads.sourceforge.net/project/sv2/sv2-1.3.tar.gz
-```
-
-## Configure SV<sup>2</sup>
+Before running SV<sup>2</sup>, define your fasta files. 
 
 ```
 sv2 -hg19 <hg19.fasta> [-hg38 <hg38.fasta>] 
 ```
-SV<sup>2</sup> requires one FASTA file to run.
 
-## Options
-`sv2 --help`
+### Options
 
-Genotyping Option | Description
------------------ | -------------
--i \| -in | Tab-delimited input [ID, BAM path, VCF path, Gender]
--r \| -cnv | SV to genotype. BED or VCF
+*Print Options* `sv2 --help`
+
+| Input Arguments | Description 
+| ----------------| -----------
+-i \| -in       | Sample information [ID, BAM-PATH,VCF-PATH, M/F]
+-b \| -bed      | Bed file(s) of SVs
+-v \| -vcf      | VCF file(s) of SVs
+
+|Genotype Arguments | Description
+| ----------------- | -------------
 -c \| -cpu | Parallelize sample-wise. 1 per CPU 
 -g \| -genome | Reference genome build [hg19, hg38]. Default: hg19
 -pcrfree | GC content normalization for PCR-free libraries
 -M | bwa mem -M compatibility. Split-reads flagged as secondary instead of supplementary
 -s \| -seed | Random seed for genome shuffling in preprocessing. Default: 42
 -o \| -out | Output name
+-merge | Merge SV after genotyping
+-min-ovr | Minimum reciprocal overlap for merging SVs [0.8]
 -pre | Preprocessing output directory. *Skips preprocessing*
 -feats | Feature output directory. *Skips feature extraction*
+
+|Classifier Arguments | Description |
+|---------------------| ----------- |
+| -load-clf           | Add custom classifiers. `-load-clf <clf.JSON>`
+| -clf                | Specify classifiers for genotyping [default] 
 
 | Configure Option | Description |
 | ---------------- | ---------- |
 | -hg19 | hg19 FASTA file | 
 | -hg38 | hg38 FASTA file |
 
-## Input
-### Sample information < -i >
+## [Input](https://github.com/dantaki/SV2/wiki/input)
+
+### [Sample information < -i >](https://github.com/dantaki/SV2/wiki/input#sample-information)
+
 Tab-delimited file containing sample information. Gender can also be encoded as 1 for M and 2 for F
 
 ID | BAM PATH |  VCF PATH | Gender [M/F]
@@ -106,37 +117,72 @@ HG00096 | /bam/HG00096.bam | /vcf/HG00096_SNVs.vcf.gz | M
 * BAM format
   * Supplementary alignment tags (SA) are required for split-read analysis
 * VCF format
-  * Allele Depth (AD) is required 
+  * Allele Depth is required 
   * bgzip and tabix indexed VCF
 
 Refer to the [User Guide](https://github.com/dantaki/SV2/wiki/input#sample-information) for more details. 
 
-### Variants to genotype < -r >
-* BED format
-  * Tab or Space Delimited: first four columns 
-    * Chromosome
-    * Start
-    * End
-    * Type: DEL | DUP
-* VCF format
-  * SVTYPE= DEL | DUP
-  * Must have END=
+### [Variants to genotype <-b ... > <-v ... >](https://github.com/dantaki/SV2/wiki/input#sv-input)
+
+SV<sup>2</sup> can accept multiple BED and VCF files.
+
+```
+sv2 -i in.txt -b del.bed dup.bed ... -v del.vcf ...
+```
+
+* [BED format](https://github.com/dantaki/SV2/wiki/input#bed-input)
+  BED files are either tab or space delimited. The first four columns must be [CHROM  START  END  TYPE]
+
+* [VCF format](https://github.com/dantaki/SV2/wiki/input#vcf-input)
+  VCF files must contain `SVTYPE=` and `END=` in the INFO column 
+
+* SV Type: must contain either `DEL` or `DUP`
 
 Refer to the [User Guide](https://github.com/dantaki/SV2/wiki/input#sv-input) for more details. 
 
-## Output
+## [Output](https://github.com/dantaki/SV2/wiki/Output)
  
  Output is generated in the current working directory. 
  
- `sv2_preprocessing/` contains preprocessing output. `sv2_features/` contains feature extraction output. 
+ * `sv2_preprocessing/` contains preprocessing output. 
+
+ * `sv2_features/` contains feature extraction output. 
  
- `sv2_genotypes/` contains output in tab-delimited BED format and VCF format.
+ * `sv2_genotypes/` contains output in tab-delimited BED format and VCF format.
  
- *Output VCF comes with gene annotations and other useful statistics*
+*Output VCF comes with gene annotations and other useful statistics*
 
  For more detail on SV<sup>2</sup> output, please refer to the [User Guide](https://github.com/dantaki/SV2/wiki/output)
  
-## Performance
+## [Training](https://github.com/dantaki/SV2/wiki/Training)
+
+Advanced users can retrain SV<sup>2</sup> genotyping classifiers with the original or custom training set. 
+
+SV<sup>2</sup> includes a script for generating training features
+
+```
+sv2train -i <in.txt> [-b ...] [-v ...] ...
+```
+
+Included is a [jupyter notebook guide for training classifiers](https://github.com/dantaki/SV2/blob/master/sv2/training/sv2_training.ipynb). This guide will produce a JSON file containing paths of the new classifiers. 
+
+Users can then load the classifiers into SV<sup>2</sup> with this command:
+
+```
+sv2 -load-clf myclf.json
+```
+
+To genotype with new classifiers, pass the name of the classifier to the SV<sup>2</sup> command
+
+```
+sv2 -i <in.txt> [-b ...] [-v ...] -clf myclf
+```
+
+[For more details please refer to the User Manual](https://github.com/dantaki/SV2/wiki/Training)
+
+## [Performance](https://github.com/dantaki/SV2/wiki/Performance)
+
+SV<sup>2</sup> performance was measured with independent cohorts using Illumina 2.5M arrays and PacBio SMRT sequencing. 
 
 ![alt text](https://raw.githubusercontent.com/dantaki/SV2/master/png/sv2_auc.png "Genotyping ROC curve")
 
@@ -161,14 +207,6 @@ Please refer to the [preprint](#preprint) for performance details.
 * SVs with estimated autosome copy number >10 cannot be genotyped. 
 
 ---
-
-## Source Files
-
-[Source Forge](https://sourceforge.net/projects/sv2/files/)
-
-[GitHub](https://github.com/dantaki/SV2/releases/tag/SV2v1.2)
-
-*Please do not use `git clone` on this repository*
 
 ## Credits
 
