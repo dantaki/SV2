@@ -1,4 +1,6 @@
-s is a guide for users to retrain the default SV<sup>2</sup> classifiers and to [train custom supervised classifiers](Training#custom-feature-extraction).
+**Warning: for advanced users. Knowledge of python and scikit-learn is recommended**
+
+This is a guide for users to retrain the default SV<sup>2</sup> classifiers and to [train custom supervised classifiers](Training#custom-feature-extraction).
 
 Included in the SV<sup>2</sup> source package are the original training set and a jupyter notebook containing instructions for (re)training. 
 
