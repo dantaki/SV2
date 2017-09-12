@@ -44,7 +44,7 @@ SV<sup>2</sup> (support-vector structural-variant genotyper) is a machine learni
 
 ### [Installation](https://github.com/dantaki/SV2/wiki/installation)
 
-*Recommended* [Install with `pip`](https://github.com/dantaki/SV2/wiki/installation#install-with-pip)
+[Install with `pip`](https://github.com/dantaki/SV2/wiki/installation#install-with-pip) *Recommended* 
 
 ```
 pip install http://downloads.sourceforge.net/project/sv2/sv2-1.3.tar.gz
@@ -70,40 +70,19 @@ Before running SV<sup>2</sup>, define your fasta files.
 sv2 -hg19 <hg19.fasta> [-hg38 <hg38.fasta>] 
 ```
 
-### Options
+### [Options](https://github.com/dantaki/SV2/wiki/options#)
 
-*Print Options* `sv2 --help`
+Please refer to the [User Manual](https://github.com/dantaki/SV2/wiki/options) for details on SV<sup>2</sup> options.
+
+## [Input](https://github.com/dantaki/SV2/wiki/input)
+
+### Input Arguments
 
 | Input Arguments | Description 
 | ----------------| -----------
 -i \| -in       | Sample information [ID, BAM-PATH,VCF-PATH, M/F]
 -b \| -bed      | Bed file(s) of SVs
 -v \| -vcf      | VCF file(s) of SVs
-
-|Genotype Arguments | Description
-| ----------------- | -------------
--c \| -cpu | Parallelize sample-wise. 1 per CPU 
--g \| -genome | Reference genome build [hg19, hg38]. Default: hg19
--pcrfree | GC content normalization for PCR-free libraries
--M | bwa mem -M compatibility. Split-reads flagged as secondary instead of supplementary
--s \| -seed | Random seed for genome shuffling in preprocessing. Default: 42
--o \| -out | Output name
--merge | Merge SV after genotyping
--min-ovr | Minimum reciprocal overlap for merging SVs [0.8]
--pre | Preprocessing output directory. *Skips preprocessing*
--feats | Feature output directory. *Skips feature extraction*
-
-|Classifier Arguments | Description |
-|---------------------| ----------- |
-| -load-clf           | Add custom classifiers. `-load-clf <clf.JSON>`
-| -clf                | Specify classifiers for genotyping [default] 
-
-| Configure Option | Description |
-| ---------------- | ---------- |
-| -hg19 | hg19 FASTA file | 
-| -hg38 | hg38 FASTA file |
-
-## [Input](https://github.com/dantaki/SV2/wiki/input)
 
 ### [Sample information < -i >](https://github.com/dantaki/SV2/wiki/input#sample-information)
 
@@ -152,13 +131,29 @@ Refer to the [User Guide](https://github.com/dantaki/SV2/wiki/input#sv-input) fo
  
 *Output VCF comes with gene annotations and other useful statistics*
 
+### [Merging SVs](https://github.com/dantaki/SV2/wiki/Output#merging-svs)
+
+SV<sup>2</sup> provides the option to merge SV calls. By default this option is off. 
+
+If merging is specified, variants of the same type with >=80% reciprocal overlap are merged. The variant with the highest ALT genotype likelihood is retained. 
+
+Users can define the minimum reciprocal overlap with the `-min-ovr <FLOAT>` option
+```
+# merge SV after genotyping
+sv2 -i in.txt [-b ...] [-v ...] -merge
+
+# merge SV with >50% reciprocal overlap
+sv2 -i in.txt [-b ...] [-v ...] -min-ovr 0.5
+```
+
  For more detail on SV<sup>2</sup> output, please refer to the [User Guide](https://github.com/dantaki/SV2/wiki/output)
  
+
 ## [Training](https://github.com/dantaki/SV2/wiki/Training)
 
 Advanced users can retrain SV<sup>2</sup> genotyping classifiers with the original or custom training set. 
 
-SV<sup>2</sup> includes a script for generating training features
+SV<sup>2</sup> includes a script for [generating training features](https://github.com/dantaki/SV2/wiki/Training#custom-feature-extraction)
 
 ```
 sv2train -i <in.txt> [-b ...] [-v ...] ...
@@ -166,13 +161,13 @@ sv2train -i <in.txt> [-b ...] [-v ...] ...
 
 Included is a [jupyter notebook guide for training classifiers](https://github.com/dantaki/SV2/blob/master/sv2/training/sv2_training.ipynb). This guide will produce a JSON file containing paths of the new classifiers. 
 
-Users can then load the classifiers into SV<sup>2</sup> with this command:
+Users can then [load the classifiers](https://github.com/dantaki/SV2/wiki/Training#adding-new-classifiers-to-sv2) into SV<sup>2</sup> with this command:
 
 ```
 sv2 -load-clf myclf.json
 ```
 
-To genotype with new classifiers, pass the name of the classifier to the SV<sup>2</sup> command
+To [genotype with new classifiers](https://github.com/dantaki/SV2/wiki/Training#genotyping-with-new-classifiers), pass the name of the classifier to the SV<sup>2</sup> command
 
 ```
 sv2 -i <in.txt> [-b ...] [-v ...] -clf myclf
