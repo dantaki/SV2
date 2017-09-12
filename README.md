@@ -135,9 +135,8 @@ Refer to the [User Guide](https://github.com/dantaki/SV2/wiki/input#sv-input) fo
 
 SV<sup>2</sup> provides the option to merge SV calls. By default this option is off. 
 
-If merging is specified, variants of the same type with >=80% reciprocal overlap are merged. The variant with the highest ALT genotype likelihood is retained. 
+[Details found in the User Manual](https://github.com/dantaki/SV2/wiki/Output#merging-svs)
 
-Users can define the minimum reciprocal overlap with the `-min-ovr <FLOAT>` option
 ```
 # merge SV after genotyping
 sv2 -i in.txt [-b ...] [-v ...] -merge
@@ -146,7 +145,7 @@ sv2 -i in.txt [-b ...] [-v ...] -merge
 sv2 -i in.txt [-b ...] [-v ...] -min-ovr 0.5
 ```
 
- For more detail on SV<sup>2</sup> output, please refer to the [User Guide](https://github.com/dantaki/SV2/wiki/output)
+For more detail on SV<sup>2</sup> output, please refer to the [User Guide](https://github.com/dantaki/SV2/wiki/output)
  
 
 ## [Training](https://github.com/dantaki/SV2/wiki/Training)
