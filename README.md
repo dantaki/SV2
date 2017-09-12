@@ -72,7 +72,7 @@ sv2 -hg19 <hg19.fasta> [-hg38 <hg38.fasta>]
 
 ### [Options](https://github.com/dantaki/SV2/wiki/options#)
 
-Please refer to the [User Manual](https://github.com/dantaki/SV2/wiki/options) for details on SV<sup>2</sup> options.
+Please refer to the [User Guide](https://github.com/dantaki/SV2/wiki/options) for details on SV<sup>2</sup> options.
 
 ## [Input](https://github.com/dantaki/SV2/wiki/input)
 
@@ -135,7 +135,7 @@ Refer to the [User Guide](https://github.com/dantaki/SV2/wiki/input#sv-input) fo
 
 SV<sup>2</sup> provides the option to merge SV calls. By default this option is off. 
 
-[Details found in the User Manual](https://github.com/dantaki/SV2/wiki/Output#merging-svs)
+[Details found in the User Guide](https://github.com/dantaki/SV2/wiki/Output#merging-svs)
 
 ```
 # merge SV after genotyping
@@ -172,7 +172,7 @@ To [genotype with new classifiers](https://github.com/dantaki/SV2/wiki/Training#
 sv2 -i <in.txt> [-b ...] [-v ...] -clf myclf
 ```
 
-[For more details please refer to the User Manual](https://github.com/dantaki/SV2/wiki/Training)
+For more details please refer to the [User Guide](https://github.com/dantaki/SV2/wiki/Training)
 
 ## [Performance](https://github.com/dantaki/SV2/wiki/Performance)
 
