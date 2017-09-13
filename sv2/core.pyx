@@ -19,6 +19,7 @@ from time import time
 from datetime import timedelta	
 import pandas as pd
 import numpy as np
+import json
 cimport numpy as np
 try:from configparser import ConfigParser
 except ImportError:from ConfigParser import ConfigParser
@@ -40,17 +41,14 @@ cdef checkCall(cl):
 	c=0
 	if 'DEL' in cl or 'DUP' in cl: c=1
 	return c
-def Bed(fh):
+def Bed(fh,flag):
 	cdef unsigned int s
 	cdef unsigned int e
 	cdef bint v
 	v=0
-	c=''
-	cl=''
-	cnv=[]
+	c,cl,sv='','',[]
 	if not os.path.isfile(fh): errFH(fh)
-	header=open(fh).readline().rstrip()
-	if 'VCF' in header: v=1
+	if flag==True: v=1
 	if v==True:
 		with open(fh) as f:
 			for l in f:
@@ -65,7 +63,7 @@ def Bed(fh):
 					if 'SVTYPE=' in i: cl=i.replace('SVTYPE=','')
 					if 'END=' in i and 'CI' not in i and i.startswith('END='): e=int(i.replace('END=',''))
 				if s<=0 or s>=e or e<=0: continue
-				if checkCall(cl)==True:cnv.append((c,s,e,cl))
+				if checkCall(cl)==True:sv.append((c,s,e,cl))
 	else:
 		with open(fh) as f:
 			for l in f:
@@ -80,14 +78,14 @@ def Bed(fh):
 					if s<=0 or s>=e or e<=0: continue
 					cl=r[3]
 					if not c.startswith('chr'): c='chr'+c	
-					if checkCall(cl)==True: cnv.append((c,s,e,cl))
-	scnv=[]
-	for x in pbed.BedTool(cnv).sort():
+					if checkCall(cl)==True: sv.append((c,s,e,cl))
+	ssv=[]
+	for x in pbed.BedTool(sv).sort():
 		(c,ss,ee,cl) = x
 		s=int(ss)
 		e=int(ee)
-		scnv.append((c,s,e,cl))	
-	return scnv
+		ssv.append((c,s,e,cl))	
+	return ssv
 def get_path():
 	try:
 		root = __file__
@@ -105,7 +103,7 @@ def check_in(fh):
 	genders = ['M','F']
 	with open(fh) as f:
 		for l in f:
-			r = l.rstrip('\n').split('\t')
+			r = l.rstrip().split('\t')
 			if len(r) != 4: sys.stderr.write('WARNING: {} not formatted correctly! Please refer to the documentation at www.github.com/dantaki/SV2\n'.format(l))
 			else:
 				(iid,bamfh,vcffh,sx) = r
@@ -130,7 +128,11 @@ cdef get_chroma():
 	chroms.append('chrX')
 	chroms.append('chrY')
 	return chroms
-def check_cnv(cnv,gen):
+def dumpJson(o,d):
+	ofh=open(o,'w')
+	json.dump(d,ofh,indent=4)
+	ofh.close()
+def check_sv(sv,gen,raw,ok):
 	cdef unsigned int s
 	sz={}
 	with open(get_path()+'/resources/{}.bedtools.genome'.format(gen)) as f:
@@ -139,20 +141,67 @@ def check_cnv(cnv,gen):
 			s=int(r[1])
 			sz[r[0]]=s
 	chroms=get_chroma()
-	raw=[]
-	ok=[]
-	for (c,s,e,cl) in cnv:
-		raw.append((c,s,e,cl))
-		if c not in chroms: print 'WARNING: {} not accepted chromosome format!\nAccepted chromosomes:\n{}'.format(c,'\n'.join(chroms))
+	for (c,s,e,cl) in sv:
+		raw.append((str(c),s,e,str(cl)))
+		if c not in chroms: print 'WARNING: {} not accepted chromosome\nAccepted chromosomes:\n{}'.format(c,' '.join(chroms))
 		else:
 			if e > sz[c]: print 'WARNING: {}:{}-{} {} has position greater than {} length!'.format(c,s,e,cl,c)
-			else: ok.append((c,s,e,cl))
+			else: ok.append((str(c),s,e,str(cl)))
 	return raw,ok
 def reportTime(init_time,s):
 	f=[]
 	s = ' '+s+' <time elapsed: {}>'.format(timedelta(seconds=int(time())-init_time))
 	for x in range(len(s)+2): f.append('-')
 	print ''.join(f)+'\n'+s+'\n'+''.join(f)
+def query_yes_no(question, default="yes"):
+	"""https://code.activestate.com/recipes/577058/"""
+	valid = {"yes": True, "y": True, "ye": True,"no": False, "n": False}
+	if default is None: prompt = " [y/n] "
+	elif default == "yes": prompt = " [Y/n] "
+	elif default == "no": prompt = " [y/N] "
+	else: raise ValueError("invalid default answer: '%s'" % default)
+	while True:
+		sys.stdout.write(question + prompt)
+		choice = raw_input().lower()
+		if default is not None and choice == '': return valid[default]
+		elif choice in valid: return valid[choice]
+		else: sys.stdout.write("Please respond with 'yes' or 'no' (or 'y' or 'n')\n")
+def sv2ClfJson():
+	sv2_clf_json = get_path()+'/config/sv2_clf.json'
+	if not os.path.isfile(sv2_clf_json):
+		sys.stderr.write('FATAL ERROR: {} NOT FOUND ... If this file is missing, reinstall sv2: pip uninstall sv2 -y && pip install sv2-VERSION.tar.gz\n'.format(sv2_clf_json))
+		sys.exit(1)
+	clfs={}
+	with open(sv2_clf_json) as data_file: clfs = json.load(data_file)
+	return clfs
+def loadClf(jsonfh):
+	import shutil
+	sv2clfs = sv2ClfJson()
+	if not os.path.isfile(jsonfh): errFH(jsonfh)
+	clfs={}
+	with open(jsonfh) as f: clfs = json.load(f)
+	realpaths=[]
+	for name in clfs:
+		print 'loading {} classifier ...'.format(name)
+		clf_dir = get_path()+'/resources/training_sets/'+name+'/'
+		if not os.path.exists(clf_dir): os.makedirs(clf_dir)
+		for x in clfs[name]:
+			clffh = clfs[name][x]
+			if not os.path.isfile(clffh): sys.stderr.write('WARNING: {} does not exist. Please check the paths in {}\n'.format(clffh,jsonfh))
+			else:
+				clfname = clffh.split('/').pop()
+				newpath = clf_dir+clfname
+				clfreplace=True
+				if os.path.isfile(newpath): clfreplace= query_yes_no('WARNING: {} exists... Replace?'.format(newpath),'no')
+				if clfreplace==True: 
+					if sv2clfs.get(name)==None: sv2clfs[name]={}
+					sv2clfs[name][x]=newpath
+					realpaths.append(newpath)
+					shutil.copyfile(clffh, newpath)
+	for x in realpaths: print 'installed classifier {}'.format(x)
+	sv2_clf_json = get_path()+'/config/sv2_clf.json'
+	print 'appending to {}... DO NOT ALTER {}'.format(sv2_clf_json,sv2_clf_json)
+	dumpJson(sv2_clf_json,sv2clfs)
 def writeConfig(hg19,hg38):
 	cfg = get_path()+'/config/sv2.ini'
 	conf = ConfigParser()
@@ -172,6 +221,19 @@ def writeConfig(hg19,hg38):
 			if not os.path.isfile(hg38): errFH(hg38)
 			conf.set('FASTA_PATHS','hg38',hg38)
 		with open(cfg,'w') as cfgfile: conf.write(cfgfile) 
+	sv2_clfs = get_path()+'/sv2_default/'
+	clfs=sv2ClfJson()
+	sv2_clf_json = get_path()+'/config/sv2_clf.json'
+	clf_path = get_path()+'/resources/training_sets/'
+	for x in clfs['default']:
+		clf_fh = str(clfs['default'][x])
+		if not os.path.isfile(clf_fh):
+			realpath = clf_path+clf_fh
+			if os.path.isfile(realpath): clfs['default'][x]=realpath
+			else:
+				sys.stderr.write('FATAL ERROR: {} pickle file note found ... If this file is missing, reinstall sv2: pip uninstall sv2 -y && pip install sv2-VERSION.tar.gz\n'.format(realpath))
+				sys.exit(1)
+	dumpJson(sv2_clf_json,clfs)
 def checkConfig():
 	cfg = get_path()+'/config/sv2.ini'
 	if not os.path.isfile(cfg): errFH(cfg)
@@ -191,7 +253,7 @@ cdef FASTA_head(fh):
 	with open (fh,'r') as f:
 		l = f.next()
 		if '>' not in l:
-			sys.stderr.write('ERROR {} MUST CONTAIN ">CHROM" in the first line\n'.format(fh))
+			sys.stderr.write('ERROR {} MUST CONTAIN ">" in the first line\n'.format(fh))
 			sys.exit(1)
 		if '>chr' in l: chr_flag=True
 	return chr_flag
@@ -202,25 +264,25 @@ cdef append_list2dict(a):
 		if d.get(tag) == None: d[tag]=[(c,s,e)]
 		else: d[tag].append((c,s,e))
 	return d
-cdef annot_toList(cnv):
-	cnv_list = []
-	cnv.sort()
-	for i in cnv:
+cdef annot_toList(sv):
+	sv_list = []
+	sv.sort()
+	for i in sv:
 		(c,s,e,cl,tag) = i
-		cnv_list.append((c,s,e,cl,tag))
-	return cnv_list
-cdef filter_calls(cnv,gen):
+		sv_list.append((c,s,e,cl,tag))
+	return sv_list
+cdef filter_calls(sv,gen):
 	cdef unsigned int tag
 	"""add unique annotation to each SV"""
 	tag = 1
-	annot_cnv=[]
-	cnv_dict={}
+	annot_sv=[]
+	sv_dict={}
 	start_flank=[]
 	end_flank=[]
-	for r in cnv:
-		cnv_dict[tag]=r
+	for r in sv:
+		sv_dict[tag]=r
 		(c,s,e,cl) = r
-		annot_cnv.append((c,s,e,cl,tag))
+		annot_sv.append((c,s,e,cl,tag))
 		start_flank.append((c,s,s,cl,tag))
 		end_flank.append((c,e,e,cl,tag))
 		tag+=1
@@ -230,27 +292,27 @@ cdef filter_calls(cnv,gen):
 	start_flank_dict=dict((i[4],(i[1],i[2])) for i in start_flank500bp)
 	end_flank_dict=dict((i[4],(i[1],i[2])) for i in end_flank500bp)
 	"""mask regions to segmental duplications and unmappable regions"""
-	masked_cnv=annot_toList(pbed.BedTool(annot_cnv).subtract(pbed.BedTool(get_path()+'/resources/'+gen+'_unmapped.bed.gz')))
+	masked_sv=annot_toList(pbed.BedTool(annot_sv).subtract(pbed.BedTool(get_path()+'/resources/'+gen+'_unmapped.bed.gz')))
 	masked_start_flank=annot_toList(start_flank500bp.subtract(pbed.BedTool(get_path()+'/resources/'+gen+'_unmapped.bed.gz')))
 	masked_end_flank=annot_toList(end_flank500bp.subtract(pbed.BedTool(get_path()+'/resources/'+gen+'_unmapped.bed.gz')))
 	"""take the union of the two masked call sets"""
-	if len(masked_cnv) == 0:
+	if len(masked_sv) == 0:
 		sys.stderr.write('ERROR: SVs completed masked by excluded regions\n')
 		sys.exit(1)
-	cnv_tag = list(zip(*masked_cnv)[4])
-	passed_tag = list(set(cnv_tag))
-	masked_cnv_dict=append_list2dict(masked_cnv)
+	sv_tag = list(zip(*masked_sv)[4])
+	passed_tag = list(set(sv_tag))
+	masked_sv_dict=append_list2dict(masked_sv)
 	masked_start_flank_dict=append_list2dict(masked_start_flank)
 	masked_end_flank_dict=append_list2dict(masked_end_flank)
-	master_cnv={}
+	master_sv={}
 	for i in passed_tag:
 		windows = (start_flank_dict[i],end_flank_dict[i])
-		cnv_span = masked_cnv_dict[i]
+		sv_span = masked_sv_dict[i]
 		flank_span=None
 		if masked_start_flank_dict.get(i) != None and masked_end_flank_dict.get(i) != None:
 			flank_span = masked_start_flank_dict[i] + masked_end_flank_dict[i]
-		master_cnv[cnv_dict[int(i)]]=(cnv_span,flank_span,windows)
-	return master_cnv
+		master_sv[sv_dict[int(i)]]=(sv_span,flank_span,windows)
+	return master_sv
 cdef gc_norm(pcrfree):
 	pcr_dict={}
 	with open(get_path()+'/resources/GC_content_reference.txt','r') as f:
@@ -263,17 +325,17 @@ cdef gc_norm(pcrfree):
 			else:
 				if 'PCRFREE' not in tag: pcr_dict[(key,int(GC))]=float(norm)
 	return pcr_dict
-cdef gc_cnv(cnv,master_cnv,gen):
-	cnv_gc={}
+cdef gc_sv(sv,master_sv,gen):
+	sv_gc={}
 	FASTA = fasta_config(gen)
 	chrFlag = FASTA_head(FASTA)
-	for call in cnv:
-		if master_cnv.get(call)==None: continue
-		cnvs = master_cnv[call][0]
-		if chrFlag == False: cnvs = [tuple(map(lambda y: str.replace(str(y),'chr',''),x)) for x in cnvs]
-		GC_content = int(5 * round(float(GC(pbed.BedTool(cnvs).nucleotide_content(fi=FASTA)))/5))
-		cnv_gc[call]=GC_content
-	return cnv_gc
+	for call in sv:
+		if master_sv.get(call)==None: continue
+		svs = master_sv[call][0]
+		if chrFlag == False: svs = [tuple(map(lambda y: str.replace(str(y),'chr',''),x)) for x in svs]
+		GC_content = int(5 * round(float(GC(pbed.BedTool(svs).nucleotide_content(fi=FASTA)))/5))
+		sv_gc[call]=GC_content
+	return sv_gc
 cdef GC(nuc):
 	cdef int A=0
 	cdef int C=0
@@ -290,13 +352,13 @@ cdef GC(nuc):
 cdef MAD(a, double c=0.6745): return np.around(np.median(np.fabs(a-np.median(a))/c),decimals=3)
 cdef normalize_chr_cov(double read_count, double chr_size, read_length): return np.around( (read_count/chr_size)*np.median(read_length),decimals=2)
 cdef normalize_coverage(double read_count, double span, double chr_cov, double read_length): return (((read_count/span)*read_length)/chr_cov)
-cdef count_reads(cnv_list,bam,ci,chrFlag,legacyM):
+cdef count_reads(sv_list,bam,ci,chrFlag,legacyM):
 	"""count reads within SV span for coverage estimation"""
 	cdef unsigned int read_count
 	cdef unsigned int bp_span
 	read_count=0
 	bp_span=0
-	for (c,s,e) in cnv_list:
+	for (c,s,e) in sv_list:
 		"""if the chromosome format lacks chr"""
 		if chrFlag == False: c = c.replace('chr','')
 		region= str(c+':'+s+'-'+e)
@@ -318,10 +380,10 @@ cdef count_reads(cnv_list,bam,ci,chrFlag,legacyM):
 				continue
 			read_count+=1
 	return(read_count,bp_span)
-cdef depth_of_coverage(cnv_list,bamfh,chrFlag,read_length):
+cdef depth_of_coverage(sv_list,bamfh,chrFlag,read_length):
 	"""return median depth of coverage for SV <= 1kb"""
 	pos_doc={}
-	for (c,s,e) in cnv_list:
+	for (c,s,e) in sv_list:
 		if chrFlag == False: c = c.replace('chr','')
 		region= str(c+':'+s+'-'+e)
 		depth_result = pysam.depth("-a", "-Q" "40", "-r", region, "-l", str(read_length-10), bamfh)
@@ -368,7 +430,7 @@ cdef is_split(read,windows,c,legacyM):
 				return True
 			else:
 				return False
-cdef discordant_split_cnv(flank_list,bam,size,ci,windows,chrFlag,legacyM):
+cdef discordant_split_sv(flank_list,bam,size,ci,windows,chrFlag,legacyM):
 	"""count discordant paired ends and split reads"""
 	cdef unsigned int discordant_count
 	cdef unsigned int split_count
@@ -596,7 +658,7 @@ class gtVCF():
 			TOT=len(genome)
 		snp_cov['GENOME']=(MED,TOT)
 		return snp_cov	
-	def extract_SNP_features(self,sorted_cnv,master_cnv,snp_cov,chrFlag,gender,gen):
+	def extract_SNP_features(self,sorted_sv,master_sv,snp_cov,chrFlag,gender,gen):
 		cdef int s=0
 		cdef int e=0
 		cdef int depth=0
@@ -605,12 +667,12 @@ class gtVCF():
 		HET_feats={}
 		tbx = pysam.TabixFile(self.fh)
 		sex_chrom =['chrX','chrY']
-		for call in sorted_cnv:
-			if master_cnv.get(call)==None: continue
-			(cnv_span,flank_span,windows) = master_cnv[call]
+		for call in sorted_sv:
+			if master_sv.get(call)==None: continue
+			(sv_span,flank_span,windows) = master_sv[call]
 			snp_cov_locus=[]
 			het_ratio_locus=[]
-			for x in cnv_span:
+			for x in sv_span:
 				c = x[0]
 				normc = c
 				s,e = map(int,(x[1],x[2]))
@@ -660,10 +722,10 @@ class Prepro(object):
 		self.insert_mad=mad
 		self.read_len=read_length
 		self.snp_cov=snp_cov
-def extract_feats(iid,bamfh,vcffh,cnv,prefh,gender,out,gen,pcrfree,legacyM):
-	master_cnv = filter_calls(cnv,gen)
+def extract_feats(iid,bamfh,vcffh,sv,prefh,gender,out,gen,pcrfree,legacyM):
+	master_sv = filter_calls(sv,gen)
 	gc_dict = gc_norm(pcrfree)
-	cnv_gc=gc_cnv(cnv,master_cnv,gen)
+	sv_gc=gc_sv(sv,master_sv,gen)
 	bam = pysam.AlignmentFile(bamfh,"rb")
 	chrFlag = bamHead(bam)
 	pre = Prepro(prefh)
@@ -675,20 +737,20 @@ def extract_feats(iid,bamfh,vcffh,cnv,prefh,gender,out,gen,pcrfree,legacyM):
 	ofh = open(outdir+out,'w')
 	out_head = '\t'.join(('chr','start','end','type','size','id','coverage','coverage_GCcorrected','discordant_ratio','split_ratio','SNP_coverage','HET_ratio','SNPs','HET_SNPs'))
 	ofh.write(out_head+'\n')
-	SNPs, HETs = gtVCF(vcffh,iid).extract_SNP_features(cnv,master_cnv,snp_cov,chrFlag,gender,gen)
-	for call in cnv:
+	SNPs, HETs = gtVCF(vcffh,iid).extract_SNP_features(sv,master_sv,snp_cov,chrFlag,gender,gen)
+	for call in sv:
 		(c,s,e,cl) = call
-		if SNPs.get(call)==None or HETs.get(call)==None or cnv_gc.get(call)==None or master_cnv.get(call)==None: continue
+		if SNPs.get(call)==None or HETs.get(call)==None or sv_gc.get(call)==None or master_sv.get(call)==None: continue
 		snp_coverage, snps = SNPs[call]
 		het_ratio, hets = HETs[call]
-		GC_content = cnv_gc[call]
-		(cnv_span,flank_span,windows) = master_cnv[call]
+		GC_content = sv_gc[call]
+		(sv_span,flank_span,windows) = master_sv[call]
 		size = int(e)-int(s)+1
 		ci = insert_size+(5*insert_mad)
-		discordant,split,concordant = discordant_split_cnv(flank_span,bam,size,ci,windows,chrFlag,legacyM)
+		discordant,split,concordant = discordant_split_sv(flank_span,bam,size,ci,windows,chrFlag,legacyM)
 		if size > 1000:
 			"""read count coverage estimation"""
-			(read_count,bp_span) = count_reads(cnv_span,bam,ci,chrFlag,legacyM)
+			(read_count,bp_span) = count_reads(sv_span,bam,ci,chrFlag,legacyM)
 			cov=float('nan')
 			normc=c
 			if gender == 'M' and checkPAR('{} {} {}'.format(c,s,e),gen)== True: normc='GENOME'
@@ -700,7 +762,7 @@ def extract_feats(iid,bamfh,vcffh,cnv,prefh,gender,out,gen,pcrfree,legacyM):
 			GCcov = cov * GCnorm_ratio
 		else:
 			"""median depth of coverage estimation"""
-			median_doc = depth_of_coverage(cnv_span,bamfh,chrFlag,pre.read_len[iid])
+			median_doc = depth_of_coverage(sv_span,bamfh,chrFlag,pre.read_len[iid])
 			cov=float('nan')
 			if pre.chr_cov[(iid,c)]!= 0: cov = median_doc/pre.chr_cov[(iid,c)]
 			GCnorm_ratio=1.0
@@ -718,20 +780,20 @@ def extract_feats(iid,bamfh,vcffh,cnv,prefh,gender,out,gen,pcrfree,legacyM):
 				str(np.around(snp_coverage,decimals=3)),str(snps),str(np.around(het_ratio,decimals=3)),str(hets) ))+'\n')
 	bam.close()
 	ofh.close()
-cdef checkPAR(cnv,gen):
+cdef checkPAR(sv,gen):
 	cdef bint i
 	i=0 
-	if len(pbed.BedTool(cnv,from_string=True).intersect(pbed.BedTool(get_path()+'/resources/par_'+gen+'.bed'),f=0.5)) > 0: i=1
+	if len(pbed.BedTool(sv,from_string=True).intersect(pbed.BedTool(get_path()+'/resources/par_'+gen+'.bed'),f=0.5)) > 0: i=1
 	return i
-cdef returnPAR(cnv,gen):
+cdef returnPAR(sv,gen):
 	out=[]
-	results = pbed.BedTool(cnv).intersect(pbed.BedTool(get_path()+'/resources/par_'+gen+'.bed'),f=0.5,wa=True,u=True)
+	results = pbed.BedTool(sv).intersect(pbed.BedTool(get_path()+'/resources/par_'+gen+'.bed'),f=0.5,wa=True,u=True)
 	if len(results) > 0:
 		for x in results: out.append(tuple(x))
 	return out
-cdef removePAR(cnv,gen):
+cdef removePAR(sv,gen):
 	out=[]
-	results= pbed.BedTool(cnv).subtract(pbed.BedTool(get_path()+'/resources/par_'+gen+'.bed'),f=0.5,A=True)
+	results= pbed.BedTool(sv).subtract(pbed.BedTool(get_path()+'/resources/par_'+gen+'.bed'),f=0.5,A=True)
 	if len(results) > 0:
 		for x in results.sort(): out.append(tuple(x))
 	return out
@@ -846,14 +908,102 @@ cdef rowParser(x):
 	j = (x[0],x[1],x[2],x[4],clf)
 	i = (x[0],x[1],x[2],x[4])
 	return (clf,k,j,i)	
-def genotype(raw,feats,sex,gen,out):
-	REF={}
-	NON={}
-	GQ={}
-	HEMI={}
-	PEF={}	
-	CLF={}
-	FILT={}
+def trainReformat(df): return df[['chr','start','end','type','size','id','covr','dpe','sr','SNP_coverage','SNPs','HET_ratio','HET_SNPs']]	
+def ofhTrain(o):
+	ofh = open(o,'w')
+	ofh.write('\t'.join(('chr','start','end','type','size','id','covr','dpe_rat','sr_rat','SNP_coverage','SNPs','HET_ratio','HET_SNPs','copy_number','classifier'))+'\n')
+	return ofh
+def outputTrain(feats,sex,gen,opre):
+	males = [k for k in sex if sex[k] == 'M']
+	sex_chrom = ['chrX','chrY']
+	dels = [ k for k in feats if 'DEL' in k[3]]
+	dups = [ k for k in feats if 'DUP' in k[3]]
+	autosome_dels = [k for k in dels if k[0] not in sex_chrom]
+	autosome_dups = [k for k in dups if k[0] not in sex_chrom]
+	sexchr_dels = [k for k in dels if k[0] in sex_chrom]
+	sexchr_dups = [k for k in dups if k[0] in sex_chrom]
+	del_par=returnPAR(sexchr_dels,gen)
+	dup_par=returnPAR(sexchr_dups,gen)
+	if len(del_par) > 0:
+		for k in del_par: autosome_dels.append(k)
+	if len(dup_par) > 0:
+		for k in dup_par: autosome_dups.append(k)
+	male_sexchr_del=[]
+	male_sexchr_dup=[]
+	for k in removePAR(sexchr_dels,gen):
+		if k[5] not in males: autosome_dels.append(k)
+		else: male_sexchr_del.append(k)
+	for k in removePAR(sexchr_dups,gen):
+		if k[5] not in males: autosome_dups.append(k)
+		else: male_sexchr_dup.append(k)
+	head = ['chr','start','end','type','size','id','old_covr','covr_GC','dpe','sr','SNP_coverage','SNPs','HET_ratio','HET_SNPs']
+	pd.options.mode.chained_assignment = None
+	outdir = os.getcwd()+'/sv2_training_features/'
+	if not os.path.exists(outdir): os.makedirs(outdir)
+	if len(autosome_dels) > 0:
+		autosome_del_df = pd.DataFrame(autosome_dels)
+		autosome_del_df.columns=head
+		(bigdf,smadf,BIG,SMA) = prep4d(autosome_del_df)
+		if len(bigdf) > 0:
+			ofh = ofhTrain(outdir+'{}_deletion_gt1kb_training_features.txt'.format(opre))
+			for x in trainReformat(bigdf).values: ofh.write('\t'.join(map(str,x))+'\tNA\tdeletion_gt1kb\n')
+			ofh.close()			
+		if len(smadf) > 0:
+			ofh = ofhTrain(outdir+'{}_deletion_lt1kb_training_features.txt'.format(opre))
+			for x in trainReformat(smadf).values: ofh.write('\t'.join(map(str,x))+'\tNA\tdeletion_lt1kb\n')
+			ofh.close()	
+	if len(autosome_dups) > 0:
+		autosome_dup_df = pd.DataFrame(autosome_dups)
+		autosome_dup_df.columns=head
+		SNP,PE=autosomeDupPrep(autosome_dup_df)
+		if len(SNP) >0:
+			ofh = ofhTrain(outdir+'{}_duplication_snv_training_features.txt'.format(opre))
+			for x in trainReformat(SNP).values: ofh.write('\t'.join(map(str,x))+'\tNA\tduplication_snv\n')
+			ofh.close()			
+		if len(PE) >0:
+			ofh = ofhTrain(outdir+'{}_duplication_breakpoint_training_features.txt'.format(opre))
+			for x in trainReformat(PE).values: ofh.write('\t'.join(map(str,x))+'\tNA\tduplication_breakpoint\n')
+			ofh.close()			
+	if len(male_sexchr_del) > 0:
+		sexchr_del_df = pd.DataFrame(male_sexchr_del)
+		sexchr_del_df.columns=head
+		MSDEL, tmp  = prep3d(sexchr_del_df)
+		if len(MSDEL)>0:
+			ofh = ofhTrain(outdir+'{}_deletion_male_sex_chrom_training_features.txt'.format(opre))
+			for x in trainReformat(MSDEL).values: ofh.write('\t'.join(map(str,x))+'\tNA\tdeletion_male_sex_chrom\n')
+			ofh.close()			
+	if len(male_sexchr_dup) > 0:
+		sexchr_dup_df = pd.DataFrame(male_sexchr_dup)
+		sexchr_dup_df.columns=head
+		MSDUP, tmp  = prep3d(sexchr_dup_df)
+		if len(MSDUP)>0:
+			ofh = ofhTrain(outdir+'{}_duplication_male_sex_chrom_training_features.txt'.format(opre))
+			for x in trainReformat(MSDUP).values: ofh.write('\t'.join(map(str,x))+'\tNA\tduplication_male_sex_chrom\n')
+			ofh.close()			
+def getClf(clf):
+	clfs=sv2ClfJson()
+	gtclf={}
+	names=[x for x in clfs['default']]
+	sv2_clf_json = get_path()+'/config/sv2_clf.json'
+	if clfs.get(clf)==None:
+		sys.stderr.write('WARNING: {} classifier name not found ... Using default classifiers. Please check {}\n'.format(clf,sv2_clf_json))
+		clf='default'
+	if clfs.get(clf)!=None: 
+		for x in names:
+			if clfs[clf].get(x)==None: 
+				sys.stderr.write('WARNING {} {} classifier not found ... Using default {} classifier. Please check {}\n'.format(clf,x,x,sv2_clf_json))
+				gtclf[x]=clfs['default'][x]
+			else: 
+				if not os.path.isfile(clfs[clf][x]): 
+					sys.stderr.write('WARNING {} {} pickle file not found ... Using default {} classifier. Please check {} and reload the classifier JSON file <sv2 -load-clf <clf.json>\n'.format(clf,x,x,sv2_clf_json))
+				else: gtclf[x]=clfs[clf][x]
+	else: 
+		sys.stderr.write('ERROR: {} classifier not found. Please check {}. If the default classifiers are not found, reinstall sv2 <pip uninstall sv2 -y && pip install sv2-VERSION-.tar.gz\n'.format(clf,sv2_clf_json))
+		sys.exit(1)
+	return gtclf
+def genotype(clf,raw,feats,sex,gen,out):
+	REF,NON,GQ,HEMI,PEF,CLF,FILT = {},{},{},{},{},{},{}
+	gtclf = getClf(clf)
 	males = [k for k in sex if sex[k] == 'M']
 	sex_chrom = ['chrX','chrY']
 	dels = [ k for k in feats if 'DEL' in k[3]]
@@ -886,7 +1036,7 @@ def genotype(raw,feats,sex,gen,out):
 	if len(autosome_dels) > 0:
 		autosome_del_df = pd.DataFrame(autosome_dels)
 		autosome_del_df.columns=head
-		for x in autosome_del_svm(autosome_del_df).values:
+		for x in autosome_del_svm(autosome_del_df,gtclf).values:
 			ofh.write('\t'.join(map(str,x))+'\n')
 			clf,k,kk,j = rowParser(x)
 			x[6] = format(float(x[6])*2,'.2f')
@@ -912,7 +1062,7 @@ def genotype(raw,feats,sex,gen,out):
 	if len(autosome_dups) > 0:
 		autosome_dup_df = pd.DataFrame(autosome_dups)
 		autosome_dup_df.columns=head
-		for x in autosome_dup_svm(autosome_dup_df).values:
+		for x in autosome_dup_svm(autosome_dup_df,gtclf).values:
 			ofh.write('\t'.join(map(str,x))+'\n')
 			clf,k,kk,j = rowParser(x)
 			if CLF.get(j)==None: CLF[j]=[clf]
@@ -940,7 +1090,7 @@ def genotype(raw,feats,sex,gen,out):
 	if len(male_sexchr_del) > 0:
 		sexchr_del_df = pd.DataFrame(male_sexchr_del)
 		sexchr_del_df.columns=head
-		for x in sexchr_del_svm(sexchr_del_df).values:
+		for x in sexchr_del_svm(sexchr_del_df,gtclf).values:
 			ofh.write('\t'.join(map(str,x))+'\n')
 			clf,k,kk,j = rowParser(x)
 			x[6] = format(float(x[6]),'.2f')
@@ -962,7 +1112,7 @@ def genotype(raw,feats,sex,gen,out):
 	if len(male_sexchr_dup) > 0:
 		sexchr_dup_df = pd.DataFrame(male_sexchr_dup)
 		sexchr_dup_df.columns=head
-		for x in sexchr_dup_svm(sexchr_dup_df).values:
+		for x in sexchr_dup_svm(sexchr_dup_df,gtclf).values:
 			ofh.write('\t'.join(map(str,x))+'\n')
 			clf,k,kk,j = rowParser(x)
 			x[6] = format(float(x[6])*2,'.2f')
@@ -1087,30 +1237,29 @@ cdef prep4d(df):
 	X1 = merge3d(big)
 	X2 = merge3d(sma)
 	return big,sma,X1,X2
-cdef autosome_del_svm(df):
+cdef autosome_del_svm(df,gtclf):
 	(bigdf,smadf,BIG,SMA) = prep4d(df)
 	final=pd.DataFrame()
 	if len(BIG) > 0:
 		clf=''
-		with open(get_path()+'/resources/training_sets/1000Genomes_HighCov_autosome_deletion_LRG-CLF.pkl','rb') as f: clf=pickle.load(f)
+		with open(gtclf['delgt'],'rb') as f: clf=pickle.load(f)
 		lik = clf.predict_proba(BIG)
 		final=final.append(del_autosome_tab(bigdf,lik,'DEL_gt1KB'))
 	if len(SMA) > 0:
 		clf=''
-		with open(get_path()+'/resources/training_sets/1000Genomes_HighCov_autosome_deletion_SMA-CLF.pkl','rb') as f: clf=pickle.load(f)
+		with open(gtclf['dellt'],'rb') as f: clf=pickle.load(f)
 		lik = clf.predict_proba(SMA)
 		final=final.append(del_autosome_tab(smadf,lik,'DEL_lt1KB'))
 	return final
-cdef sexchr_del_svm(df):
+cdef sexchr_del_svm(df,gtclf):
 	(df,X) = prep3d(df)
 	clf=''
-	with open(get_path()+'/resources/training_sets/1000Genomes_HighCov_sexchr_deletion_CLF.pkl','rb') as f: clf=pickle.load(f)
+	with open(gtclf['delmsc'],'rb') as f: clf=pickle.load(f)
 	lik = clf.predict_proba(X)
 	return del_sexchr_tab(df,lik,'DEL_Male_Sex_Chrom')
-cdef autosome_dup_svm(df):
+cdef autosomeDupPrep(df):
 	snpCLF=pd.DataFrame()
 	peCLF=pd.DataFrame()
-	final=pd.DataFrame()
 	df[['SNPs','HET_SNPs']]=df[['SNPs','HET_SNPs']].astype(int)
 	df[['covr_GC','dpe','sr']]=df[['covr_GC','dpe','sr']].astype(float)
 	mean_covr=[]
@@ -1127,12 +1276,16 @@ cdef autosome_dup_svm(df):
 	snpCLF=df.loc[snpList]
 	snpCLF[['HET_ratio']]=snpCLF[['HET_ratio']].astype(float)
 	peCLF=df.loc[peList]
+	return snpCLF,peCLF
+cdef autosome_dup_svm(df,gtclf):
+	snpCLF,peCLF=autosomeDupPrep(df)
+	final=pd.DataFrame()
 	X=None
 	clf=None
 	temp=pd.DataFrame()
 	if len(snpCLF) >0:
 		temp,X = prepHET(snpCLF)
-		with open(get_path()+'/resources/training_sets/1000Genomes_HighCov_autosome_duplication_SNP-CLF.pkl','rb') as f: clf=pickle.load(f)
+		with open(gtclf['dupsnv'],'rb') as f: clf=pickle.load(f)
 		lik = clf.predict_proba(X)
 		final=final.append(dup_autosome_tab(temp,lik,'DUP_SNV'))
 	clf=None
@@ -1140,14 +1293,14 @@ cdef autosome_dup_svm(df):
 	temp=pd.DataFrame()
 	if len(peCLF) >0:
 		temp,X= prepPE(peCLF)
-		with open(get_path()+'/resources/training_sets/1000Genomes_LowCov_autosome_duplication_PE-CLF.pkl','rb') as f: clf=pickle.load(f)
+		with open(gtclf['dupbrk'],'rb') as f: clf=pickle.load(f)
 		lik = clf.predict_proba(X)
 		final=final.append(dup_autosome_tab(temp,lik,'DUP_Breakpoint'))
 	return final
-cdef sexchr_dup_svm(df):
+cdef sexchr_dup_svm(df,gtclf):
 	(df,X) = prep3d(df)
 	clf=''
-	with open(get_path()+'/resources/training_sets/1000Genomes_LowCov_sexchr_duplication_CLF.pkl','rb') as f: clf=pickle.load(f)
+	with open(gtclf['dupmsc'],'rb') as f: clf=pickle.load(f)
 	lik = clf.predict_proba(X)
 	return dup_sexchr_tab(df,lik,'DUP_Male_Sex_Chrom')
 cdef recipOver(x):
@@ -1165,18 +1318,18 @@ cdef recipOver(x):
 	emin=min(e1,e2)
 	ovr = emin-smax+1
 	return min((ovr/sz1),(ovr/sz2))
-cdef cytobandOverlap(cnv,gen):
+cdef cytobandOverlap(sv,gen):
 	cyto={}
 	try:
-		for (c,s,e,c2,s2,e2,band,t,ovr) in cnv.intersect(get_path()+'/resources/annotation_files/{}_cytoband.bed'.format(gen),wao=True):
+		for (c,s,e,c2,s2,e2,band,t,ovr) in sv.intersect(get_path()+'/resources/annotation_files/{}_cytoband.bed'.format(gen),wao=True):
 			if cyto.get((c,s,e))==None: cyto[(c,s,e)]=c2.replace('chr','')+band
 			else: cyto[(c,s,e)]=cyto[(c,s,e)]+','+c2.replace('chr','')+band
 	except pbed.cbedtools.MalformedBedLineError: cyto[(c,s,e)]='NA' 	
 	return cyto
-cdef flagsOverlap(cnv,gen):
+cdef flagsOverlap(sv,gen):
 	flags={}
 	cdef int ovr
-	for x in cnv.intersect(get_path()+'/resources/annotation_files/{}_flags.bed.gz'.format(gen),wao=True):
+	for x in sv.intersect(get_path()+'/resources/annotation_files/{}_flags.bed.gz'.format(gen),wao=True):
 		x=list(x)
 		x[len(x)-1]=int(x[len(x)-1])
 		if(x[(len(x)-1)]==0): continue
@@ -1185,11 +1338,11 @@ cdef flagsOverlap(cnv,gen):
 		else: flags[(c,s,e,flag)]+=int(ovr)
 	for (c,s,e,f) in flags: flags[(c,s,e,f)]= float(flags[(c,s,e,f)])/(int(e)-int(s)+1.0)
 	return flags
-cdef meiOverlap(cnv,gen):
+cdef meiOverlap(sv,gen):
 	cdef double rovr
 	mei={}
 	maxovr={}
-	for x in cnv.intersect(get_path()+'/resources/annotation_files/{}_repeatmasker.bed.gz'.format(gen), f=0.8, F=0.8, wa=True, wb=True):
+	for x in sv.intersect(get_path()+'/resources/annotation_files/{}_repeatmasker.bed.gz'.format(gen), f=0.8, F=0.8, wa=True, wb=True):
 		rovr=0
 		rovr=recipOver(map(int,(x[1],x[4],x[2],x[5])))
 		k = (x[0],x[1],x[2])
@@ -1215,7 +1368,7 @@ cdef thouGenOverlap(genos,gen):
 		if int(x[len(x)-1])==0: continue
 		else: thouGen[(x[0],x[1],x[2],x[3])]=(x[len(x)-2],format(float(x[len(x)-1])/(int(x[2])-int(x[1])+1.0),'.2f'))
 	return thouGen
-cdef geneOverlap(cnv,gen):
+cdef geneOverlap(sv,gen):
 	cdef unsigned int exonTotal
 	cdef unsigned int exonNum
 	cdef unsigned int intronTotal
@@ -1227,7 +1380,7 @@ cdef geneOverlap(cnv,gen):
 	GENEFH=get_path()+'/resources/annotation_files/{}_genes.bed.gz'.format(gen)
 	genes={}
 	geneTEMP={}
-	for (c,s,e,c2,s2,e2,gene) in cnv.intersect(GENEFH, wa=True,wb=True):
+	for (c,s,e,c2,s2,e2,gene) in sv.intersect(GENEFH, wa=True,wb=True):
 		if geneTEMP.get((c,s,e))==None: geneTEMP[(c,s,e)]=[gene]
 		elif gene not in geneTEMP[(c,s,e)]: geneTEMP[(c,s,e)].append(gene)
 		else: continue
@@ -1330,12 +1483,12 @@ def annotate(raw,genos,gen,REF,NON,GQ,OFH,sex,hemi,FILT,DNMFILT):
 	males = [k for k in sex if sex[k] == 'M']
 	IID = list(set([str(x[5]) for x in genos]))
 	IID.sort(key=str.lower)
-	cnv=pbed.BedTool(list(set([(x[0],x[1],x[2]) for x in raw]))).sort()
-	cyto=cytobandOverlap(cnv,gen)
-	flags=flagsOverlap(cnv,gen)
-	mei,meiRO=meiOverlap(cnv,gen)
+	sv=pbed.BedTool(list(set([(x[0],x[1],x[2]) for x in raw]))).sort()
+	cyto=cytobandOverlap(sv,gen)
+	flags=flagsOverlap(sv,gen)
+	mei,meiRO=meiOverlap(sv,gen)
 	thouGen=thouGenOverlap(raw,gen)
-	genes=geneOverlap(cnv,gen)
+	genes=geneOverlap(sv,gen)
 	for x in genos:
 		k = (x[0],x[1],x[2],x[4])
 		GTed[k]=1
@@ -1395,8 +1548,8 @@ def annotate(raw,genos,gen,REF,NON,GQ,OFH,sex,hemi,FILT,DNMFILT):
 		GTS=[]
 		PASS='PASS'
 		fail=[]
-		cnvref=0
-		if refcnt.get((c,s,e,cl))!=None: cnvref=refcnt[(c,s,e,cl)]
+		svref=0
+		if refcnt.get((c,s,e,cl))!=None: svref=refcnt[(c,s,e,cl)]
 		if mei.get((c,s,e))!=None: 
 			meiName=mei[(c,s,e)]
 			TYPE=TYPE+':'+meiName
@@ -1421,7 +1574,7 @@ def annotate(raw,genos,gen,REF,NON,GQ,OFH,sex,hemi,FILT,DNMFILT):
 		if float(SEGD) >= 0.5: fail.append('SEGDUP')
 		if float(STR) >= 0.5: fail.append('STR')
 		if float(UNMAP) >= 0.5: fail.append('UNMAPABLE')
-		if cnvref == len(IID): fail.append('ALLREF')
+		if svref == len(IID): fail.append('ALLREF')
 		if GTed.get((c,s,e,cl))==None: fail.append('FAIL')	
 		if DNMFILT.get((c,s,e,cl))!=None:
 			if DNMFILT[(c,s,e,cl)]==1: DENOVO_FILT='PASS'
@@ -1490,3 +1643,58 @@ def annotate(raw,genos,gen,REF,NON,GQ,OFH,sex,hemi,FILT,DNMFILT):
 	outfh.write('\t'.join(('#CHROM','POS','ID','REF','ALT','QUAL','FILTER','INFO','FORMAT','\t'.join(IID)))+'\n')
 	outfh.write('\n'.join(VCF)+'\n')
 	outfh.close()
+def skipSV(x):
+	k1,k2 = tuple((x[0],x[1],x[2],x[3])),tuple((x[4],x[5],x[6],x[7]))
+	if k1==k2: return True
+	else: return False
+def checkMerge(sv,minOvr):
+	toMerge=[]
+	for x in sv.intersect(sv,f=minOvr,F=minOvr,wao=True):
+		x= tuple(x)
+		if skipSV(x)==False: toMerge.append(x)
+	return toMerge
+def firstMerge(sv,minOvr):
+	noMerge=[]
+	toMerge=[]
+	for x in sv.intersect(sv,f=minOvr,F=minOvr,wao=True):
+		x= tuple(x)
+		k1,k2 = tuple((x[0],x[1],x[2],x[3])),tuple((x[4],x[5],x[6],x[7]))
+		if skipSV(x)==False: 
+			toMerge.append(k1)
+			toMerge.append(k2)
+		else: noMerge.append(k1)
+	return [x for x in noMerge if x not in toMerge]
+def merging(sv,non):
+	merged,trash=[],[]
+	for x in sv:
+		k1,k2 = tuple((x[0],x[1],x[2],x[3])),tuple((x[4],x[5],x[6],x[7]))
+		non1,non2=0,0
+		if non.get(k1)!=None: non1=non[k1]
+		if non.get(k2)!=None: non2=non[k2]
+		if non1 > non2: 
+			if k1 not in trash: merged.append(k1)
+			trash.append(k2)
+		elif non2 > non1: 
+			if k2 not in trash: merged.append(k2)
+			trash.append(k1)
+		else: 
+			if k1 not in trash: merged.append(k1)
+			trash.append(k2)
+	return pbed.BedTool(list(set(merged))) 
+def mergeSV(raw,non,minOvr):
+	dels = pbed.BedTool([x for x in raw if 'DEL' in x[3]])
+	dups = pbed.BedTool([x for x in raw if 'DUP' in x[3]])
+	dels_nomerge = firstMerge(dels,minOvr)
+	while len(checkMerge(dels,minOvr))>0:
+		dels = merging(checkMerge(dels,minOvr),non)
+		toMerge = checkMerge(dels,minOvr)
+	raw=[]
+	for x in dels_nomerge: raw.append((str(x[0]),int(x[1]),int(x[2]),str(x[3])))
+	for x in dels: raw.append((str(x[0]),int(x[1]),int(x[2]),str(x[3])))
+	dups_nomerge = firstMerge(dups,minOvr)
+	while len(checkMerge(dups,minOvr))>0:
+		dels = merging(checkMerge(dups,minOvr),non)
+		toMerge = checkMerge(dups,minOvr)
+	for x in dups_nomerge: raw.append((str(x[0]),int(x[1]),int(x[2]),str(x[3])))
+	for x in dups: raw.append((str(x[0]),int(x[1]),int(x[2]),str(x[3])))
+	return raw
