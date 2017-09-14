@@ -10,7 +10,7 @@ def main():
 	splash='                       ____\n  _____________   ___ |___ \\\n /   _____/\   \ /   // ___/\n \_____  \  \   Y   //_____)\n /        \  \     /\n/_________/   \___/\nSupport Vector Structural Variation Genotyper\nVersion 1.3.2    Author: Danny Antaki <dantaki@ucsd.edu>    github.com/dantaki/SV2\n\n'
 	parser = argparse.ArgumentParser(description=splash,formatter_class=RawTextHelpFormatter)
 	inArgs, genoArgs,clfArgs,configArgs= parser.add_argument_group('input arguments'),parser.add_argument_group('genotype arguments'), parser.add_argument_group('classifier arguments'),parser.add_argument_group('config arguments')
-	inArgs.add_argument('-i','-in', help='Tab delimited input [ID, BAM-PATH, VCF-PATH, M/F]',default=None,type=str)
+	inArgs.add_argument('-i','-in', help='Tab or space delimited input [ID, BAM-PATH, VCF-PATH, M/F]',default=None,type=str)
 	inArgs.add_argument('-b','-bed',help='BED file(s)',type=str,default=None,nargs='*')
 	inArgs.add_argument('-v','-vcf',help='VCF file(s)',type=str,default=None,nargs='*')
 	genoArgs.add_argument('-c','-cpu', help='Parallelize sample-wise. 1 per cpu',required=False,default=1,type=int)
