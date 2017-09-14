@@ -104,7 +104,10 @@ def check_in(fh):
 	with open(fh) as f:
 		for l in f:
 			r = l.rstrip().split('\t')
-			if len(r) != 4: sys.stderr.write('WARNING: {} not formatted correctly! Please refer to the documentation at www.github.com/dantaki/SV2\n'.format(l))
+			if len(r)==1: r=l.rstrip().split(' ')
+			if len(r)==1: sys.stderr.write('WARNING: {} NOT FORMATTED CORRECTLY. SAMPLE INFORMATION ENTRIES ARE REQUIRED TO BE TAB OR SPACE DELIMITED\n'.format(l))
+
+			elif len(r) != 4: sys.stderr.write('WARNING: {} not formatted correctly! Please refer to the documentation at www.github.com/dantaki/SV2\n'.format(l))
 			else:
 				(iid,bamfh,vcffh,sx) = r
 				if not os.path.isfile(bamfh): errFH(bamfh)

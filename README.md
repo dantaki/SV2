@@ -86,7 +86,7 @@ Please refer to the [User Guide](https://github.com/dantaki/SV2/wiki/options) fo
 
 ### [Sample information < -i >](https://github.com/dantaki/SV2/wiki/input#sample-information)
 
-Tab-delimited file containing sample information. Gender can also be encoded as 1 for M and 2 for F
+Tab or space delimited file containing sample information. Gender can also be encoded as 1 for M and 2 for F
 
 ID | BAM PATH |  VCF PATH | Gender [M/F]
 --- | --- | --- | ---
