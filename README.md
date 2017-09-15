@@ -14,17 +14,12 @@ Support Vector Structural Variation Genotyper
    * [Tutorial](#tutorial)
 * [Getting Started](#getting-started)
    * [Installation](#installation)
-   * [Configure SV<sup>2</sup>](#configure-sv2)
-* [Options](#options)
 * [Input](#input)
 * [Output](#output)
 * [Training](#training)
 * [Performance](#performance)
-* [Usage](#usage)
 * [Requirements](#requirements)
-* [Credits](#credits)
 * [Citing SV<sup>2</sup>](#citing-sv2)
-* [History](#history)
 * [License](#license)
 * [Contact](#contact)
 
@@ -62,15 +57,13 @@ $ sv2 -hg19 /full/path/to/hg19.fasta [-hg38 /full/path/to/hg38.fasta]
 $ sv2 -i samples.txt -b sv.bed -v sv.vcf -o my_genotypes
 ```
 
----
-
-## [Options](https://github.com/dantaki/SV2/wiki/options#)
-
-[:notebook: Options Documentation](https://github.com/dantaki/SV2/wiki/options)
+[:notebook: SV<sup>2</sup> Options Documentation](https://github.com/dantaki/SV2/wiki/options#)
 
 ---
 
 ## [Input](https://github.com/dantaki/SV2/wiki/input)
+
+SV<sup>2</sup> *requires* a sample information file and either a BED or VCF file of SVs to genotype.
 
 1. [Sample Information](https://github.com/dantaki/SV2/wiki/input#sample-information)
  
@@ -98,7 +91,7 @@ SV<sup>2</sup> can accept multiple BED and VCF files.
 -v | -vcf    ...       VCF file(s) of SVs
 ```
 
-Documentation on SV required file formats:
+Documentation on required SV file formats:
   * [BED format](https://github.com/dantaki/SV2/wiki/input#bed-input)
 
   * [VCF format](https://github.com/dantaki/SV2/wiki/input#vcf-input)
@@ -109,19 +102,17 @@ Documentation on SV required file formats:
  
  Output is generated in the current working directory. 
  
- * `sv2_preprocessing/` contains preprocessing output. 
+ * `sv2_preprocessing/` contains preprocessing output 
 
- * `sv2_features/` contains feature extraction output. 
+ * `sv2_features/` feature extraction output
  
- * `sv2_genotypes/` contains output in tab-delimited BED format and VCF format.
+ * `sv2_genotypes/` genotype output
  
-*Output VCF comes with gene annotations and other useful statistics*
+*Output VCF comes with gene annotations and other useful annotations*
 
-### [Merging SVs](https://github.com/dantaki/SV2/wiki/Output#merging-svs)
+* SV<sup>2</sup> can merge divergent breakpoints. By default this option is off. 
 
-SV<sup>2</sup> can merge divergent breakpoints. By default this option is off. 
-
-[:notebook: Merging Documentation](https://github.com/dantaki/SV2/wiki/Output#merging-svs)
+* [:notebook: Merging Documentation](https://github.com/dantaki/SV2/wiki/Output#merging-svs)
 
 ---
 
@@ -145,23 +136,7 @@ Please refer to the [preprint](#preprint) for performance details.
 
 ---
 
-## Usage
-
-* SV<sup>2</sup> is designed for human whole genome short-read sequencing libraries. Given deletion and duplication positions, SV<sup>2</sup> returns a VCF with predicted copy number genotypes.
-* Whole genome alignments from the [1000 Genomes Project](http://www.1000genomes.org/) were used for training. Validated genotypes were obtained from the phase 3 integrated structural variation call set ([DOI:10.1038/nature15394](http://dx.doi.org/10.1038%2Fnature15394); PMID:    26432246).
-* Features for genotyping include coverage, discordant paired-ends, split-reads, and heterozygous allele depth ratio.
-   * BAM files must have supplementary alignment tags (SA).
-   * SNV VCF must contain Allele Depth (AD/DPR). SV<sup>2</sup> can accommodate [GATK Haplotype Caller](https://software.broadinstitute.org/gatk/gatkdocs/org_broadinstitute_gatk_tools_walkers_haplotypecaller_HaplotypeCaller.php) and [FreeBayes](https://github.com/ekg/freebayes) VCFs.
-      * SNV VCF must be compressed and indexed with [bgzip and tabix](http://www.htslib.org/doc/tabix.html)
-* SV<sup>2</sup> operates with a bi-allelic model with a copy number range of 0-4
-* Output is in VCF format.
-   * Median Phred-adjusted ALT likelihoods are reported in the QUAL column
-   * SV<sup>2</sup> standard filters are reported in the FILTER column
-   * SV<sup>2</sup> stringent filters for *de novo* discovery are located in the INFO column as `DENOVO_FILTER=`
-   * Positions are annotated based on their overlap to genes, RepeatMasker, segmental duplications, 1000 Genomes phase 3 CNV, and more
-* SVs with estimated autosome copy number >10 cannot be genotyped. 
-
----
+[:notebook: Usage Documentation](https://github.com/dantaki/SV2/wiki/usage)
 
 ## Requirements
 * [python 2.7](https://www.python.org/)
@@ -176,28 +151,11 @@ Please refer to the [preprint](#preprint) for performance details.
 
 ---
 
-## Credits
-
-### Author:
-
-* Danny Antaki
-    * dantaki@ucsd.edu
-
-### Acknowledgements:
-* William Brandler
-* Jonathan Sebat
-    * Sebat Lab http://sebatlab.ucsd.edu/index.php/software-data
-
 ## Citing SV<sup>2</sup>
 
 For citing SV<sup>2</sup> please refer to the preprint: [bioRxiv](http://biorxiv.org/content/early/2017/03/17/113498) : [doi](https://doi.org/10.1101/113498)
 
-
-## History
-
-[SV<sup>2</sup> version 1.1](https://github.com/dantaki/SV2/tree/v1.1) used in Brander, Antaki, Gujral,  et al. *bioRxiv* 2017: [DOI](http://biorxiv.org/content/early/2017/04/04/102327)
-
-[gtCNV version 0.1](https://github.com/dantaki/gtCNV/tree/Version-0.1) used in Brander, Antaki, Gujral,  et al. *AJHG* 2016: [DOI](http://dx.doi.org/10.1016/j.ajhg.2016.02.018) PMID:    27018473
+---
 
 ## License 
 MIT License
