@@ -4,6 +4,19 @@ This is a guide for users to retrain the default SV<sup>2</sup> classifiers and 
 
 Included in the SV<sup>2</sup> source package are the original training set and a jupyter notebook containing instructions for (re)training. 
 
+---
+
+## Methodology
+
+1. Get a training set
+    * [SV<sup>2</sup> Training Set](Training#sv2-training-set)
+    * [Generate your own training features](Training#custom-feature-extraction)
+2. [Train the models](Training#training-svm-classifiers)
+3. [Add your models to SV<sup>2</sup>](Training#adding-new-classifiers-to-sv2)
+4. [Genotype with your model](Training#genotyping-with-new-classifiers)
+
+---
+
 ## SV<sup>2</sup> Training Set
 
 The default training set is packaged with the source package:
@@ -19,6 +32,8 @@ $ ls sv2-VERSION/sv2/training/1kgp_training_data
 1kgp_lowcov_dup_malesexchrom.txt
 ```
 These files can be used for retraining in the [training SVM classifiers section](Training#training-svm-classifiers)
+
+---
 
 ## Custom Feature Extraction
 
@@ -62,13 +77,16 @@ before training, users have to populate the values in `copy_number`. The expecte
 | 1           | 0 (REF)      |
 | 2           | 1 (DUP:ALT)  |
 
-The companion [jupyter notebook](https://github.com/dantaki/SV2/blob/master/sv2/training/sv2_training.ipynb) encodes genotype labels as copy number for simplicity. This is useful for users that wish to include variants with multiple alleles such as,
+The companion [jupyter notebook](https://github.com/dantaki/SV2/blob/master/sv2/training/sv2_training.ipynb) encodes genotype labels as copy number for simplicity. This is useful for users that wish to include variants with multiple alleles.
 
+#### Examples of multiallelic SVs
 | REF | ALT | Genotype | copy_number |
 | ----| --- | -------- | ----------- | 
 | \<CN1\> | \<CN0\>,\<CN2\>  | 2/2 | 4        |
 | \<CN1\> | \<CN0\>,\<CN2\>  | 1/2 | 2        |
 | \<CN1\> | \<CN2\>,\<CN3\>  | 0/2 | 4        |
+
+---
 
 ## Training SVM Classifiers
 
@@ -84,6 +102,8 @@ The output of the jupyter notebook is a JSON file containing the paths to the tr
 
 **VERY IMPORTANT:bangbang:** do not alter the paths in the JSON file or the pickle files themselves.
 
+---
+
 ## Adding New Classifiers to SV<sup>2</sup>
 
 A JSON file containing paths to classifier models is required to add new classifiers. 
@@ -95,6 +115,8 @@ $ sv2 -load-clf myclf.json
 ```
 
 This command appends new classifiers to the SV<sup>2</sup> classifier JSON file located here: `$SV2_INSTALL_LOCATION/sv2/config/sv2_clf.json`
+
+---
 
 ## Genotyping with New Classifiers
 
