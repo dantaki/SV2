@@ -14,14 +14,14 @@ Support Vector Structural Variation Genotyper
    * [Tutorial](#tutorial)
 * [Getting Started](#getting-started)
    * [Installation](#installation)
-   * [Requirements](#requirements)
    * [Configure SV<sup>2</sup>](#configure-sv2)
-   * [Options](#options)
+* [Options](#options)
 * [Input](#input)
 * [Output](#output)
 * [Training](#training)
 * [Performance](#performance)
 * [Usage](#usage)
+* [Requirements](#requirements)
 * [Credits](#credits)
 * [Citing SV<sup>2</sup>](#citing-sv2)
 * [History](#history)
@@ -36,88 +36,74 @@ SV<sup>2</sup> (support-vector structural-variant genotyper) is a machine learni
 
 ## [User Guide](https://github.com/dantaki/SV2/wiki)
 
-[click here :notebook:](https://github.com/dantaki/SV2/wiki)
-
 ### [Tutorial](https://github.com/dantaki/SV2/wiki/tutorial)
+
+---
 
 ## Getting Started
 
-### [Installation](https://github.com/dantaki/SV2/wiki/installation)
+1. [Installation](https://github.com/dantaki/SV2/wiki/installation)
 
 [Install with `pip`](https://github.com/dantaki/SV2/wiki/installation#install-with-pip) *Recommended* 
 
 ```
-pip install https://github.com/dantaki/SV2/releases/download/sv2v1.3.2/sv2-1.3.2.tar.gz 
-```
-*Advanced users:* SV<sup>2</sup> can be [manually installed from source](https://github.com/dantaki/SV2/wiki/installation#manual-install). 
-
-### Requirements
-* [python 2.7](https://www.python.org/)
-  * [cython](https://github.com/cython/cython)
-  * [numpy](http://www.numpy.org/)
-  * [pandas](http://pandas.pydata.org/)
-  * [pybedtools](https://daler.github.io/pybedtools/)
-  * [pysam 0.9+](https://github.com/pysam-developers/pysam)
-  * [scikit-learn v0.17](http://scikit-learn.org/)
-
-* [bedtools 2.25.0](https://github.com/arq5x/bedtools2/releases) or later
-
-### [Configure SV<sup>2</sup>](https://github.com/dantaki/SV2/wiki/installation#configure)
-
-Before running SV<sup>2</sup>, define your fasta files. 
-
-```
-sv2 -hg19 <hg19.fasta> [-hg38 <hg38.fasta>] 
+$ pip install https://github.com/dantaki/SV2/releases/download/sv2v1.3.2/sv2-1.3.2.tar.gz 
 ```
 
-### [Options](https://github.com/dantaki/SV2/wiki/options#)
+2. [Configure SV<sup>2</sup>](https://github.com/dantaki/SV2/wiki/installation#configure)
 
-Please refer to the [User Guide](https://github.com/dantaki/SV2/wiki/options) for details on SV<sup>2</sup> options.
+```
+$ sv2 -hg19 /full/path/to/hg19.fasta [-hg38 /full/path/to/hg38.fasta] 
+```
+
+3. Run SV<sup>2</sup>
+
+```
+$ sv2 -i samples.txt -b sv.bed -v sv.vcf -o my_genotypes
+```
+
+---
+
+## [Options](https://github.com/dantaki/SV2/wiki/options#)
+
+[:notebook: Options Documentation](https://github.com/dantaki/SV2/wiki/options)
+
+---
 
 ## [Input](https://github.com/dantaki/SV2/wiki/input)
 
-### Input Arguments
-
-| Input Arguments | Description 
-| ----------------| -----------
--i \| -in       | Sample information [ID, BAM-PATH,VCF-PATH, M/F]
--b \| -bed      | Bed file(s) of SVs
--v \| -vcf      | VCF file(s) of SVs
-
-### [Sample information < -i >](https://github.com/dantaki/SV2/wiki/input#sample-information)
-
-Tab or space delimited file containing sample information. Gender can also be encoded as 1 for M and 2 for F
+1. [Sample Information](https://github.com/dantaki/SV2/wiki/input#sample-information)
+ 
+```
+-i | -in    PATH        Sample information file
+```
+Tab or space delimited file containing sample information.
 
 ID | BAM PATH |  VCF PATH | Gender [M/F]
 --- | --- | --- | ---
 NA12878 | /bam/NA12878.bam | /vcf/NA12878_SNVs.vcf.gz | F 
 HG00096 | /bam/HG00096.bam | /vcf/HG00096_SNVs.vcf.gz | M
 
-* BAM format
-  * Supplementary alignment tags (SA) are required for split-read analysis
-* VCF format
-  * Allele Depth is required 
-  * bgzip and tabix indexed VCF
+[:notebook: Sample Information Documentation](https://github.com/dantaki/SV2/wiki/input#sample-information).
 
-Refer to the [User Guide](https://github.com/dantaki/SV2/wiki/input#sample-information) for more details. 
-
-### [Variants to genotype <-b ... > <-v ... >](https://github.com/dantaki/SV2/wiki/input#sv-input)
+2. [SVs to Genotype](https://github.com/dantaki/SV2/wiki/input#sv-input)
 
 SV<sup>2</sup> can accept multiple BED and VCF files.
 
 ```
-sv2 -i in.txt -b del.bed dup.bed ... -v del.vcf ...
+-b | -bed    ...       BED file(s) of SVs
 ```
 
-* [BED format](https://github.com/dantaki/SV2/wiki/input#bed-input)
-  BED files are either tab or space delimited. The first four columns must be [CHROM  START  END  TYPE]
+```
+-v | -vcf    ...       VCF file(s) of SVs
+```
 
-* [VCF format](https://github.com/dantaki/SV2/wiki/input#vcf-input)
-  VCF files must contain `SVTYPE=` and `END=` in the INFO column 
+Documentation on SV required file formats:
+  * [BED format](https://github.com/dantaki/SV2/wiki/input#bed-input)
 
-* SV Type: must contain either `DEL` or `DUP`
+  * [VCF format](https://github.com/dantaki/SV2/wiki/input#vcf-input)
 
-Refer to the [User Guide](https://github.com/dantaki/SV2/wiki/input#sv-input) for more details. 
+---
 
 ## [Output](https://github.com/dantaki/SV2/wiki/Output)
  
@@ -133,46 +119,19 @@ Refer to the [User Guide](https://github.com/dantaki/SV2/wiki/input#sv-input) fo
 
 ### [Merging SVs](https://github.com/dantaki/SV2/wiki/Output#merging-svs)
 
-SV<sup>2</sup> provides the option to merge SV calls. By default this option is off. 
+SV<sup>2</sup> can merge divergent breakpoints. By default this option is off. 
 
-Details found in the [User Guide](https://github.com/dantaki/SV2/wiki/Output#merging-svs)
+[:notebook: Merging Documentation](https://github.com/dantaki/SV2/wiki/Output#merging-svs)
 
-```
-# merge SV after genotyping
-sv2 -i in.txt [-b ...] [-v ...] -merge
-
-# merge SV with >50% reciprocal overlap
-sv2 -i in.txt [-b ...] [-v ...] -min-ovr 0.5
-```
-
-For more detail on SV<sup>2</sup> output, please refer to the [User Guide](https://github.com/dantaki/SV2/wiki/output)
- 
+---
 
 ## [Training](https://github.com/dantaki/SV2/wiki/Training)
 
 Advanced users can retrain SV<sup>2</sup> genotyping classifiers with the original or custom training set. 
 
-SV<sup>2</sup> includes a script for [generating training features](https://github.com/dantaki/SV2/wiki/Training#custom-feature-extraction)
+[:notebook: Training Documentation](https://github.com/dantaki/SV2/wiki/Training)
 
-```
-sv2train -i <in.txt> [-b ...] [-v ...] ...
-```
-
-Included is a [jupyter notebook guide for training classifiers](https://github.com/dantaki/SV2/blob/master/sv2/training/sv2_training.ipynb). This guide will produce a JSON file containing paths of the new classifiers. 
-
-Users can then [load the classifiers](https://github.com/dantaki/SV2/wiki/Training#adding-new-classifiers-to-sv2) into SV<sup>2</sup> with this command:
-
-```
-sv2 -load-clf myclf.json
-```
-
-To [genotype with new classifiers](https://github.com/dantaki/SV2/wiki/Training#genotyping-with-new-classifiers), pass the name of the classifier to the SV<sup>2</sup> command
-
-```
-sv2 -i <in.txt> [-b ...] [-v ...] -clf myclf
-```
-
-For more details please refer to the [User Guide](https://github.com/dantaki/SV2/wiki/Training)
+---
 
 ## [Performance](https://github.com/dantaki/SV2/wiki/Performance)
 
@@ -183,6 +142,8 @@ SV<sup>2</sup> performance was measured with independent cohorts using Illumina 
 ##### [Performance of *de novo* mutations](https://github.com/dantaki/SV2/wiki/performance#de-novo-mutations)
 
 Please refer to the [preprint](#preprint) for performance details. 
+
+---
 
 ## Usage
 
@@ -199,6 +160,19 @@ Please refer to the [preprint](#preprint) for performance details.
    * SV<sup>2</sup> stringent filters for *de novo* discovery are located in the INFO column as `DENOVO_FILTER=`
    * Positions are annotated based on their overlap to genes, RepeatMasker, segmental duplications, 1000 Genomes phase 3 CNV, and more
 * SVs with estimated autosome copy number >10 cannot be genotyped. 
+
+---
+
+## Requirements
+* [python 2.7](https://www.python.org/)
+  * [cython](https://github.com/cython/cython)
+  * [numpy](http://www.numpy.org/)
+  * [pandas](http://pandas.pydata.org/)
+  * [pybedtools](https://daler.github.io/pybedtools/)
+  * [pysam 0.9+](https://github.com/pysam-developers/pysam)
+  * [scikit-learn v0.17](http://scikit-learn.org/)
+
+* [bedtools 2.25.0](https://github.com/arq5x/bedtools2/releases) or later
 
 ---
 
@@ -247,6 +221,8 @@ AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
 LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
+
+---
 
 ## Contact
 :mailbox:
