@@ -7,6 +7,8 @@ Support Vector Structural Variation Genotyper
 
 [![DOI](https://zenodo.org/badge/80166279.svg)](https://zenodo.org/badge/latestdoi/80166279)
 
+---
+
 ## Table of Contents
 
 * [Preprint](#preprint)
@@ -23,11 +25,15 @@ Support Vector Structural Variation Genotyper
 * [License](#license)
 * [Contact](#contact)
 
+---
+
 ## [Preprint](http://biorxiv.org/content/early/2017/03/17/113498) : [doi](https://doi.org/10.1101/113498)
 
 SV<sup>2</sup> (support-vector structural-variant genotyper) is a machine learning algorithm for genotyping deletions and duplications from paired-end whole genome sequencing data. SV<sup>2</sup> can rapidly integrate variant calls from multiple SV discovery algorithms into a unified callset with [high genotyping accuracy](https://raw.githubusercontent.com/dantaki/SV2/master/png/sv2_auc.png) and detection of [*de novo* mutations](https://raw.githubusercontent.com/dantaki/SV2/master/png/sv2_fdr.png).
 
 ![alt text](https://raw.githubusercontent.com/dantaki/SV2/master/png/sv2_flowchart.png "Support Vector Structural Variation Genotyper Work Flow")
+
+---
 
 ## [User Guide](https://github.com/dantaki/SV2/wiki)
 
@@ -125,7 +131,7 @@ Advanced users can retrain SV<sup>2</sup> genotyping classifiers with the origin
 
 ## [Performance](https://github.com/dantaki/SV2/wiki/Performance)
 
-SV<sup>2</sup> performance was measured with independent cohorts using Illumina 2.5M arrays and PacBio SMRT sequencing. 
+SV<sup>2</sup> performance was measured with independent cohorts from the training set using Illumina 2.5M microarrays and PacBio single molecule sequencing. 
 
 ![alt text](https://raw.githubusercontent.com/dantaki/SV2/master/png/sv2_auc.png "Genotyping ROC curve")
 
