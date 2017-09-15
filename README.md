@@ -71,7 +71,7 @@ $ sv2 -i samples.txt -b sv.bed -v sv.vcf -o my_genotypes
 
 SV<sup>2</sup> *requires* a sample information file and a BED or VCF file of SVs to genotype.
 
-1. Sample Information [:notebook: Documentation](https://github.com/dantaki/SV2/wiki/input#sample-information)
+1. **Sample Information** [:notebook: Documentation](https://github.com/dantaki/SV2/wiki/input#sample-information)
  
 ```
 -i | -in    PATH        Sample information file
@@ -84,7 +84,7 @@ NA12878 | /bam/NA12878.bam | /vcf/NA12878_SNVs.vcf.gz | F
 HG00096 | /bam/HG00096.bam | /vcf/HG00096_SNVs.vcf.gz | M
 
 
-2. SVs to Genotype [:notebook: Documentation](https://github.com/dantaki/SV2/wiki/input#sv-input)
+2. **SVs to Genotype** [:notebook: Documentation](https://github.com/dantaki/SV2/wiki/input#sv-input)
 
 SV<sup>2</sup> can accept multiple BED and VCF files.
 
