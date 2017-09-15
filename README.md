@@ -65,7 +65,7 @@ $ sv2 -i samples.txt -b sv.bed -v sv.vcf -o my_genotypes
 
 SV<sup>2</sup> *requires* a sample information file and either a BED or VCF file of SVs to genotype.
 
-1. [Sample Information](https://github.com/dantaki/SV2/wiki/input#sample-information)
+1. Sample Information [:notebook: Documentation](https://github.com/dantaki/SV2/wiki/input#sample-information)
  
 ```
 -i | -in    PATH        Sample information file
@@ -77,9 +77,8 @@ ID | BAM PATH |  VCF PATH | Gender [M/F]
 NA12878 | /bam/NA12878.bam | /vcf/NA12878_SNVs.vcf.gz | F 
 HG00096 | /bam/HG00096.bam | /vcf/HG00096_SNVs.vcf.gz | M
 
-[:notebook: Sample Information Documentation](https://github.com/dantaki/SV2/wiki/input#sample-information).
 
-2. [SVs to Genotype](https://github.com/dantaki/SV2/wiki/input#sv-input)
+2. SVs to Genotype [:notebook: Documentation](https://github.com/dantaki/SV2/wiki/input#sv-input)
 
 SV<sup>2</sup> can accept multiple BED and VCF files.
 
@@ -136,8 +135,6 @@ Please refer to the [preprint](#preprint) for performance details.
 
 ---
 
-[:notebook: Usage Documentation](https://github.com/dantaki/SV2/wiki/usage)
-
 ## Requirements
 * [python 2.7](https://www.python.org/)
   * [cython](https://github.com/cython/cython)
@@ -149,6 +146,8 @@ Please refer to the [preprint](#preprint) for performance details.
 
 * [bedtools 2.25.0](https://github.com/arq5x/bedtools2/releases) or later
 
+[:notebook: Usage Documentation](https://github.com/dantaki/SV2/wiki/usage)
+
 ---
 
 ## Citing SV<sup>2</sup>
@@ -158,6 +157,7 @@ For citing SV<sup>2</sup> please refer to the preprint: [bioRxiv](http://biorxiv
 ---
 
 ## License 
+
 MIT License
 
 Copyright (c) 2017 Danny Antaki
