@@ -135,12 +135,12 @@ cdef filter_sv(sv,Bam,gen,tmp_dir):
 	for r in sv:
 		sv_dict[tag]=r
 		(c,s,e,cl) = r
-		if c not in accepted_chrom(Bam.chr_flag,gen):
-			sys.stderr.write('WARNING: Skipping {}. SV2 does not genotype SVs on contig {}\n'.format(r,c))
-			continue
 		chrom=format_chrom(c)
 		c = match_chrom_prefix(c,Bam.chr_flag) # chromosome matches ones in the BAM file
 		if skip_sv(c,s,e,cl,Bam.refs[c])==True: continue
+		if c not in accepted_chrom(Bam.chr_flag,gen):
+			sys.stderr.write('WARNING: Skipping {}. SV2 does not genotype SVs on contig {}\n'.format(r,c))
+			continue
 		annot_sv.append((chrom,s,e,cl,tag))
 		start_flank.append((chrom,s,int(s)+1,cl,tag))
 		end_flank.append((chrom,e,int(e)+1,cl,tag))

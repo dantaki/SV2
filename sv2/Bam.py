@@ -62,7 +62,8 @@ def bam_init(args=None,Ped=None,Snv=None,gen=None):
 		for snv in Snv:
 			if snv.id.get(bam.id)!=None:
 				bam.Snv,bam.snv_index=snv,snv.id[bam.id]
-		if bam.id!=None and bam.Snv==None: sys.stderr.write('WARNING: BAM file {} sample name (@RG:SM):{} not found in SNV VCFs. Skipping {} ...\n'.format(f,bam.id,f))
+		if bam.id!=None and bam.Snv==None: sys.stderr.write('WARNING: BAM file {} sample name (@RG  SM:<sample_id>):{} not found in SNV VCFs. Skipping {} ...\n'.format(f,bam.id,f))
+		if bam.id==None: sys.stderr.write('WARNING: Skipping BAM file {}. No sample name (@RG SM:<sample_id>). See https://github.com/dantaki/SV2/wiki/input#bam for details')
 		if bam.id!=None and bam.Snv!=None: bams.append(bam)
 	if len(bams)<1:
 		print 'FATAL ERROR: BAM file(s) were not formatted correctly. See https://github.com/dantaki/SV2/wiki/input#bam for details'
