@@ -1,3 +1,4 @@
+#!/usr/bin/env python2
 '''
 Copyright <2017> <Danny Antaki>
 
@@ -7,121 +8,172 @@ The above copyright notice and this permission notice shall be included in all c
 
 THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 '''
-__version__='1.3.2'
-import sys,os,argparse
-from core import writeConfig,checkConfig,check_in,Bed,check_sv,errFH,reportTime,preprocess,extract_feats,outputTrain
+__version__='1.4.0'
+from Backend import make_dir,report_time,slash_check
+from Bam import bam_init
+from Config import Config
+from FeatureExtraction import extract_feats
+from Output import sv2_train_output
+from Ped import ped_init
+from Preprocess import preprocess
+from Snv import snv_init
+from SV import sv_init
 from argparse import RawTextHelpFormatter
-from multiprocessing import Pool
 from glob import glob
 from time import time
+import shutil,sys,os,argparse
+splash='                       ____\n  _____________   ___ |___ \\\n /   _____/\   \ /   // ___/\n \_____  \  \   Y   //_____)\n /        \  \     /\n/_________/   \___/\n'
+__useage___="""
+Support Vector Structural Variation Genotyper Train: generate a training set
+Version {}    Author: Danny Antaki <dantaki@ucsd.edu>    github.com/dantaki/SV2
+
+  sv2 -i <bam ...> -v <vcf ...> -b <bed ...> -snv <snv vcf ...> -p <ped ...> [OPTIONS]
+
+input arguments: github.com/dantaki/SV2/wiki/Options#input-arguments
+
+  Note: input arguments can take multiple files, separated by space <-i BAM1 BAM2 ...>
+
+  -i, -bam    ...     bam file(s)
+  -v, -vcf    ...     vcf files(s) of SVs
+  -b, -bed    ...     bed files(s) of SVs
+  -snv        ...     snv vcf files(s), must be bgzipped and tabixed
+  -p, -ped    ...     ped files(s)
+
+genotype arguments: github.com/dantaki/SV2/wiki/Options#genotype-arguments
+
+  -g, -genome         reference genome build <hg19, hg38, mm10> [default: hg19]
+  -pcrfree            GC content normalization for pcr free sequences
+  -M                  bwa mem -M compatibility, split-reads flagged as secondary instead of supplementary
+
+  -pre                preprocessing output directory, skips preprocessing
+  -feats              feature extraction output directory, skips feature extraction
+
+optional arguments:
+ 
+  -L, -log            log file for standard error messages [default: sv2.err]
+  -T, -tmp-dir        directory for temporary files [default: working directory]
+  -s, -seed           random seed for preprocessing shuffling [default: 42]
+  -o, -out            output prefix [default: sv2_training_features]
+
+  -h, -help          show this message and exit
+""".format(__version__)
+
 def main():
 	init_time = int(time())
-	splash='                       ____\n  _____________   ___ |___ \\\n /   _____/\   \ /   // ___/\n \_____  \  \   Y   //_____)\n /        \  \     /\n/_________/   \___/\nSupport Vector Structural Variation Genotyper Train: Generate a training set\nVersion {}    Author: Danny Antaki <dantaki@ucsd.edu>    github.com/dantaki/SV2\n\n'.format(__version__)
-	parser = argparse.ArgumentParser(description=splash,formatter_class=RawTextHelpFormatter)
-	inArgs,genoArgs = parser.add_argument_group('input arguments'),parser.add_argument_group('genotype arguments')
-	inArgs.add_argument('-i','-in', help='Tab delimited input [ ID, BAM-PATH, VCF-PATH, M/F ]',default=None,type=str)
-	inArgs.add_argument('-b','-bed',help='BED file(s) of SVs',type=str,default=None,nargs='*')
-	inArgs.add_argument('-v','-vcf',help='VCF file(s) of SVs',type=str,default=None,nargs='*')
-	genoArgs.add_argument('-c','-cpu', help='Parallelize sample-wise. 1 per cpu',required=False,default=1,type=int)
-	genoArgs.add_argument('-g','-genome',  help='Reference genome build [ hg19, hg38 ]',required=False,default='hg19',type=str)
-	genoArgs.add_argument('-pcrfree',  help='GC content normalization for PCR free libraries',required=False,default=False,action="store_true")
-	genoArgs.add_argument('-M', help='bwa mem -M compatibility. Split-reads flagged as secondary instead of supplementary',default=False,required=False,action="store_true")
-	genoArgs.add_argument('-s','-seed', help='Preprocessing: integer seed for genome shuffling',required=False,default=42,type=int)
-	genoArgs.add_argument('-pre', help='Preprocessing output directory',required=False,default=None)
-	genoArgs.add_argument('-feats', help='Feature extraction output directory',required=False,default=None)
-	genoArgs.add_argument('-o','-out', help='Output prefix',required=False,default="sv2",type=str)
+ 	parser = argparse.ArgumentParser(formatter_class=RawTextHelpFormatter,usage=splash.replace("       ","",1)+__useage___,add_help=False)
+	inArgs,genoArgs,optArgs = parser.add_argument_group('input arguments'),parser.add_argument_group('genotype arguments'),parser.add_argument_group('optional arguments')
+	inArgs.add_argument('-i','-bam',type=str,default=None,nargs='*')
+	inArgs.add_argument('-b','-bed',type=str,default=None,nargs='*')
+	inArgs.add_argument('-v','-vcf',type=str,default=None,nargs='*')
+	inArgs.add_argument('-snv',type=str,default=None,nargs='*')
+	inArgs.add_argument('-p','-ped',type=str,default=None,nargs='*')
+	genoArgs.add_argument('-g','-genome',required=False,default='hg19',type=str)
+	genoArgs.add_argument('-pcrfree',required=False,default=False,action="store_true")
+	genoArgs.add_argument('-M',default=False,required=False,action="store_true")
+	genoArgs.add_argument('-pre',required=False,default=None)
+	genoArgs.add_argument('-feats',required=False,default=None)
+	optArgs.add_argument('-L','-log',default=os.getcwd()+'/sv2.err',required=False)
+	optArgs.add_argument('-T','-tmp-dir',default=os.getcwd()+'/sv2_tmp',required=False)
+	optArgs.add_argument('-s','-seed',required=False,default=42,type=int)
+	optArgs.add_argument('-o','-out',required=False,default="sv2_training_features",type=str)
+	optArgs.add_argument('-h','-help',required=False,action="store_true",default=False)
 	args = parser.parse_args()
-	infh,bed,vcf = args.i,args.b,args.v
-	cores,gen, pcrfree,legacyM,seed,ofh = args.c,args.g,args.pcrfree,args.M,args.s,args.o
-	predir,featsdir = args.pre,args.feats
-	preprocess_files={}
-	feats_files={}
-	gens = ['hg19','hg38']
-	if infh==None: 
-		sys.stderr.write('ERROR sample information file <-i | -in> not defined.\n')
+	bams,bed,vcf,snv,ped = args.i,args.b,args.v,args.snv,args.p
+	gen,pcrfree,legacy_m,predir,featsdir= args.g,args.pcrfree,args.M,args.pre,args.feats
+	logfh, tmp_dir, seed, ofh = args.L,args.T,args.s,args.o
+	_help = args.h
+	if (_help==True or len(sys.argv)==1):
+		print splash+__useage___
+		sys.exit(0)
+	sys.stderr=open(logfh,'w')
+	preprocess_files,feats_files={},{}
+	gens = ['hg19','hg38','mm10']
+	Confs=Config()
+	if bams==None and predir==None and featsdir==None:
+		print 'FATAL ERROR: No BAM file specified <-i, -bam  FILE ...>'
+		sys.stderr.write('FATAL ERROR: No BAM file specified <-i, -bam  FILE ...>\n')
 		sys.exit(1)
-	if gen not in gens: 
-		sys.stderr.write('ERROR -g must be either hg19 or hg38. NOT {}\n'.format(gen))
+	if snv==None and predir==None and featsdir==None:
+		print 'FATAL ERROR: No SNV VCF file specified <-snv  FILE ...>'
+		sys.stderr.write('FATAL ERROR: No SNV VCF file specified <-snv  FILE ...>\n')
 		sys.exit(1)
-	checkConfig()
-	raw,sv= [],[]
-	if bed!=None:
-		for x in bed: raw,sv = check_sv(Bed(x,False),gen,raw,sv)
-	if vcf!=None:
-		for x in vcf: raw,sv = check_sv(Bed(x,True),gen,raw,sv)
-	bam_dict,vcf_dict,gender_dict=check_in(infh)
+	if ped==None:
+		print 'FATAL ERROR: No PED file specified <-p, -ped  FILE ...>'
+		sys.stderr.write('FATAL ERROR: No PED file specified <-p, -ped  FILE ...>\n')
+		sys.exit(1)
+	if bed==None and vcf==None:
+		print 'FATAL ERROR: No SVs provided <-b, -bed  BED ...> <-v,-vcf  VCF ...>'
+		sys.stderr.write('FATAL ERROR: No SVs provided <-b, -bed  BED ...> <-v,-vcf  VCF ...>\n')
+		sys.exit(1)
+	if gen not in gens:
+		print 'FATAL ERROR -g must be hg19 or hg38. NOT {}'.format(gen)
+		sys.stderr.write('FATAL ERROR -g must be hg19 or hg38. NOT {}\n'.format(gen))
+		sys.exit(1)
+	Peds=ped_init(ped)
+	if bams!=None: Bams=bam_init(bams,Peds,snv_init(snv),gen)
+	SV = sv_init(bed,vcf,gen)
+	ofh = ofh.replace('.vcf','').replace('.out','').replace('.txt','')
+	make_dir(tmp_dir)
+	tmp_dir=slash_check(tmp_dir)
 	"""
 	PREPROCESSING
 	"""
 	if predir == None:
-		if cores > 1 :
-			pool = Pool(processes=cores)
-	       		for bam_id in bam_dict:
-				preofh = bam_id+'_sv2_preprocessing.txt'
-	      			preprocess_files[bam_id]=os.getcwd()+'/sv2_preprocessing/'+preofh
-				pool.apply_async(preprocess, args=(bam_id,bam_dict[bam_id],vcf_dict[bam_id],preofh,gen,seed) )
-			pool.close()
-			pool.join()
-		else:
-			for bam_id in bam_dict:
-				preofh = bam_id+'_sv2_preprocessing.txt'
-				preprocess_files[bam_id]=os.getcwd()+'/sv2_preprocessing/'+preofh
-				preprocess(bam_id,bam_dict[bam_id],vcf_dict[bam_id],preofh,gen,seed)	
-	else: 
-		if not predir.endswith('/'): predir = predir+'/'
-		if not os.path.isdir(predir): errFH(predir)
+		outdir = os.getcwd()+'/sv2_preprocessing/'
+		make_dir(outdir)
+		for bam in Bams:
+			preofh = outdir+bam.id+'_sv2_preprocessing.txt'
+			preprocess_files[bam.id]=preofh
+			preprocess(bam,preofh,seed,gen,tmp_dir)
+	else:
+		predir=slash_check(predir)
 		for fh in glob(predir+'*sv2_preprocessing.txt'):
 			f = open(fh)
 			if sum(1 for l in open(fh)) <= 1: continue
 			else:
 				preids=[]
-				head=f.next().rstrip('\n')
-				for l in f: preids.append(l.rstrip('\n').split('\t').pop(0))
+				for l in f:
+					if l.startswith('#'):continue
+					preids.append(l.rstrip('\n').split('\t').pop(0))
 			f.close()
-			for iid in set(preids): 
-				if gender_dict.get(iid) != None: preprocess_files[iid]=fh
-	reportTime(init_time,'PREPROCESSING COMPLETE')
+			for iid in set(preids):
+				if iid in Peds.ids : preprocess_files[iid]=fh
+	report_time(init_time,'PREPROCESSING COMPLETE')
 	""""
 	FEATURE EXTRACTION
 	"""
 	if featsdir == None:
-		if cores > 1 :
-			pool = Pool(processes=cores)
-      			for bam_id in bam_dict:
-				if preprocess_files.get(bam_id) == None:
-					print 'WARNING: preprocessing iid {} does not match inlist iid'.format(bam_id)
-					continue
-				prefh = preprocess_files[bam_id]
-				gtofh = bam_id+'_sv2_features.txt'
-				feats_files[bam_id]=os.getcwd()+'/sv2_features/'+gtofh
-				pool.apply_async(extract_feats, args=(bam_id,bam_dict[bam_id],vcf_dict[bam_id],sv,prefh,gender_dict[bam_id],gtofh,gen,pcrfree,legacyM) )
-			pool.close()
-			pool.join()
-		else:
-			for bam_id in bam_dict:
-				if preprocess_files.get(bam_id) == None:
-					print 'WARNING: preprocessing iid {} does not match inlist iid'.format(bam_id)
-					continue
-				prefh = preprocess_files[bam_id]
-				gtofh = bam_id+'_sv2_features.txt'
-				feats_files[bam_id]=os.getcwd()+'/sv2_features/'+gtofh
-				extract_feats(bam_id,bam_dict[bam_id],vcf_dict[bam_id],sv,prefh,gender_dict[bam_id],gtofh,gen,pcrfree,legacyM)
-	else: 
-		if not featsdir.endswith('/'): featsdir=featsdir+'/'
-		if not os.path.isdir(featsdir): errFH(featsdir)
+		outdir = os.getcwd()+'/sv2_features/'
+		make_dir(outdir)
+		for bam in Bams:
+			if preprocess_files.get(bam.id) == None:
+				sys.stderr.write('WARNING: BAM sample id {} not found in preprocessing files. Skipping ...\n'.format(bam.id))
+				continue
+			prefh = preprocess_files[bam.id]
+			featfh = outdir+bam.id+'_sv2_features.txt'
+			feats_files[bam.id]=featfh
+			extract_feats(bam,SV.raw,prefh,featfh,gen,pcrfree,legacy_m,Confs,tmp_dir)
+	else:
+		featsdir=slash_check(featsdir)
 		for fh in glob(featsdir+'*sv2_features.txt'):
 			f = open(fh)
 			if sum(1 for l in open(fh)) <= 1: continue
 			else:
 				featsid=[]
-				head=f.next().rstrip('\n')
-				for l in f: featsid.append(l.rstrip('\n').split('\t').pop(5))
+				for l in f:
+					if l.startswith('#'):continue
+					featsid.append(l.rstrip('\n').split('\t').pop(5))
 			f.close()
-			for iid in set(featsid): 
-				if gender_dict.get(iid) != None: feats_files[iid]=fh
+			for iid in set(featsid):
+				if iid in Peds.ids : feats_files[iid]=fh
 	feats=[]
+	train_dir = os.getcwd()+'/sv2_training_features/'
+	make_dir(train_dir)
 	for iid in feats_files:
 		with open(feats_files[iid]) as f:
 			for l in f: feats.append(tuple(l.rstrip('\n').split('\t')))
-	outputTrain(feats,gender_dict,gen,ofh)
-	reportTime(init_time,'FEATURE EXTRACTION COMPLETE')
+	sv2_train_output(feats,Peds,gen,train_dir+ofh)
+	shutil.rmtree(tmp_dir)
+	sys.stderr.close()
+	report_time(init_time,'FEATURE EXTRACTION COMPLETE')
+	print '\nerror messages located in: {}'.format(logfh)

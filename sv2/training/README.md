@@ -45,12 +45,12 @@ Given SV input, SV<sup>2</sup> will generate features for training a new classif
 $ sv2train -i <in.txt> [-b ...] [-v ...] -o <sv2>
 
 $ ls sv2_training_features/
-
-   sv2_deletion_gt1kb_training_features.txt
-   sv2_deletion_lt1kb_training_features.txt
-   sv2_deletion_male_sex_chrom_features.txt
-   sv2_duplication_breakpoint_training_features.txt
-   ...
+    
+    sv2_training_features_deletion_gt1kb.txt
+    sv2_training_features_deletion_lt1kb.txt
+    sv2_training_features_deletion_male_sex_chrom.txt
+    sv2_training_features_duplication_breakpoint.txt
+    ...
 ```
 
 The header is formatted for the companion [jupyter notebook](https://github.com/dantaki/SV2/blob/master/sv2/training/sv2_training.ipynb), please do not alter it.
@@ -122,10 +122,11 @@ This command appends new classifiers to the SV<sup>2</sup> classifier JSON file 
 
 After loading the classifiers with the `-load-clf` command, users can specify which model to genotype with the `-clf <classifier-name>` option. 
 
+genotype with default classifiers
 ```
-# genotype with default classifiers
-$ sv2 -i in.txt [-b ...] [-v ...] -clf default
-
-# genotype with a classifier named "myclf"
-$ sv2 -i in.txt [-b ...] [-v ...] -clf myclf
+$ sv2 ... -clf default
+```
+genotype with a classifier named `myclf`
+```
+$ sv2 ...  -clf myclf
 ```

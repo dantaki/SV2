@@ -1,143 +1,224 @@
-__version__='1.3.2'
-import sys,os,argparse
-from .core import loadClf,writeConfig,checkConfig,check_in,Bed,check_sv,errFH,reportTime,preprocess,extract_feats,genotype,mergeSV,annotate
+#!/usr/bin/env python2
+'''
+Copyright <2017> <Danny Antaki>
+
+Permission is hereby granted, free of charge, to any person obtaining a copy of this software and associated documentation files (the "Software"), to deal in the Software without restriction, including without limitation the rights to use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies of the Software, and to permit persons to whom the Software is furnished to do so, subject to the following conditions:
+
+The above copyright notice and this permission notice shall be included in all copies or substantial portions of the Software.
+
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
+'''
+__version__='1.4.0'
+from Backend import check_ids,make_dir,report_time,slash_check
+from Bam import bam_init
+from Config import Config
+from FeatureExtraction import extract_feats
+from Genotype import genotype
+from Merge import merge_sv
+from Output import output
+from Ped import ped_init
+from Preprocess import preprocess
+from Snv import snv_init
+from SV import sv_init
 from argparse import RawTextHelpFormatter
-from multiprocessing import Pool
 from glob import glob
 from time import time
+import shutil,sys,os,argparse
+splash='                       ____\n  _____________   ___ |___ \\\n /   _____/\   \ /   // ___/\n \_____  \  \   Y   //_____)\n /        \  \     /\n/_________/   \___/\n'
+__useage___="""
+Support Vector Structural Variation Genotyper
+Version {}    Author: Danny Antaki <dantaki@ucsd.edu>    github.com/dantaki/SV2
+
+  sv2 -i <bam ...> -v <vcf ...> -b <bed ...> -snv <snv vcf ...> -p <ped ...> [OPTIONS]
+
+input arguments: github.com/dantaki/SV2/wiki/Options#input-arguments
+
+  Note: input arguments can take multiple files, separated by space <-i BAM1 BAM2 ...>
+
+  -i, -bam    ...     bam file(s)
+  -v, -vcf    ...     vcf files(s) of SVs
+  -b, -bed    ...     bed files(s) of SVs
+  -snv        ...     snv vcf files(s), must be bgzipped and tabixed
+  -p, -ped    ...     ped files(s)
+
+genotype arguments: github.com/dantaki/SV2/wiki/Options#genotype-arguments
+
+  -g, -genome         reference genome build <hg19, hg38, mm10> [default: hg19]
+  -pcrfree            GC content normalization for pcr free sequences
+  -M                  bwa mem -M compatibility, split-reads flagged as secondary instead of supplementary
+  -merge              merge overlapping SV breakpoints after genotyping
+  -min-ovr            minimum reciprocal overlap for merging [default: 0.8]
+
+  -pre                preprocessing output directory, skips preprocessing
+  -feats              feature extraction output directory, skips feature extraction
+
+classifier arguments: github.com/dantaki/SV2/wiki/Options#classifier-arguments
+
+  -load-clf           add custom classifiers (-load-clf <clf.json>)
+  -clf                define classifier for genotyping [default:default]
+
+config arguments: github.com/dantaki/SV2/wiki/Options#config-arguments
+
+  -hg19               hg19 fasta file
+  -hg38               hg38 fasta file
+  -mm10               mm10 fasta file
+
+optional arguments:
+ 
+  -L, -log            log file for standard error messages [default: sv2.err]
+  -T, -tmp-dir        directory for temporary files [default: working directory]
+  -s, -seed           random seed for preprocessing shuffling [default: 42]
+  -o, -out            output prefix [default: sv2_genotypes]
+
+  -h, -help          show this message and exit
+""".format(__version__)
 def main():
 	init_time = int(time())
-	splash='                       ____\n  _____________   ___ |___ \\\n /   _____/\   \ /   // ___/\n \_____  \  \   Y   //_____)\n /        \  \     /\n/_________/   \___/\nSupport Vector Structural Variation Genotyper\nVersion 1.3.2    Author: Danny Antaki <dantaki@ucsd.edu>    github.com/dantaki/SV2\n\n'
-	parser = argparse.ArgumentParser(description=splash,formatter_class=RawTextHelpFormatter)
-	inArgs, genoArgs,clfArgs,configArgs= parser.add_argument_group('input arguments'),parser.add_argument_group('genotype arguments'), parser.add_argument_group('classifier arguments'),parser.add_argument_group('config arguments')
-	inArgs.add_argument('-i','-in', help='Tab or space delimited input [ID, BAM-PATH, VCF-PATH, M/F]',default=None,type=str)
-	inArgs.add_argument('-b','-bed',help='BED file(s)',type=str,default=None,nargs='*')
-	inArgs.add_argument('-v','-vcf',help='VCF file(s)',type=str,default=None,nargs='*')
-	genoArgs.add_argument('-c','-cpu', help='Parallelize sample-wise. 1 per cpu',required=False,default=1,type=int)
-	genoArgs.add_argument('-g','-genome',  help='Reference genome build [hg19, hg38]',required=False,default='hg19',type=str)
-	genoArgs.add_argument('-pcrfree',  help='GC content normalization for PCR free chemistries',required=False,default=False,action="store_true")
-	genoArgs.add_argument('-M', help='bwa mem -M compatibility. Split-reads flagged as secondary instead of supplementary',default=False,required=False,action="store_true")
-	genoArgs.add_argument('-s','-seed', help='Preprocessing integer seed for genome shuffling',required=False,default=42,type=int)
-	genoArgs.add_argument('-o','-out', help='Output',required=False,default="sv2_genotypes.vcf",type=str)
-	genoArgs.add_argument('-merge',help='Merge SV after genotyping',required=False,default=False,action="store_true")
-	genoArgs.add_argument('-min-ovr',help='Minimum reciprocal overlap for merging SVs [0.8]',required=False,default=None,type=float)
-	genoArgs.add_argument('-pre', help='Preprocessing output directory',required=False,default=None)
-	genoArgs.add_argument('-feats', help='Feature extraction output directory',required=False,default=None)
-	clfArgs.add_argument('-load-clf',help='Add custom classifiers. -load-clf <clf.JSON>', required=False, default=None,type=str)
-	clfArgs.add_argument('-clf',help='Specify classifiers for genotyping [default]',required=False,default='default',type=str)
-	configArgs.add_argument('-hg19',default=None,help='hg19 FASTA',required=False)
-	configArgs.add_argument('-hg38',default=None,help='hg38 FASTA',required=False)	
+ 	parser = argparse.ArgumentParser(formatter_class=RawTextHelpFormatter,usage=splash.replace("       ","",1)+__useage___,add_help=False)
+	inArgs, genoArgs,clfArgs,configArgs,optArgs= parser.add_argument_group('input arguments'),parser.add_argument_group('genotype arguments'), parser.add_argument_group('classifier arguments'),parser.add_argument_group('config arguments'),parser.add_argument_group('optional arguments')
+	inArgs.add_argument('-i','-bam',type=str,default=None,nargs='*')
+	inArgs.add_argument('-b','-bed',type=str,default=None,nargs='*')
+	inArgs.add_argument('-v','-vcf',type=str,default=None,nargs='*')
+	inArgs.add_argument('-snv',type=str,default=None,nargs='*')
+	inArgs.add_argument('-p','-ped',type=str,default=None,nargs='*')
+	genoArgs.add_argument('-g','-genome',required=False,default='hg19',type=str)
+	genoArgs.add_argument('-pcrfree',required=False,default=False,action="store_true")
+	genoArgs.add_argument('-M',default=False,required=False,action="store_true")
+	genoArgs.add_argument('-merge',required=False,default=False,action="store_true")
+	genoArgs.add_argument('-min-ovr',required=False,default=None,type=float)
+	genoArgs.add_argument('-pre',required=False,default=None)
+	genoArgs.add_argument('-feats',required=False,default=None)
+	clfArgs.add_argument('-load-clf',required=False, default=None,type=str)
+	clfArgs.add_argument('-clf',required=False,default='default',type=str)
+	configArgs.add_argument('-hg19',default=None,required=False)
+	configArgs.add_argument('-hg38',default=None,required=False)	
+	configArgs.add_argument('-mm10',default=None,required=False)
+	optArgs.add_argument('-L','-log',default=os.getcwd()+'/sv2.err',required=False)
+	optArgs.add_argument('-T','-tmp-dir',default=os.getcwd()+'/sv2_tmp',required=False)
+	optArgs.add_argument('-s','-seed',required=False,default=42,type=int)
+	optArgs.add_argument('-o','-out',required=False,default="sv2_genotypes.vcf",type=str)
+	optArgs.add_argument('-h','-help',required=False,action="store_true",default=False)
 	args = parser.parse_args()
-	infh,bed,vcf = args.i,args.b,args.v
-	cores,gen, pcrfree,legacyM,ofh,seed = args.c,args.g,args.pcrfree,args.M,args.o,args.s
-	mergeFlag,minOvr = args.merge,args.min_ovr
+	bams,bed,vcf,snv,ped = args.i,args.b,args.v,args.snv,args.p
+	gen,pcrfree,legacy_m,merge_flag,min_ovr= args.g,args.pcrfree,args.M,args.merge,args.min_ovr
 	predir,featsdir = args.pre,args.feats
-	clfLoad, CLF = args.load_clf,args.clf
-	conf_hg19,conf_hg38=args.hg19,args.hg38
+	clfLoad, classifier_name = args.load_clf,args.clf
+	conf_hg19,conf_hg38, conf_mm10=args.hg19,args.hg38,args.mm10
+	logfh, tmp_dir, seed, ofh = args.L,args.T,args.s,args.o
+	_help = args.h
+	if (_help==True or len(sys.argv)==1):
+		print splash+__useage___
+		sys.exit(0)
+	sys.stderr=open(logfh,'w')
 	preprocess_files={}
 	feats_files={}
-	gens = ['hg19','hg38']
-	if clfLoad!=None: 
-		loadClf(clfLoad)
+	gens = ['hg19','hg38','mm10']
+	Confs=Config()
+	if clfLoad!=None:
+		Confs.load_clf(clfLoad)
 		sys.exit(0)
-	if conf_hg19 != None or conf_hg38 != None: 
-		writeConfig(conf_hg19,conf_hg38)
+	if conf_hg19 != None or conf_hg38 != None or conf_mm10 != None:
+		Confs.write_config(conf_hg19,conf_hg38,conf_mm10)
 		sys.exit(0)
-	if infh==None: 
-		sys.stderr.write('ERROR sample information file <-i | -in> not defined.\n')
+	if bams==None and predir==None and featsdir==None:
+		print 'FATAL ERROR: No BAM file specified <-i, -bam  FILE ...>'
+		sys.stderr.write('FATAL ERROR: No BAM file specified <-i, -bam  FILE ...>\n')
 		sys.exit(1)
-	if gen not in gens: 
-		sys.stderr.write('ERROR -g must be hg19 or hg38. NOT {}\n'.format(gen))
+	if snv==None and predir==None and featsdir==None:
+		print 'FATAL ERROR: No SNV VCF file specified <-snv  FILE ...>'
+		sys.stderr.write('FATAL ERROR: No SNV VCF file specified <-snv  FILE ...>\n')
 		sys.exit(1)
-	checkConfig()
-	bam_dict,vcf_dict,gender_dict=check_in(infh)
-	raw,sv= [],[]
-	if bed!=None:
-		for x in bed: raw,sv = check_sv(Bed(x,False),gen,raw,sv)
-	if vcf!=None:
-		for x in vcf: raw,sv = check_sv(Bed(x,True),gen,raw,sv)
+	if ped==None:
+		print 'FATAL ERROR: No PED file specified <-p, -ped  FILE ...>'
+		sys.stderr.write('FATAL ERROR: No PED file specified <-p, -ped  FILE ...>\n')
+		sys.exit(1)
+	if bed==None and vcf==None:
+		print 'FATAL ERROR: No SVs provided <-b, -bed  BED ...> <-v,-vcf  VCF ...>'
+		sys.stderr.write('FATAL ERROR: No SVs provided <-b, -bed  BED ...> <-v,-vcf  VCF ...>\n')
+		sys.exit(1)
+	if gen not in gens:
+		print 'FATAL ERROR -g must be hg19 or hg38. NOT {}'.format(gen)
+		sys.stderr.write('FATAL ERROR -g must be hg19 or hg38. NOT {}\n'.format(gen))
+		sys.exit(1)
+	Confs.check_config()
+	Peds=ped_init(ped)
+	if bams!=None: Bams=bam_init(bams,Peds,snv_init(snv),gen)
+	SV = sv_init(bed,vcf,gen)
 	ofh = ofh.replace('.txt','.vcf').replace('.out','.vcf')
 	if not ofh.endswith('.vcf'): ofh=ofh+'.vcf'
+	make_dir(tmp_dir)
+	tmp_dir=slash_check(tmp_dir)
 	"""
 	PREPROCESSING
 	"""
 	if predir == None:
-		if cores > 1 :
-			pool = Pool(processes=cores)
-	       		for bam_id in bam_dict:
-				preofh = bam_id+'_sv2_preprocessing.txt'
-	      			preprocess_files[bam_id]=os.getcwd()+'/sv2_preprocessing/'+preofh
-				pool.apply_async(preprocess, args=(bam_id,bam_dict[bam_id],vcf_dict[bam_id],preofh,gen,seed) )
-			pool.close()
-			pool.join()
-		else:
-			for bam_id in bam_dict:
-				preofh = bam_id+'_sv2_preprocessing.txt'
-				preprocess_files[bam_id]=os.getcwd()+'/sv2_preprocessing/'+preofh
-				preprocess(bam_id,bam_dict[bam_id],vcf_dict[bam_id],preofh,gen,seed)	
-	else: 
-		if not predir.endswith('/'): predir = predir+'/'
-		if not os.path.isdir(predir): errFH(predir)
+		outdir = os.getcwd()+'/sv2_preprocessing/'
+		make_dir(outdir)
+		for bam in Bams:
+			preofh = outdir+bam.id+'_sv2_preprocessing.txt'
+			preprocess_files[bam.id]=preofh
+			preprocess(bam,preofh,seed,gen,tmp_dir)
+	else:
+		predir=slash_check(predir)
 		for fh in glob(predir+'*sv2_preprocessing.txt'):
 			f = open(fh)
 			if sum(1 for l in open(fh)) <= 1: continue
 			else:
 				preids=[]
-				head=f.next().rstrip('\n')
-				for l in f: preids.append(l.rstrip('\n').split('\t').pop(0))
+				for l in f:
+					if l.startswith('#'):continue
+					preids.append(l.rstrip('\n').split('\t').pop(0))
 			f.close()
-			for iid in set(preids): 
-				if gender_dict.get(iid) != None: preprocess_files[iid]=fh
-	reportTime(init_time,'PREPROCESSING COMPLETE')
+			for iid in set(preids):
+				if iid in Peds.ids : preprocess_files[iid]=fh
+	report_time(init_time,'PREPROCESSING COMPLETE')
 	""""
 	FEATURE EXTRACTION
 	"""
 	if featsdir == None:
-		if cores > 1 :
-			pool = Pool(processes=cores)
-      			for bam_id in bam_dict:
-				if preprocess_files.get(bam_id) == None:
-					print 'WARNING: preprocessing iid {} does not match sample information iid'.format(bam_id)
-					continue
-				prefh = preprocess_files[bam_id]
-				gtofh = bam_id+'_sv2_features.txt'
-				feats_files[bam_id]=os.getcwd()+'/sv2_features/'+gtofh
-				pool.apply_async(extract_feats, args=(bam_id,bam_dict[bam_id],vcf_dict[bam_id],sv,prefh,gender_dict[bam_id],gtofh,gen,pcrfree,legacyM) )
-			pool.close()
-			pool.join()
-		else:
-			for bam_id in bam_dict:
-				if preprocess_files.get(bam_id) == None:
-					print 'WARNING: preprocessing iid {} does not match sample information iid'.format(bam_id)
-					continue
-				prefh = preprocess_files[bam_id]
-				gtofh = bam_id+'_sv2_features.txt'
-				feats_files[bam_id]=os.getcwd()+'/sv2_features/'+gtofh
-				extract_feats(bam_id,bam_dict[bam_id],vcf_dict[bam_id],sv,prefh,gender_dict[bam_id],gtofh,gen,pcrfree,legacyM)
-	else: 
-		if not featsdir.endswith('/'): featsdir=featsdir+'/'
-		if not os.path.isdir(featsdir): errFH(featsdir)
+		outdir = os.getcwd()+'/sv2_features/'
+		make_dir(outdir)
+		for bam in Bams:
+			if preprocess_files.get(bam.id) == None:
+				sys.stderr.write('WARNING: BAM sample id {} not found in preprocessing files. Skipping ...\n'.format(bam.id))
+				continue
+			prefh = preprocess_files[bam.id]
+			featfh = outdir+bam.id+'_sv2_features.txt'
+			feats_files[bam.id]=featfh
+			extract_feats(bam,SV.raw,prefh,featfh,gen,pcrfree,legacy_m,Confs,tmp_dir)
+	else:
+		featsdir=slash_check(featsdir)
 		for fh in glob(featsdir+'*sv2_features.txt'):
 			f = open(fh)
 			if sum(1 for l in open(fh)) <= 1: continue
 			else:
 				featsid=[]
-				head=f.next().rstrip('\n')
-				for l in f: featsid.append(l.rstrip('\n').split('\t').pop(5))
+				for l in f:
+					if l.startswith('#'):continue
+					featsid.append(l.rstrip('\n').split('\t').pop(5))
 			f.close()
-			for iid in set(featsid): 
-				if gender_dict.get(iid) != None: feats_files[iid]=fh
-	reportTime(init_time,'FEATURE EXTRACTION COMPLETE')	
+			for iid in set(featsid):
+				if iid in Peds.ids : feats_files[iid]=fh
+	report_time(init_time,'FEATURE EXTRACTION COMPLETE')	
 	"""
 	GENOTYPING
 	"""
-	if mergeFlag==True and minOvr==None: minOvr=0.8
-	if minOvr!=None: mergeFlag=True
-	feats=[]
+	outdir = os.getcwd()+'/sv2_genotypes/'
+	make_dir(outdir)
+	if merge_flag==True and min_ovr==None: min_ovr=0.8
+	if min_ovr!=None: merge_flag=True
+	feats,ids=[],[]
 	for iid in feats_files:
+		ids.append(iid)
 		with open(feats_files[iid]) as f:
-			for l in f: feats.append(tuple(l.rstrip('\n').split('\t')))
-	genos,REF,NON,GQ,HEMI,STD_FILT,DNM_FILT = genotype(CLF,raw,feats,gender_dict,gen,ofh.replace('.vcf','.txt'))
-	if mergeFlag==True: raw = mergeSV(raw,NON,minOvr)
-	annotate(raw,genos,gen,REF,NON,GQ,ofh,gender_dict,HEMI,STD_FILT,DNM_FILT)
-	reportTime(init_time,'GENOTYPING COMPLETE')	
+			for l in f:
+				if l.startswith('#'):continue
+				feats.append(tuple(l.rstrip('\n').split('\t')))
+	ids = check_ids(Peds.ids,ids)
+	SVs = genotype(feats,outdir+ofh.replace('.vcf','.txt'),classifier_name,Peds,Confs,gen)
+	if merge_flag==True: SV.raw = merge_sv(SV.raw,SVs,min_ovr)
+	output(SV,SVs,Peds,ids,gen,outdir+ofh)
+	shutil.rmtree(tmp_dir)
+	sys.stderr.close()
+	report_time(init_time,'GENOTYPING COMPLETE')
+	print '\nerror messages located in: {}'.format(logfh)
