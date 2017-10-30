@@ -71,7 +71,7 @@ $ sv2 -i in.bam -b sv.bed -v sv.vcf -p fam.ped -o sv2_genotypes
 
 ## [Input](https://github.com/dantaki/SV2/wiki/input)
 
-SV<sup>2</sup> requires BAM files, SVs to genotype, SNV VCF files, and PED files.
+SV<sup>2</sup> requires BAM/CRAM files, SVs to genotype, SNV VCF files, and PED files.
 
 ```
 $sv2 -i <in.bam ...> -v <sv.vcf ...> -b <sv.bed ...> -snv <snv.vcf.gz ...> -p <fam.ped ...> 
