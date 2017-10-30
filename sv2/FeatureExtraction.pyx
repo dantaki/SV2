@@ -17,7 +17,7 @@ def extract_feats(Bam,sv,prefh,out,gen,pcrfree,legacyM,Conf,tmp_dir):
 	sv_gc=gc_sv(sv,master_sv,gen,Conf)
 	Pre = Preprocess(prefh)
 	snv_feats,het_feats=extract_snv_features(Bam,sv,master_sv,Pre,gen)
-	Itr = pysam.AlignmentFile(Bam.fh,"rb")
+	Itr = pysam.AlignmentFile(Bam.fh,'r{}'.format(Bam.char))
 	insert_size, insert_mad = Pre.insert_size[Bam.id],Pre.insert_mad[Bam.id]
 	ofh = open(out,'w')
 	ofh.write('\t'.join(('#chr','start','end','type','size','id','coverage','coverage_GCcorrected','discordant_ratio','split_ratio','snv_coverage','heterozygous_allele_depth','snvs','het_snvs'))+'\n')

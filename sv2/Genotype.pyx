@@ -93,12 +93,12 @@ cdef male_sex_chrom(df,Ped,SVs,ofh):
 		svgt = int(x[13])
 		if svgt==1:
 			lik=np.rint(float(x[18]))
+			SV.genotype(x,'0',cn,lik,False)
 			if SV.ref.get(clf)==None: SV.ref[clf]=[lik]
 			else: SV.ref[clf].append(lik)
-			SV.genotype(x,'0',cn,lik,False)
 		else:
-			SV.genotype(x,'1',cn,lik,False)
 			lik=np.rint(float(x[19]))
+			SV.genotype(x,'1',cn,lik,False)
 			if SV.alt.get(clf)==None: SV.alt[clf]=[lik]
 			else: SV.alt[clf].append(lik)
 		SVs[SV.locus]=SV

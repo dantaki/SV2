@@ -44,7 +44,7 @@ cdef sv2_preprocess(Bam,ofh,seed,gen,tmp_dir):
 	snv_depth=preprocess_snv(Bam,mask_bed(tmp_bed,gen))
 	os.remove(tmp_bed)
 	out = open(ofh,'a')
-	Itr = pysam.AlignmentFile(Bam.fh,'rb')
+	Itr = pysam.AlignmentFile(Bam.fh,'r{}'.format(Bam.char))
 	for chrom in Bam.refs:
 		tmp_genome = Bam.tmp_chrom_file(tmp_dir,True,chrom)
 		chrom=format_chrom(chrom)

@@ -7,12 +7,14 @@ class Bam():
 		self.id = None
 		self.chr_flag=False # True == 'chrN'; False == 'N'
 		self.sex=None
+		self.char='b'
 		self.refs=OrderedDict()
 		self.fh=fh
 		self.Snv=None
 		self.snv_index=None
 		sm=[]
-		bam = pysam.AlignmentFile(fh,'rb')
+		bam = pysam.AlignmentFile(fh)
+		if bam.is_cram==True: self.char='c'
 		header = bam.header
 		if header.get('RG')==None: sys.stderr.write('WARNING: {} lacks Read Group (@RG) entry in the header. Skipping ...\n'.format(fh))
 		else:
@@ -47,7 +49,7 @@ def bam_init(args=None,Ped=None,Snv=None,gen=None):
 	bams=[]
 	for f in args:
 		errFH(f)
-		try: pysam.AlignmentFile(f,'rb').check_index()
+		try: pysam.AlignmentFile(f).check_index()
 		except ValueError:
 			sys.stderr.write('WARNING: {} is not indexed with samtools index. Skipping ...\n'.format(f))
 			continue

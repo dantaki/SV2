@@ -25,7 +25,7 @@ import shutil,sys,os,argparse
 splash='                       ____\n  _____________   ___ |___ \\\n /   _____/\   \ /   // ___/\n \_____  \  \   Y   //_____)\n /        \  \     /\n/_________/   \___/\n'
 __useage___="""
 Support Vector Structural Variation Genotyper Train: generate a training set
-Version {}    Author: Danny Antaki <dantaki@ucsd.edu>    github.com/dantaki/SV2
+Version {}    Author: Danny Antaki <dantaki at ucsd dot edu>    github.com/dantaki/SV2
 
   sv2 -i <bam ...> -v <vcf ...> -b <bed ...> -snv <snv vcf ...> -p <ped ...> [OPTIONS]
 
@@ -85,9 +85,11 @@ def main():
 	if (_help==True or len(sys.argv)==1):
 		print splash+__useage___
 		sys.exit(0)
-	sys.stderr=open(logfh,'w')
+	lfh = open(logfh,'w')
+	sys.stderr=lfh
 	preprocess_files,feats_files={},{}
 	gens = ['hg19','hg38','mm10']
+	print 'sv2 version:{}    report bugs to <dantaki at ucsd dot edu>       error messages located in {}'.format(__version__,logfh)
 	Confs=Config()
 	if bams==None and predir==None and featsdir==None:
 		print 'FATAL ERROR: No BAM file specified <-i, -bam  FILE ...>'
@@ -174,6 +176,5 @@ def main():
 			for l in f: feats.append(tuple(l.rstrip('\n').split('\t')))
 	sv2_train_output(feats,Peds,gen,train_dir+ofh)
 	shutil.rmtree(tmp_dir)
-	sys.stderr.close()
+	lfh.close()
 	report_time(init_time,'FEATURE EXTRACTION COMPLETE')
-	print '\nerror messages located in: {}'.format(logfh)

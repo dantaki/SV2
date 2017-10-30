@@ -42,7 +42,7 @@ These files can be used for retraining in the [training SVM classifiers section]
 Given SV input, SV<sup>2</sup> will generate features for training a new classifier, given user-defined genotype labels.
 
 ```
-$ sv2train -i <in.txt> [-b ...] [-v ...] -o <sv2>
+$ sv2train -i <in.bam> [-b ...] [-v ...] -snv in.vcf.gz -p in.ped -o <sv2>
 
 $ ls sv2_training_features/
     

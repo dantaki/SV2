@@ -27,7 +27,7 @@ import shutil,sys,os,argparse
 splash='                       ____\n  _____________   ___ |___ \\\n /   _____/\   \ /   // ___/\n \_____  \  \   Y   //_____)\n /        \  \     /\n/_________/   \___/\n'
 __useage___="""
 Support Vector Structural Variation Genotyper
-Version {}    Author: Danny Antaki <dantaki@ucsd.edu>    github.com/dantaki/SV2
+Version {}    Author: Danny Antaki <dantaki at ucsd dot edu>    github.com/dantaki/SV2
 
   sv2 -i <bam ...> -v <vcf ...> -b <bed ...> -snv <snv vcf ...> -p <ped ...> [OPTIONS]
 
@@ -109,10 +109,12 @@ def main():
 	if (_help==True or len(sys.argv)==1):
 		print splash+__useage___
 		sys.exit(0)
-	sys.stderr=open(logfh,'w')
+	lfh = open(logfh,'w')
+	sys.stderr=lfh
 	preprocess_files={}
 	feats_files={}
 	gens = ['hg19','hg38','mm10']
+	print 'sv2 version:{}    report bugs to <dantaki at ucsd dot edu>       error messages located in {}'.format(__version__,logfh)
 	Confs=Config()
 	if clfLoad!=None:
 		Confs.load_clf(clfLoad)
@@ -219,6 +221,5 @@ def main():
 	if merge_flag==True: SV.raw = merge_sv(SV.raw,SVs,min_ovr)
 	output(SV,SVs,Peds,ids,gen,outdir+ofh)
 	shutil.rmtree(tmp_dir)
-	sys.stderr.close()
+	lfh.close()
 	report_time(init_time,'GENOTYPING COMPLETE')
-	print '\nerror messages located in: {}'.format(logfh)
