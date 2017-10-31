@@ -45,7 +45,7 @@ SV<sup>2</sup> (support-vector structural-variant genotyper) is a machine learni
 
 ## Getting Started
 
-1. [Installation](https://github.com/dantaki/SV2/wiki/installation)
+:one: [Installation](https://github.com/dantaki/SV2/wiki/installation)
 
 [Install with `pip`](https://github.com/dantaki/SV2/wiki/installation#install-with-pip) *Recommended* 
 
@@ -53,16 +53,16 @@ SV<sup>2</sup> (support-vector structural-variant genotyper) is a machine learni
 $ pip --no-cache-dir install https://github.com/dantaki/SV2/releases/download/sv2v1.4.0/sv2-1.4.0.tar.gz 
 ```
 
-2. [Configure SV<sup>2</sup>](https://github.com/dantaki/SV2/wiki/installation#configure)
+:two: [Configure SV<sup>2</sup>](https://github.com/dantaki/SV2/wiki/installation#configure)
 
 ```
 $ sv2 -hg19 /full/path/to/hg19.fa [-hg38 hg38.fa -mm10 mm10.fa] 
 ```
 
-3. Run SV<sup>2</sup>
+:three: Run SV<sup>2</sup>
 
 ```
-$ sv2 -i in.bam -b sv.bed -v sv.vcf -p fam.ped -o sv2_genotypes
+$ sv2 -i in.bam -b sv.bed -v sv.vcf -snv in.vcf.gz -p fam.ped
 ```
 
 [:notebook: SV<sup>2</sup> Options Documentation](https://github.com/dantaki/SV2/wiki/options#)
