@@ -62,7 +62,7 @@ $ sv2 -hg19 /full/path/to/hg19.fa [-hg38 hg38.fa -mm10 mm10.fa]
 :three: Run SV<sup>2</sup>
 
 ```
-$ sv2 -i in.bam -b sv.bed -v sv.vcf -snv in.vcf.gz -p fam.ped
+$ sv2 -i in.bam -v sv.vcf -snv in.vcf.gz -p fam.ped
 ```
 
 [:notebook: SV<sup>2</sup> Options Documentation](https://github.com/dantaki/SV2/wiki/options#)
@@ -77,7 +77,7 @@ SV<sup>2</sup> requires BAM/CRAM files, SVs to genotype, SNV VCF files, and PED 
 $sv2 -i <in.bam ...> -v <sv.vcf ...> -b <sv.bed ...> -snv <snv.vcf.gz ...> -p <fam.ped ...> 
 ```
 
-Documentation on required inputs:
+Documentation for required inputs:
   * [Input files](https://github.com/dantaki/SV2/wiki/input)
 
   * [BED format](https://github.com/dantaki/SV2/wiki/input#bed-input)
@@ -96,7 +96,7 @@ Documentation on required inputs:
  
  * `sv2_genotypes/` genotype output
  
-*Output VCF comes with gene annotations and other useful annotations*
+[*Output VCF contains annotations for genes and filters*](https://github.com/dantaki/SV2/wiki/Output#variant-annotations)
 
 * SV<sup>2</sup> can merge divergent breakpoints. By default this option is off. 
 
