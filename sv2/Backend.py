@@ -1,8 +1,8 @@
 #!/usr/bin/env python2
-import json,os,sys
 from datetime import timedelta
 from pybedtools import BedTool
 from time import time
+import json,os,random,string,sys
 def accepted_chrom(flag,gen):
 	chroms,prefix=[],''
 	if flag==True: prefix='chr'
@@ -71,6 +71,8 @@ def query_yes_no(question, default="yes"):
 		if default is not None and choice == '': return valid[default]
 		elif choice in valid: return valid[choice]
 		else: sys.stdout.write("Please respond with 'yes' or 'no' (or 'y' or 'n')\n")
+def rand_id(size=7, chars=string.ascii_uppercase + string.digits):
+	return ''.join(random.choice(chars) for _ in range(size))
 def reciprocal_overlap(x):
 	(s1,s2,e1,e2) = x
 	sz1 = e1-s1

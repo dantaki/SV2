@@ -9,7 +9,7 @@ The above copyright notice and this permission notice shall be included in all c
 THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 '''
 __version__='1.4.0'
-from Backend import check_ids,make_dir,report_time,slash_check
+from Backend import check_ids,make_dir,rand_id,report_time,slash_check
 from Bam import bam_init
 from Config import Config
 from FeatureExtraction import extract_feats
@@ -94,7 +94,7 @@ def main():
 	configArgs.add_argument('-hg38',default=None,required=False)	
 	configArgs.add_argument('-mm10',default=None,required=False)
 	optArgs.add_argument('-L','-log',default=os.getcwd()+'/sv2.err',required=False)
-	optArgs.add_argument('-T','-tmp-dir',default=os.getcwd()+'/sv2_tmp',required=False)
+	optArgs.add_argument('-T','-tmp-dir',default=os.getcwd()+'/sv2_tmp_'+rand_id(),required=False)
 	optArgs.add_argument('-s','-seed',required=False,default=42,type=int)
 	optArgs.add_argument('-o','-out',required=False,default="sv2_genotypes.vcf",type=str)
 	optArgs.add_argument('-h','-help',required=False,action="store_true",default=False)
