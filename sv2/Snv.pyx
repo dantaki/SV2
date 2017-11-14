@@ -134,7 +134,7 @@ cdef tokenize_vcf(Bam,Variant,HAD=True):
 		depth = int(sample_entry[depth_index])
 		if genotype[0]!=genotype[1]:
 			allele_depth = [float(x) for x in sample_entry[allele_depth_index].split(',')]
-			a,b = allele_depth[0],allele_depth[1]
+			a,b = allele_depth[genotype[0]],allele_depth[genotype[1]]
 			if a== 0.0 or b == 0.0: return 0
 			ratio = b/a
 			if b > a: ratio=a/b
