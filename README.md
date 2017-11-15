@@ -7,7 +7,7 @@ Support Vector Structural Variation Genotyper
 
 [![DOI](https://zenodo.org/badge/80166279.svg)](https://zenodo.org/badge/latestdoi/80166279)
 
-SV<sup>2</sup> filters and integrates structural variants from multiple calling algorithms. Genotypes from multiple samples can be [combined into one VCF](https://github.com/dantakli/SV2/wiki/tutorial#integrate-genotypes-across-samples). SV<sup>2</sup> also provides annotations for genes, repeat elements, and common SVs for filtering post-genotyping. 
+SV<sup>2</sup> filters and integrates structural variants from multiple calling algorithms. Given multiple samples, SV<sup>2</sup> creates a [genotype matrix](https://github.com/dantaki/SV2/wiki/Tutorial#4-genotype-matrix). SV<sup>2</sup> also provides annotations for genes, repeat elements, and common SVs for filtering post-genotyping. 
 
 ---
 
