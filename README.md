@@ -116,7 +116,7 @@ Advanced users can retrain SV<sup>2</sup> genotyping classifiers with the origin
 
 SV<sup>2</sup> estimated runtime performance. [Details](https://github.com/dantaki/SV2/wiki/Performance#runtime-performance)
 
-![alt text](https://raw.githubusercontent.com/dantaki/SV2/master/png/sv2_runtime.png, "SV2 Runtime")
+![alt text](https://raw.githubusercontent.com/dantaki/SV2/master/png/sv2_runtime.png "SV2 Runtime")
 
 SV<sup>2</sup> performance was determined with independent evaluation cohorts. Genotypes were validated with Illumina 2.5M microarrays and PacBio single molecule sequencing. 
 
