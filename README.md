@@ -40,7 +40,7 @@ SV<sup>2</sup> (support-vector structural-variant genotyper) is a machine learni
 ## [User Guide](https://github.com/dantaki/SV2/wiki)
 
 ### [Tutorial](https://github.com/dantaki/SV2/wiki/tutorial)
-  * [Integrate genotypes across samples](https://github.com/dantakli/SV2/wiki/tutorial#integrate-genotypes-across-samples)
+
 ---
 
 ## Getting Started
@@ -50,7 +50,7 @@ SV<sup>2</sup> (support-vector structural-variant genotyper) is a machine learni
 [Install with `pip`](https://github.com/dantaki/SV2/wiki/installation#install-with-pip) *Recommended* 
 
 ```
-$ pip --no-cache-dir install https://github.com/dantaki/SV2/releases/download/sv2v1.4.0/sv2-1.4.0.tar.gz 
+$ pip install https://github.com/dantaki/SV2/releases/download/sv2v1.4.0/sv2-1.4.0.tar.gz 
 ```
 
 :two: [Configure SV<sup>2</sup>](https://github.com/dantaki/SV2/wiki/installation#configure)
@@ -62,7 +62,7 @@ $ sv2 -hg19 /full/path/to/hg19.fa [-hg38 hg38.fa -mm10 mm10.fa]
 :three: Run SV<sup>2</sup>
 
 ```
-$ sv2 -i in.bam -v sv.vcf -snv in.vcf.gz -p fam.ped
+$ sv2 -i in.bam -v sv.vcf -snv in.vcf.gz -p in.ped
 ```
 
 [:notebook: SV<sup>2</sup> Options Documentation](https://github.com/dantaki/SV2/wiki/options#)
@@ -96,7 +96,7 @@ Documentation for required inputs:
  
  * `sv2_genotypes/` genotype output
  
-[*Output VCF contains annotations for genes and filters*](https://github.com/dantaki/SV2/wiki/Output#variant-annotations)
+[Output VCF contains annotations for genes and filters](https://github.com/dantaki/SV2/wiki/Output#variant-annotations)
 
 * SV<sup>2</sup> can merge divergent breakpoints. By default this option is off. 
 
