@@ -59,7 +59,7 @@ class VCF():
 			'##FORMAT=<ID=SR,Number=1,Type=Float,Description="Normalized split-read count">',
 			'##FORMAT=<ID=SC,Number=1,Type=Float,Description="SNV normalized coverage">',
 			'##FORMAT=<ID=NS,Number=1,Type=Integer,Description="Number of SNVs within locus">',
-			'##FORMAT=<ID=HA,Number=1,Type=Float,Description="Heterozygous allele depth">',
+			'##FORMAT=<ID=HA,Number=1,Type=Float,Description="Heterozygous allele ratio">',
 			'##FORMAT=<ID=NH,Number=1,Type=Integer,Description="Number of heterozygous SNVs">',
 			'##FORMAT=<ID=SQ,Number=1,Type=Float,Description="Phred-scaled genotype likelihood">',
 			'##FORMAT=<ID=GL,Number=2|3,Type=Float,Description="Phred-scaled genotype likelihoods in the order, REF:(0/0), HET:(0/1), HOM:(1/1)">',
@@ -124,8 +124,8 @@ class VCF():
 						if allele=='.': continue
 						if self.allele_freq.get(locus)==None: self.allele_freq[locus]=[int(allele),1]
 						else: self.allele_freq[locus]=[self.allele_freq[locus][0]+int(allele),self.allele_freq[locus][1]+1]
-			if self.genotypes.get(locus)==None:self.genotypes[locus]=[gt]
-			else: self.genotypes[locus].append(gt)
+				if self.genotypes.get(locus)==None: self.genotypes[locus]=[gt]
+				else: self.genotypes[locus].append(gt)
 		self.Annotations=Annot
 def check_dict(d,key):
 	if d.get(key)!=None: return float(format(d[key],'.3f'))

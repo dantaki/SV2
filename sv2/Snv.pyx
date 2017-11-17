@@ -66,7 +66,7 @@ cdef c_extract_snv_features(Bam,svs,master_sv,Pre,gen):
 			# foreach masked region within SV
 			c,s,e = str(locus[0]),int(locus[1]),int(locus[2])
 			c=match_chrom_prefix(c,Bam.Snv.chr_flag)
-			for Variant in Itr.fetch(region='{}:{}-{}'.format(c,s,e)):
+			for Variant in Itr.fetch(region='{}:{}-{}'.format(c,s+1,e)):
 				data= tokenize_vcf(Bam,Variant)
 				if data==0:continue
 				depth,ratio= data
@@ -89,7 +89,7 @@ cdef c_preprocess_snv(Bam,masked):
 		if Bam.chr_flag==False: c=c.replace('chr','')
 		chrom = format_chrom(c)
 		if depths.get(chrom)==None: depths[chrom]=[]
-		region = '{}:{}-{}'.format(c,int(entry[1]),int(entry[2]))
+		region = '{}:{}-{}'.format(c,int(entry[1])+1,int(entry[2]))
 		try:
 			for Variant in Itr.fetch(region=region):
 				data = tokenize_vcf(Bam,Variant,False) # False=only process depth; output is (depth, allele depth)

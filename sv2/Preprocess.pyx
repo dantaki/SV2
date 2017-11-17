@@ -56,7 +56,7 @@ cdef sv2_preprocess(Bam,ofh,seed,gen,tmp_dir):
 			entry=tuple(entry)
 			c,s,e = str(entry[0]),int(entry[1]),int(entry[2])
 			if Bam.chr_flag==False: c=c.replace('chr','')
-			region = '{}:{}-{}'.format(c,s,e)
+			region = '{}:{}-{}'.format(c,s+1,e)
 			chr_size+=e-s
 			for Aln in Itr.fetch(region=region):
 				if (Aln.is_proper_pair == False or Aln.is_qcfail== True or Aln.is_duplicate == True or Aln.mapq < 40 or read_stats.get(str(Aln.qname)+str(Aln.is_read1)) != None): continue

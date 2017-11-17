@@ -20,7 +20,7 @@ def extract_feats(Bam,sv,prefh,out,gen,pcrfree,legacyM,Conf,tmp_dir):
 	Itr = pysam.AlignmentFile(Bam.fh,'r{}'.format(Bam.char))
 	insert_size, insert_mad = Pre.insert_size[Bam.id],Pre.insert_mad[Bam.id]
 	ofh = open(out,'w')
-	ofh.write('\t'.join(('#chr','start','end','type','size','id','coverage','coverage_GCcorrected','discordant_ratio','split_ratio','snv_coverage','heterozygous_allele_depth','snvs','het_snvs'))+'\n')
+	ofh.write('\t'.join(('#chr','start','end','type','size','id','coverage','coverage_GCcorrected','discordant_ratio','split_ratio','snv_coverage','heterozygous_allele_ratio','snvs','het_snvs'))+'\n')
 	for call in sv:
 		(c,s,e,cl) = call
 		if sv_gc.get(call)==None or master_sv.get(call)==None: continue
@@ -75,7 +75,7 @@ cdef count_reads(sv_list,Itr,ci,chr_flag,legacyM):
 	Aln_count,bp_span=0,0
 	for (c,s,e) in sv_list:
 		c =  match_chrom_prefix(c,chr_flag)
-		region= str('{}:{}-{}').format(c,s,e)
+		region= str('{}:{}-{}').format(c,int(s)+1,e)
 		bp_span+=int(e)-int(s)
 		"""count each Aln within the span"""
 		for Aln in Itr.fetch(region=region):
@@ -90,7 +90,7 @@ cdef depth_of_coverage(sv_list,bamfh,chr_flag,Aln_length):
 	pos_doc={}
 	for (c,s,e) in sv_list:
 		c =  match_chrom_prefix(c,chr_flag)
-		region= str('{}:{}-{}').format(c,s,e)
+		region= str('{}:{}-{}').format(c,int(s)+1,e)
 		depth_result = pysam.depth("-a", "-Q" "40", "-r", region, "-l", str(Aln_length-10), bamfh)
 		str_flag=0
 		if isinstance(depth_result,str):
@@ -117,7 +117,7 @@ cdef discordant_split_sv(flank_list,Itr,size,ci,windows,chr_flag,legacyM):
 	else:
 		for (c,s,e) in flank_list:
 			c =  match_chrom_prefix(c,chr_flag)
-			region= str('{}:{}-{}').format(c,s,e)
+			region= str('{}:{}-{}').format(c,int(s)+1,e)
 			for Aln in Itr.fetch(region=region,until_eof=True):
 				if (Aln.is_qcfail or Aln.is_unmapped or Aln.mate_is_unmapped or Aln.tid != Aln.rnext or Aln.is_reverse == Aln.mate_is_reverse or Aln.is_duplicate): continue
 				else:

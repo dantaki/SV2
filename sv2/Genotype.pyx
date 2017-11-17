@@ -15,14 +15,14 @@ def init_dataframe(obj,header=['chr','start','end','type','size','id','old_covr'
 	df.columns=header
 	return df
 def genotype(features,out,classifier_name,Ped,Conf,gen):
-	SVs={} # SVs[SV.locus]=SV object
+	SVs={} # SVs[SV.locus]=Variant object
 	Conf.get_clf(classifier_name)
 	biallelic_dels,biallelic_dups,male_sex_chrom_dels,male_sex_chrom_dups=partition_svs(features,Ped,gen)
 	pd.options.mode.chained_assignment = None
 	genos=[]
 	outdir = os.getcwd()+'/sv2_genotypes/'
 	ofh = open(out,'w')
-	ofh.write('\t'.join(('#CHROM','START','END','TYPE','LENGTH','ID','COVERAGE','DISCORDANT_PAIRED-END','SPLIT_READS','SNV_COVERAGE','SNVs','HETEROZYGOUS_ALLELIC_DEPTH','HETEROZYGOUS_SNVs','COPY_NUMBER_GENOTYPE','REF_GENOTYPE_LIKELIHOOD','HET_GENOTYPE_LIKELIHOOD','HOM_GENOTYPE_LIKELIHOOD','ALT_GENOTYPE_LIKELIHOOD','REF_QUAL','ALT_QUAL','CLASSIFIER'))+'\n')
+	ofh.write('\t'.join(('#CHROM','START','END','TYPE','LENGTH','ID','COVERAGE','DISCORDANT_PAIRED-END','SPLIT_READS','SNV_COVERAGE','SNVs','HETEROZYGOUS_ALLELE_RATIO','HETEROZYGOUS_SNVs','COPY_NUMBER_GENOTYPE','REF_GENOTYPE_LIKELIHOOD','HET_GENOTYPE_LIKELIHOOD','HOM_GENOTYPE_LIKELIHOOD','ALT_GENOTYPE_LIKELIHOOD','REF_QUAL','ALT_QUAL','CLASSIFIER'))+'\n')
 	if len(biallelic_dels)>0:
 		c_biallele_dels(biallelic_dels,Ped,Conf,SVs,ofh)
 	if len(biallelic_dups)>0:

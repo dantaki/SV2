@@ -153,14 +153,14 @@ def main():
 	"""
 	PREPROCESSING
 	"""
-	if predir == None:
+	if predir == None  and featsdir==None:
 		outdir = os.getcwd()+'/sv2_preprocessing/'
 		make_dir(outdir)
 		for bam in Bams:
 			preofh = outdir+bam.id+'_sv2_preprocessing.txt'
 			preprocess_files[bam.id]=preofh
 			preprocess(bam,preofh,seed,gen,tmp_dir)
-	else:
+	elif predir!=None:
 		predir=slash_check(predir)
 		for fh in glob(predir+'*sv2_preprocessing.txt'):
 			f = open(fh)
