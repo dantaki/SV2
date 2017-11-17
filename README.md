@@ -100,7 +100,7 @@ Documentation for required inputs:
 
 * SV<sup>2</sup> can merge divergent breakpoints. By default this option is off. 
 
-* [:notebook: Merging Documentation](https://github.com/dantaki/SV2/wiki/Output#merging-svs)
+* [:notebook: Merging Documentation](https://github.com/dantaki/SV2/wiki/Options#merging-divergent-breakpoints)
 
 ---
 
