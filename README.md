@@ -13,7 +13,7 @@ SV<sup>2</sup> filters and integrates structural variants from multiple calling 
 
 ## Table of Contents
 
-* [Preprint](#preprint)
+* [Preprint](#preprint--doi)
 * [User Guide](#user-guide)
    * [Tutorial](#tutorial)
 * [Getting Started](#getting-started)
