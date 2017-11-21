@@ -21,8 +21,8 @@ def biallelic_dup_svm(df,gtclf):
 	if len(snv_df) >0:
 		clf=None
 		snv_mat = tabulate_snv(snv_df)
-		with open(gtclf['dupsnv'],'rb') as f: clf=pickle.load(f)
-		final=final.append(biallelic_dup_tabulate(snv_df,clf.predict_proba(snv_mat),'DUP_snv'))
+		with open(gtclf['duphar'],'rb') as f: clf=pickle.load(f)
+		final=final.append(biallelic_dup_tabulate(snv_df,clf.predict_proba(snv_mat),'DUP_har'))
 	if len(brk_df) >0:
 		clf=None
 		brk_mat= tabulate_3feats(brk_df)
@@ -61,8 +61,8 @@ def training_features(df,case,out): # case 0:dels; 1:dups; 2:del_msc; 3:dup_msc
 			for x in train_reformat(brk_df).values: ofh.write('\t'.join(map(str,x))+'\tNA\tduplication_breakpoint\n')
 			ofh.close()
 		if len(snv_df)>0:
-			ofh= ofh_train('{}_duplication_snv.txt'.format(out))
-			for x in train_reformat(snv_df).values: ofh.write('\t'.join(map(str,x))+'\tNA\tduplication_snv\n')
+			ofh= ofh_train('{}_duplication_har.txt'.format(out))
+			for x in train_reformat(snv_df).values: ofh.write('\t'.join(map(str,x))+'\tNA\tduplication_har\n')
 			ofh.close()
 	if case==2 or case==3:
 		df[['covr_GC','dpe','sr']]=df[['covr_GC','dpe','sr']].astype(float)

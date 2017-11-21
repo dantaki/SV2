@@ -27,7 +27,7 @@ $ ls sv2-VERSION/sv2/training/1kgp_training_data
 1kgp_highcov_del_gt1kb.txt
 1kgp_highcov_del_lt1kb.txt         
 1kgp_highcov_del_malesexchrom.txt           
-1kgp_highcov_dup_snv.txt
+1kgp_highcov_dup_har.txt
 1kgp_lowcov_dup_breakpoint.txt
 1kgp_lowcov_dup_malesexchrom.txt
 ```
