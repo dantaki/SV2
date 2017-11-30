@@ -19,7 +19,8 @@ class VCF():
 			for l in f:
 				chrom, leng = l.rstrip().split('\t')
 				chroms[format_chrom(chrom)]=leng
-		for x in Structural_Variant.raw: refs[x[0]]=chroms[format_chrom(x[0])]
+		for x in Structural_Variant.raw: 
+			if chroms.get(format_chrom(x[0]))!=None: refs[x[0]]=chroms[format_chrom(x[0])]
 		for chrom in refs: contigs.append('##contig=<ID={},length={}>'.format(chrom,refs[chrom]))
 		self.head=[
 			'##fileformat=VCFv4.1',

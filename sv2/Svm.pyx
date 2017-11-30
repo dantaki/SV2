@@ -81,8 +81,14 @@ cdef data_table(df,lik,cn,biallelic=True):
 	else:
 		df['likHOM'],df['likHET'],df['likREF']=lik[:,0],lik[:,0],lik[:,1]
 	df['NONREF'] = 1 - df['likREF']
-	df['PHRED_REF'] = -10.0 * np.log10(1.0-df['likREF'])
-	df['PHRED_NONREF'] = -10.0 * np.log10(1.0-df['NONREF'])
+	pref = 1.0 - df['likREF']
+	palt = 1.0 - df['NONREF']
+	pref[pref==1]=1-1e-12
+	pref[pref==0]=0+1e-12
+	palt[palt==1]=1-1e-12
+	palt[palt==0]=0+1e-12
+	df['PHRED_REF'] = -10.0 * np.log10(pref)
+	df['PHRED_NONREF'] = -10.0 * np.log10(palt)
 	df= df[['chr','start','end','type','size','id','covr','dpe','sr','SNP_coverage','SNPs','HET_ratio','HET_SNPs','copy_number','likREF','likHET','likHOM','NONREF','PHRED_REF','PHRED_NONREF','classif']]	
 	return df
 cdef biallelic_del_tabulate(df,lik,clfname):

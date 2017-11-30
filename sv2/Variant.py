@@ -83,7 +83,7 @@ class Variant:
 			gq=','.join((format(float(data[14]),'.2f'),format(float(data[15]),'.2f'),format(float(data[16]),'.2f')))
 		else:
 			gq=','.join((format(float(data[14]),'.2f'),format(float(data[15]),'.2f')))
-		_format = '{}:{}:{}'.format(label,copy_number,':'.join(map(str,(format(float(data[7]),'.2f',), format(float(data[8]),'.2f',), format(float(data[9]),'.2f',), int(data[10]), format(float(data[11]),'.2f'), int(data[12]),int(lik),gq))))		
+		_format = '{}:{}:{}'.format(label,copy_number,':'.join(map(str,(format(float(data[7]),'.2f',), format(float(data[8]),'.2f',), format(float(data[9]),'.2f',), int(data[10]), format(float(data[11]),'.2f'), int(np.rint(float(data[12]))),int(np.rint(lik)),gq))))		
 		self.gt[self.locus+(str(data[5]),)]=_format
 	def median_likelihood(self):
 		if len(self.ref)>0:
