@@ -159,4 +159,3 @@ cdef prep_biallelic_dups(df):
 cdef tabulate_3feats(df): return df[['covr','dpe','sr']].as_matrix()
 cdef tabulate_snv(df): return df[['covr','HET_ratio']].as_matrix()
 cdef train_reformat(df): return df[['chr','start','end','type','size','id','covr','dpe','sr','SNP_coverage','SNPs','HET_ratio','HET_SNPs']]	
-

@@ -48,6 +48,7 @@ genotype arguments: github.com/dantaki/SV2/wiki/Options#genotype-arguments
   -M                  bwa mem -M compatibility, split-reads flagged as secondary instead of supplementary
   -merge              merge overlapping SV breakpoints after genotyping
   -min-ovr            minimum reciprocal overlap for merging [default: 0.8]
+  -no-anno            genotype without annotating variants   
 
   -pre                preprocessing output directory, skips preprocessing
   -feats              feature extraction output directory, skips feature extraction
@@ -86,6 +87,7 @@ def main():
 	genoArgs.add_argument('-M',default=False,required=False,action="store_true")
 	genoArgs.add_argument('-merge',required=False,default=False,action="store_true")
 	genoArgs.add_argument('-min-ovr',required=False,default=None,type=float)
+	genoArgs.add_argument('-no-anno',required=False,default=False,action="store_true")
 	genoArgs.add_argument('-pre',required=False,default=None)
 	genoArgs.add_argument('-feats',required=False,default=None)
 	clfArgs.add_argument('-load-clf',required=False, default=None,type=str)
@@ -100,7 +102,7 @@ def main():
 	optArgs.add_argument('-h','-help',required=False,action="store_true",default=False)
 	args = parser.parse_args()
 	bams,bed,vcf,snv,ped = args.i,args.b,args.v,args.snv,args.p
-	gen,pcrfree,legacy_m,merge_flag,min_ovr= args.g,args.pcrfree,args.M,args.merge,args.min_ovr
+	gen,pcrfree,legacy_m,merge_flag,min_ovr,anno_flag= args.g,args.pcrfree,args.M,args.merge,args.min_ovr,args.no_anno
 	predir,featsdir = args.pre,args.feats
 	clfLoad, classifier_name = args.load_clf,args.clf
 	conf_hg19,conf_hg38, conf_mm10=args.hg19,args.hg38,args.mm10
@@ -219,7 +221,7 @@ def main():
 	ids = check_ids(Peds.ids,ids)
 	SVs = genotype(feats,outdir+ofh.replace('.vcf','.txt'),classifier_name,Peds,Confs,gen)
 	if merge_flag==True: SV.raw = merge_sv(SV.raw,SVs,min_ovr)
-	output(SV,SVs,Peds,ids,gen,outdir+ofh)
+	output(SV,SVs,Peds,ids,gen,outdir+ofh,anno_flag)
 	shutil.rmtree(tmp_dir)
 	lfh.close()
 	report_time(init_time,'GENOTYPING COMPLETE')

@@ -4,10 +4,10 @@ from Genotype import init_dataframe,partition_svs
 from Svm import training_features
 from Vcf import VCF
 import datetime
-def output(Structural_Variant,SVs,Ped,ids,gen,ofh):
+def output(Structural_Variant,SVs,Ped,ids,gen,ofh,anno_flag):
 	Ofh = VCF(ofh)
 	Ofh.init_header(datetime.date.today(),ids,Structural_Variant,gen)
-	Ofh.load_genotypes(Structural_Variant,SVs,Ped,ids,gen)
+	Ofh.load_genotypes(Structural_Variant,SVs,Ped,ids,gen,anno_flag)
 	vcf_ofh = open(ofh,'w')
 	vcf_ofh.write('\n'.join(Ofh.head)+'\n')
 	chroms={}

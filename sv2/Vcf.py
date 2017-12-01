@@ -77,41 +77,47 @@ class VCF():
 		if self.quals.get(locus+(svtype,))!=None: median_ref,qual = self.quals[locus+(svtype,)]
 		if self.allele_freq.get(locus+(svtype,))!=None: allele=float(format(float(self.allele_freq[locus+(svtype,)][0])/float(self.allele_freq[locus+(svtype,)][1]),'.3f'))
 		if self.filters.get(locus+(svtype,))!=None: std_flt,dnm_flt=self.filters[locus+(svtype,)]
-		if self.Annotations.repeatmasker.get(locus)!=None:
-			mei_id,mei_ovr= self.Annotations.repeatmasker[locus]
-			mei_ovr= format(mei_ovr,'.2f')
-			svtype=svtype+':'+mei_id
 		description='{}:{}-{}_{}'.format(data[0],int(data[1])+1,data[2],svtype.replace('DEL','deletion').replace('DUP','duplication'))
-		if self.Annotations.cytoband.get(locus)!=None: cytoband=self.Annotations.cytoband[locus]
-		abpart_ovr = check_dict(self.Annotations.excluded,locus+('abparts',))
-		centromere_ovr = check_dict(self.Annotations.excluded,locus+('centromere',))
-		gap_ovr = check_dict(self.Annotations.excluded,locus+('gap',))
-		segdup_ovr = check_dict(self.Annotations.excluded,locus+('segDup',))
-		str_ovr = check_dict(self.Annotations.excluded,locus+('STR',))
-		unmap_ovr = check_dict(self.Annotations.excluded,locus+('unmappable',))
-		if self.Annotations._1kgp.get(locus+(str(data[3]),))!=None: _1kgp_id,_1kgp_ovr=self.Annotations._1kgp[locus+(str(data[3]),)]
-		if self.Annotations.genes.get(locus)!=None: gene=self.Annotations.genes[locus]
 		fail=[]
-		# filters
-		if float(abpart_ovr) >= 0.5: fail.append('ABPARTS')
-		if float(centromere_ovr) >= 0.5: fail.append('CENTROMERE')
-		if float(gap_ovr)>=0.5: fail.append('GAP')
+		if self.Annotations!=None:
+			if self.Annotations.repeatmasker.get(locus)!=None:
+				mei_id,mei_ovr= self.Annotations.repeatmasker[locus]
+				mei_ovr= format(mei_ovr,'.2f')
+				svtype=svtype+':'+mei_id
+			if self.Annotations.cytoband.get(locus)!=None: cytoband=self.Annotations.cytoband[locus]
+			abpart_ovr = check_dict(self.Annotations.excluded,locus+('abparts',))
+			centromere_ovr = check_dict(self.Annotations.excluded,locus+('centromere',))
+			gap_ovr = check_dict(self.Annotations.excluded,locus+('gap',))
+			segdup_ovr = check_dict(self.Annotations.excluded,locus+('segDup',))
+			str_ovr = check_dict(self.Annotations.excluded,locus+('STR',))
+			unmap_ovr = check_dict(self.Annotations.excluded,locus+('unmappable',))
+			if self.Annotations._1kgp.get(locus+(str(data[3]),))!=None: _1kgp_id,_1kgp_ovr=self.Annotations._1kgp[locus+(str(data[3]),)]
+			if self.Annotations.genes.get(locus)!=None: gene=self.Annotations.genes[locus]
+			# filters
+			if float(abpart_ovr) >= 0.5: fail.append('ABPARTS')
+			if float(centromere_ovr) >= 0.5: fail.append('CENTROMERE')
+			if float(gap_ovr)>=0.5: fail.append('GAP')
+			if float(segdup_ovr) >= 0.5: fail.append('SEGDUP')
+			if float(str_ovr) >= 0.5: fail.append('STR')
+			if float(unmap_ovr) >= 0.5: fail.append('UNMAPPABLE')
 		if median_ref=='NA' and qual=='NA': fail.append('GENOTYPEFAIL')
 		if allele==0: fail.append('NOALT')
-		if float(segdup_ovr) >= 0.5: fail.append('SEGDUP')
-		if float(str_ovr) >= 0.5: fail.append('STR')
-		if float(unmap_ovr) >= 0.5: fail.append('UNMAPPABLE')
 		if std_flt=='FAIL': fail.append('FAIL')
 		elif std_flt=='PASS' and ('GENOTYPEFAIL' not in fail and 'NOALT' not in fail): fail.append('PASS')
 		if len(fail) > 0: filt = ','.join(fail)
 		if std_flt=='FAIL':dnm_flt='FAIL'
 		if ('NOALT' in filt or 'GENOTYPEFAIL' in filt) and dnm_flt=='PASS':dnm_flt='NA' 
-		info = 'END={};SVTYPE={};SVLEN={};DENOVO_FILTER={};REF_GTL={};AF={};CYTOBAND={};REPEATMASKER={},{};1000G_ID={};1000G_OVERLAP={};DESCRIPTION={};GENES={};ABPARTS={};CENTROMERE={};GAP={};SEGDUP={};STR={};UNMAPPABLE={}'.format(data[2],svtype,svlen,dnm_flt,median_ref,allele,cytoband,mei_id,mei_ovr,_1kgp_id,_1kgp_ovr,description,gene,abpart_ovr,centromere_ovr,gap_ovr,segdup_ovr,str_ovr,unmap_ovr)
+		if self.Annotations!=None:
+			info = 'END={};SVTYPE={};SVLEN={};DENOVO_FILTER={};REF_GTL={};AF={};CYTOBAND={};REPEATMASKER={},{};1000G_ID={};1000G_OVERLAP={};DESCRIPTION={};GENES={};ABPARTS={};CENTROMERE={};GAP={};SEGDUP={};STR={};UNMAPPABLE={}'.format(data[2],svtype,svlen,dnm_flt,median_ref,allele,cytoband,mei_id,mei_ovr,_1kgp_id,_1kgp_ovr,description,gene,abpart_ovr,centromere_ovr,gap_ovr,segdup_ovr,str_ovr,unmap_ovr)
+		else:
+			info = 'END={};SVTYPE={};SVLEN={};DENOVO_FILTER={};REF_GTL={};AF={};'.format(data[2],svtype,svlen,dnm_flt,median_ref,allele)
 		return '<{}>\t{}\t{}\t{}\tGT:CN:PE:SR:SC:NS:HA:NH:SQ:GL'.format(svtype,qual,filt,info)
-	def load_genotypes(self,Structural_Variant=None,SVs=None,Ped=None,ids=None,gen=None):
+	def load_genotypes(self,Structural_Variant=None,SVs=None,Ped=None,ids=None,gen=None,no_anno=None):
 		svs=BedTool(list(set([(format_chrom(x[0]),x[1],x[2]) for x in Structural_Variant.raw]))).sort()
-		Annot = Annotation()
-		Annot.check_overlap(svs,Structural_Variant.raw,gen)
+		if no_anno==False:
+			Annot = Annotation()
+			Annot.check_overlap(svs,Structural_Variant.raw,gen)
+			self.Annotations=Annot
 		for locus in SVs:
 			Variant = SVs[locus]
 			self.quals[locus]=Variant.med_ref,Variant.med_alt
@@ -127,7 +133,6 @@ class VCF():
 						else: self.allele_freq[locus]=[self.allele_freq[locus][0]+int(allele),self.allele_freq[locus][1]+1]
 				if self.genotypes.get(locus)==None: self.genotypes[locus]=[gt]
 				else: self.genotypes[locus].append(gt)
-		self.Annotations=Annot
 def check_dict(d,key):
 	if d.get(key)!=None: return float(format(d[key],'.3f'))
 	else: return 0
