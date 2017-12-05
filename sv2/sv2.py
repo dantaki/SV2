@@ -221,7 +221,7 @@ def main():
 	ids = check_ids(Peds.ids,ids)
 	SVs = genotype(feats,outdir+ofh.replace('.vcf','.txt'),classifier_name,Peds,Confs,gen)
 	if merge_flag==True: SV.raw = merge_sv(SV.raw,SVs,min_ovr)
-	output(SV,SVs,Peds,ids,gen,outdir+ofh,anno_flag)
+	output(SV,SVs,Peds,ids,gen,outdir+ofh,anno_flag,tmp_dir)
 	shutil.rmtree(tmp_dir)
 	lfh.close()
 	report_time(init_time,'GENOTYPING COMPLETE')

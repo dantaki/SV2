@@ -112,11 +112,11 @@ class VCF():
 		else:
 			info = 'END={};SVTYPE={};SVLEN={};DENOVO_FILTER={};REF_GTL={};AF={};'.format(data[2],svtype,svlen,dnm_flt,median_ref,allele)
 		return '<{}>\t{}\t{}\t{}\tGT:CN:PE:SR:SC:NS:HA:NH:SQ:GL'.format(svtype,qual,filt,info)
-	def load_genotypes(self,Structural_Variant=None,SVs=None,Ped=None,ids=None,gen=None,no_anno=None):
+	def load_genotypes(self,Structural_Variant=None,SVs=None,Ped=None,ids=None,gen=None,no_anno=None,tmp_dir=None):
 		svs=BedTool(list(set([(format_chrom(x[0]),x[1],x[2]) for x in Structural_Variant.raw]))).sort()
 		if no_anno==False:
 			Annot = Annotation()
-			Annot.check_overlap(svs,Structural_Variant.raw,gen)
+			Annot.check_overlap(svs,Structural_Variant.raw,gen,tmp_dir)
 			self.Annotations=Annot
 		for locus in SVs:
 			Variant = SVs[locus]

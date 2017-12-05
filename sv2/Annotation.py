@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 from Backend import format_chrom,get_path,reciprocal_overlap
-import pybedtools
+import os,pybedtools
 from pybedtools import BedTool
 class Annotation():
 	def __init__(self):
@@ -9,7 +9,7 @@ class Annotation():
 		self.repeatmasker={} #[(c,s,e)]= id,ovr
 		self._1kgp={} #[(c,s,e,cl)]= id,ovr
 		self.genes={}
-	def check_overlap(self,svs=None,raw=None,gen=None):
+	def check_overlap(self,svs=None,raw=None,gen=None,tmp_dir=None):
 		# overlap cytobands
 		try:
 			for entry in svs.intersect(get_path()+'/resources/annotation_files/{}_cytoband.bed'.format(gen),wao=True):
@@ -18,36 +18,46 @@ class Annotation():
 				else: self.cytoband[locus]=self.cytoband[locus]+','+str(entry[3]).replace('chr','')+str(entry[6])
 		except pybedtools.cbedtools.MalformedBedLineError: self.cytoband[locus]='NA'
 		# overlap excluded elements
-		for entry in svs.intersect(get_path()+'/resources/annotation_files/{}_excluded.bed.gz'.format(gen),wao=True):
-			entry=tuple(entry)
-			locus, ovr = tokenize_sv(entry),int(entry[-1])
-			if ovr==0: continue
-			key = locus+(str(entry[6]),)
-			if self.excluded.get(key)==None: self.excluded[key]=ovr
-			else: self.excluded[key]+=ovr
+		tmp_bed=tmp_dir+'tmp_anno.bed'
+		svs.intersect(get_path()+'/resources/annotation_files/{}_excluded.bed.gz'.format(gen),wao=True,output=tmp_bed)
+		with open(tmp_bed,'r') as f:
+			for l in f:
+				entry = tuple(l.rstrip().split('\t'))
+				locus, ovr = tokenize_sv(entry),int(entry[-1])
+				if ovr==0: continue
+				key = locus+(str(entry[6]),)
+				if self.excluded.get(key)==None: self.excluded[key]=ovr
+				else: self.excluded[key]+=ovr
 		for locus in self.excluded: self.excluded[locus]=float(self.excluded[locus])/(int(locus[2])-int(locus[1]))
+		os.remove(tmp_bed)
 		# overlap repeatmasker
-		for entry in svs.intersect(get_path()+'/resources/annotation_files/{}_repeatmasker.bed.gz'.format(gen), f=0.8, F=0.8, wa=True, wb=True):
-			entry=tuple(entry)
-			locus, rovr=tokenize_sv(entry), reciprocal_overlap(map(int,(entry[1],entry[4],entry[2],entry[5])))
-			name = '{}:{}:{}'.format(entry[7],entry[8],entry[6])
-			if self.repeatmasker.get(locus)==None:
-				self.repeatmasker[locus]=(name, rovr)
-			elif self.repeatmasker.get(locus)!=None and rovr > self.repeatmasker[locus][1]:
-				self.repeatmasker[locus]=(name, rovr)
-			else: continue
+		svs.intersect(get_path()+'/resources/annotation_files/{}_repeatmasker.bed.gz'.format(gen), f=0.8, F=0.8, wa=True, wb=True,output=tmp_bed)
+		with open(tmp_bed,'r') as f:
+			for l in f:
+				entry = tuple(l.rstrip().split('\t'))
+				locus, rovr=tokenize_sv(entry), reciprocal_overlap(map(int,(entry[1],entry[4],entry[2],entry[5])))
+				name = '{}:{}:{}'.format(entry[7],entry[8],entry[6])
+				if self.repeatmasker.get(locus)==None:
+					self.repeatmasker[locus]=(name, rovr)
+				elif self.repeatmasker.get(locus)!=None and rovr > self.repeatmasker[locus][1]:
+					self.repeatmasker[locus]=(name, rovr)
+				else: continue
+		os.remove(tmp_bed)
 		# overlap 1KGP phase 3 DEL/DUP
 		if 'hg' in gen:
-			self.load_1kgp(raw,'DEL',gen)
-			self.load_1kgp(raw,'DUP',gen)
+			self.load_1kgp(raw,'DEL',gen,tmp_bed)
+			self.load_1kgp(raw,'DUP',gen,tmp_bed)
 		# overlap genes
 		genes={}
-		for entry in svs.intersect(get_path()+'/resources/annotation_files/{}_genes.bed.gz'.format(gen), wa=True,wb=True):
-			entry=tuple(entry)
-			locus, gene = tokenize_sv(entry), str(entry[6])
-			if genes.get(locus)==None: genes[locus]=[gene]
-			elif gene not in genes[locus]: genes[locus].append(gene)
-			else: continue
+		svs.intersect(get_path()+'/resources/annotation_files/{}_genes.bed.gz'.format(gen), wa=True,wb=True,output=tmp_bed)
+		with open(tmp_bed,'r') as f:
+			for l in f:
+				entry = tuple(l.rstrip().split('\t'))
+				locus, gene = tokenize_sv(entry), str(entry[6])
+				if genes.get(locus)==None: genes[locus]=[gene]
+				elif gene not in genes[locus]: genes[locus].append(gene)
+				else: continue
+		os.remove(tmp_bed)
 		for x in genes:
 			ori,exons,introns,trx,genlist = {},{},{},{},[]
 			exon_total,exon_num, intron_total,intron_num,exoncnt,exontot,introncnt,introntot=0,0,0,0,0,0,0,0
@@ -126,17 +136,20 @@ class Annotation():
 					if exons.get((y,'upstream_1kb')) == 1 and exons.get((y,'downstream_1kb')) != 1:
 						genlist.append(','.join(map(str,(y,trx[y],'upstream_1kb'))))
 			if len(genlist)>=1 : self.genes[x]='|'.join(genlist)
-	def load_1kgp(self,raw=None,svtype=None,gen=None):
+	def load_1kgp(self,raw=None,svtype=None,gen=None,tmp_bed=None):
 		sv = BedTool([(format_chrom(x[0]),x[1],x[2],x[3]) for x in raw if svtype in str(x[3])]).sort()
-		for x in sv.intersect(get_path()+'/resources/annotation_files/{}_1000Genomes_{}.bed'.format(gen,svtype), f=0.8, F=0.8, wao=True):
-			x=tuple(x)
-			locus = tokenize_sv(x)+(str(x[3]),)
-			ovr = int(x[-1])
-			if ovr==0: continue
-			ovr = format(float(x[len(x)-1])/(int(x[2])-int(x[1])),'.2f')
-			if self._1kgp.get(locus)==None:
-				self._1kgp[locus]=(x[len(x)-2],ovr)
-			elif self._1kgp.get(locus)!=None and float(ovr) > float(self._1kgp[locus][1]):
-				self._1kgp[locus]=(x[len(x)-2],ovr)
-			else: continue
+		sv.intersect(get_path()+'/resources/annotation_files/{}_1000Genomes_{}.bed'.format(gen,svtype), f=0.8, F=0.8, wao=True,output=tmp_bed)
+		with open(tmp_bed,'r') as f:
+			for l in f:
+				x = tuple(l.rstrip().split('\t'))
+				locus = tokenize_sv(x)+(str(x[3]),)
+				ovr = int(x[-1])
+				if ovr==0: continue
+				ovr = format(float(x[len(x)-1])/(int(x[2])-int(x[1])),'.2f')
+				if self._1kgp.get(locus)==None:
+					self._1kgp[locus]=(x[len(x)-2],ovr)
+				elif self._1kgp.get(locus)!=None and float(ovr) > float(self._1kgp[locus][1]):
+					self._1kgp[locus]=(x[len(x)-2],ovr)
+				else: continue
+		os.remove(tmp_bed)
 def tokenize_sv(x): return (format_chrom(str(x[0])),int(x[1]),int(x[2]))
