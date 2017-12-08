@@ -24,6 +24,7 @@ SV<sup>2</sup> filters and integrates structural variants from multiple calling 
 * [Performance](#performance)
 * [Requirements](#requirements)
 * [Citing SV<sup>2</sup>](#citing-sv2)
+* [Troubleshooting](#troubleshooting)
 * [License](#license)
 * [Contact](#contact)
 
@@ -148,6 +149,8 @@ Please refer to the [preprint](#preprint) for performance details.
 For citing SV<sup>2</sup> please refer to the preprint: [bioRxiv](http://biorxiv.org/content/early/2017/03/17/113498) : [doi](https://doi.org/10.1101/113498)
 
 ---
+
+## [Troubleshooting](https://github.com/dantaki/SV2/wiki/troubleshooting)
 
 ## License 
 
