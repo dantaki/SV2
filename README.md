@@ -7,13 +7,14 @@ Support Vector Structural Variation Genotyper
 
 [![DOI](https://zenodo.org/badge/80166279.svg)](https://zenodo.org/badge/latestdoi/80166279)
 
+Danny Antaki, William M Brandler, Jonathan Sebat; SV<sup>2</sup>: Accurate Structural Variation Genotyping and De Novo Mutation Detection from Whole Genomes, Bioinformatics, , btx813, https://doi.org/10.1093/bioinformatics/btx813
+
 SV<sup>2</sup> filters and integrates structural variants from multiple calling algorithms. Given multiple samples, SV<sup>2</sup> creates a [genotype matrix](https://github.com/dantaki/SV2/wiki/Tutorial#4-genotype-matrix). SV<sup>2</sup> also provides annotations for genes, repeat elements, and common SVs for filtering post-genotyping. 
 
 ---
 
 ## Table of Contents
 
-* [Preprint](#preprint--doi)
 * [User Guide](#user-guide)
    * [Tutorial](#tutorial)
 * [Getting Started](#getting-started)
@@ -29,8 +30,6 @@ SV<sup>2</sup> filters and integrates structural variants from multiple calling 
 * [Contact](#contact)
 
 ---
-
-## [Preprint](http://biorxiv.org/content/early/2017/03/17/113498) : [doi](https://doi.org/10.1101/113498)
 
 SV<sup>2</sup> (support-vector structural-variant genotyper) is a machine learning algorithm for genotyping deletions and duplications from paired-end whole genome sequencing data. SV<sup>2</sup> can rapidly integrate variant calls from multiple SV discovery algorithms into a unified callset with [high genotyping accuracy](https://raw.githubusercontent.com/dantaki/SV2/master/png/sv2_auc.png) and detection of [*de novo* mutations](https://raw.githubusercontent.com/dantaki/SV2/master/png/sv2_fdr.png). 
 
@@ -146,7 +145,9 @@ Please refer to the [preprint](#preprint) for performance details.
 
 ## Citing SV<sup>2</sup>
 
-For citing SV<sup>2</sup> please refer to the preprint: [bioRxiv](http://biorxiv.org/content/early/2017/03/17/113498) : [doi](https://doi.org/10.1101/113498)
+Danny Antaki, William M Brandler, Jonathan Sebat; SV<sup>2</sup>: Accurate Structural Variation Genotyping and De Novo Mutation Detection from Whole Genomes, Bioinformatics, , btx813, https://doi.org/10.1093/bioinformatics/btx813
+
+[Link to Article](https://doi.org/10.1093/bioinformatics/btx813)
 
 ---
 
