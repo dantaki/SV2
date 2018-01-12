@@ -124,7 +124,7 @@ SV<sup>2</sup> performance was determined with independent evaluation cohorts. G
 
 ##### [Performance of *de novo* mutations](https://github.com/dantaki/SV2/wiki/performance#de-novo-mutations)
 
-Please refer to the [preprint](#preprint) for performance details. 
+Please refer to the [publication](https://doi.org/10.1093/bioinformatics/btx813) for performance details. 
 
 ---
 
