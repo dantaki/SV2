@@ -97,6 +97,6 @@ def tokenize(l):
 	r=l.rstrip().split('\t')
 	if len(r)==1: r=l.rstrip().split(' ')
 	if len(r)==1:
-		std.stderr.write('WARNING: {} not tokenized correctly. Check if {} is Tab or Space delimited\n'.format(l,l))
+		sys.stderr.write('WARNING: {} not tokenized correctly. Check if {} is Tab or Space delimited\n'.format(l,l))
 		return 0
 	else: return r
