@@ -45,7 +45,9 @@ SV<sup>2</sup> (support-vector structural-variant genotyper) is a machine learni
 
 ## Getting Started
 
-:one: [Installation](https://github.com/dantaki/SV2/wiki/installation)
+:one: 
+
+### [Installation](https://github.com/dantaki/SV2/wiki/installation)
 
 [Install with `pip`](https://github.com/dantaki/SV2/wiki/installation#install-with-pip) *Recommended* 
 
