@@ -1,0 +1,9 @@
+include sv2/*.py
+include sv2/*.pyx
+include sv2/config/*
+include sv2/resources/*
+include sv2/resources/training_sets/*
+include	sv2/training/*
+include sv2/training/1kgp_training_data/*
+include README
+include INSTALL

@@ -2,7 +2,7 @@
 #cython: boundscheck=False
 #cython: wraparound=False
 #cython: cdivision=True
-from Backend import errFH,format_chrom,match_chrom_key,match_chrom_prefix
+from sv2_backend import errFH,format_chrom,match_chrom_key,match_chrom_prefix
 import numpy as np
 import os,pysam,sys
 from pybedtools import BedTool

@@ -8,10 +8,10 @@ The above copyright notice and this permission notice shall be included in all c
 
 THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 '''
-__version__='1.4.0'
-from Backend import make_dir,rand_id,report_time,slash_check
+__version__='1.4.1'
+from sv2_backend import make_dir,rand_id,report_time,slash_check
 from Bam import bam_init
-from Config import Config
+from sv2Config import Config
 from FeatureExtraction import extract_feats
 from Output import sv2_train_output
 from Ped import ped_init
@@ -50,7 +50,7 @@ genotype arguments: github.com/dantaki/SV2/wiki/Options#genotype-arguments
 
 optional arguments:
  
-  -L, -log            log file for standard error messages [default: sv2.err]
+  -L, -log            log file for standard error messages [default: STDOUT]
   -T, -tmp-dir        directory for temporary files [default: working directory]
   -s, -seed           random seed for preprocessing shuffling [default: 42]
   -o, -out            output prefix [default: sv2_training_features]
@@ -72,7 +72,7 @@ def main():
 	genoArgs.add_argument('-M',default=False,required=False,action="store_true")
 	genoArgs.add_argument('-pre',required=False,default=None)
 	genoArgs.add_argument('-feats',required=False,default=None)
-	optArgs.add_argument('-L','-log',default=os.getcwd()+'/sv2.err',required=False)
+	optArgs.add_argument('-L','-log',default=None,required=False)
 	optArgs.add_argument('-T','-tmp-dir',default=os.getcwd()+'/sv2_tmp_'+rand_id(),required=False)
 	optArgs.add_argument('-s','-seed',required=False,default=42,type=int)
 	optArgs.add_argument('-o','-out',required=False,default="sv2_training_features",type=str)
@@ -85,11 +85,14 @@ def main():
 	if (_help==True or len(sys.argv)==1):
 		print splash+__useage___
 		sys.exit(0)
-	lfh = open(logfh,'w')
-	sys.stderr=lfh
+	if logfh!=None:
+		lfh = open(logfh,'w')
+		sys.stderr=lfh
 	preprocess_files,feats_files={},{}
 	gens = ['hg19','hg38','mm10']
-	print 'sv2 version:{}    report bugs to <dantaki at ucsd dot edu>       error messages located in {}'.format(__version__,logfh)
+	olog = logfh
+	if olog == None: olog = 'STDOUT'
+	print 'sv2 version:{}    report bugs to <dantaki at ucsd dot edu>       error messages located in {}'.format(__version__,olog)
 	Confs=Config()
 	if bams==None and predir==None and featsdir==None:
 		print 'FATAL ERROR: No BAM file specified <-i, -bam  FILE ...>'

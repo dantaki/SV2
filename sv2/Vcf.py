@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 from Annotation import Annotation,tokenize_sv
-from Backend import format_chrom,get_path
+from sv2_backend import format_chrom
 from collections import OrderedDict
 from pybedtools import BedTool
 import sys
@@ -15,7 +15,8 @@ class VCF():
 		self.head=None
 	def init_header(self,date=None,ids=None,Structural_Variant=None,gen=None):
 		chroms,refs,contigs={},OrderedDict(),[]
-		with open(get_path()+'/resources/'+gen+'.genome','r') as f:
+		from sv2Config import Config
+		with open('{}{}.genome'.format(Config().resource_path(),gen),'r') as f:
 			for l in f:
 				chrom, leng = l.rstrip().split('\t')
 				chroms[format_chrom(chrom)]=leng

@@ -2,7 +2,7 @@
 #cython: boundscheck=False
 #cython: wraparound=False
 #cython: cdivision=True
-from Backend import format_chrom,get_path,make_dir,mask_bed,match_chrom_prefix
+from sv2_backend import format_chrom,get_path,make_dir,mask_bed,match_chrom_prefix
 from Snv import preprocess_snv
 import numpy as np
 import os,pysam,sys
@@ -45,13 +45,14 @@ cdef sv2_preprocess(Bam,ofh,seed,gen,tmp_dir):
 	os.remove(tmp_bed)
 	out = open(ofh,'a')
 	Itr = pysam.AlignmentFile(Bam.fh,'r{}'.format(Bam.char))  
+	from sv2Config import Config
 	for chrom in Bam.refs:
 		tmp_genome = Bam.tmp_chrom_file(tmp_dir,True,chrom)
 		chrom=format_chrom(chrom)
 		chr_size,read_count,read_stats,read_length,insert_size=0,0,{},[],[]
 		rand_bed = BedTool()
 		rand_bed = rand_bed.random(l=100000,n=100,seed=seed,g=tmp_genome)
-		rand_bed = rand_bed.subtract(BedTool(get_path()+'/resources/'+gen+'_excluded.bed.gz')).sort().merge()
+		rand_bed = rand_bed.subtract(BedTool('{}{}_excluded.bed.gz'.format(Config().resource_path(),gen))).sort().merge()
 		for entry in rand_bed:
 			entry=tuple(entry)
 			c,s,e = str(entry[0]),int(entry[1]),int(entry[2])

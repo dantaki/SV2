@@ -8,10 +8,10 @@ The above copyright notice and this permission notice shall be included in all c
 
 THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 '''
-__version__='1.4.0'
-from Backend import check_ids,make_dir,rand_id,report_time,slash_check
+__version__='1.4.1'
+from sv2_backend import check_ids,get_path,make_dir,rand_id,report_time,slash_check
 from Bam import bam_init
-from Config import Config
+from sv2Config import Config
 from FeatureExtraction import extract_feats
 from Genotype import genotype
 from Merge import merge_sv
@@ -60,13 +60,14 @@ classifier arguments: github.com/dantaki/SV2/wiki/Options#classifier-arguments
 
 config arguments: github.com/dantaki/SV2/wiki/Options#config-arguments
 
+  -download           download required data files
   -hg19               hg19 fasta file
   -hg38               hg38 fasta file
   -mm10               mm10 fasta file
-
+  
 optional arguments:
  
-  -L, -log            log file for standard error messages [default: sv2.err]
+  -L, -log            log file for standard error messages [default: STDOUT]
   -T, -tmp-dir        directory for temporary files [default: working directory]
   -s, -seed           random seed for preprocessing shuffling [default: 42]
   -o, -out            output prefix [default: sv2_genotypes]
@@ -92,34 +93,42 @@ def main():
 	genoArgs.add_argument('-feats',required=False,default=None)
 	clfArgs.add_argument('-load-clf',required=False, default=None,type=str)
 	clfArgs.add_argument('-clf',required=False,default='default',type=str)
+	configArgs.add_argument('-download',default=False,required=False,action="store_true")
 	configArgs.add_argument('-hg19',default=None,required=False)
 	configArgs.add_argument('-hg38',default=None,required=False)	
 	configArgs.add_argument('-mm10',default=None,required=False)
-	optArgs.add_argument('-L','-log',default=os.getcwd()+'/sv2.err',required=False)
+	optArgs.add_argument('-L','-log',default=None,required=False)
 	optArgs.add_argument('-T','-tmp-dir',default=os.getcwd()+'/sv2_tmp_'+rand_id(),required=False)
 	optArgs.add_argument('-s','-seed',required=False,default=42,type=int)
 	optArgs.add_argument('-o','-out',required=False,default="sv2_genotypes.vcf",type=str)
 	optArgs.add_argument('-h','-help',required=False,action="store_true",default=False)
+	
 	args = parser.parse_args()
 	bams,bed,vcf,snv,ped = args.i,args.b,args.v,args.snv,args.p
 	gen,pcrfree,legacy_m,merge_flag,min_ovr,anno_flag= args.g,args.pcrfree,args.M,args.merge,args.min_ovr,args.no_anno
 	predir,featsdir = args.pre,args.feats
 	clfLoad, classifier_name = args.load_clf,args.clf
-	conf_hg19,conf_hg38, conf_mm10=args.hg19,args.hg38,args.mm10
+	download, conf_hg19,conf_hg38, conf_mm10=args.download,args.hg19,args.hg38,args.mm10
 	logfh, tmp_dir, seed, ofh = args.L,args.T,args.s,args.o
 	_help = args.h
 	if (_help==True or len(sys.argv)==1):
 		print splash+__useage___
 		sys.exit(0)
-	lfh = open(logfh,'w')
-	sys.stderr=lfh
+	if logfh!=None:
+		lfh = open(logfh,'w')
+		sys.stderr=lfh
 	preprocess_files={}
 	feats_files={}
 	gens = ['hg19','hg38','mm10']
-	print 'sv2 version:{}    report bugs to <dantaki at ucsd dot edu>       error messages located in {}'.format(__version__,logfh)
+	olog = logfh
+	if olog == None: olog = 'STDOUT'
+	print 'sv2 version:{}    report bugs to <dantaki at ucsd dot edu>       error messages located in {}'.format(__version__,olog)
 	Confs=Config()
 	if clfLoad!=None:
 		Confs.load_clf(clfLoad)
+		sys.exit(0)
+	if download==True:
+		Confs.download_resource()
 		sys.exit(0)
 	if conf_hg19 != None or conf_hg38 != None or conf_mm10 != None:
 		Confs.write_config(conf_hg19,conf_hg38,conf_mm10)
@@ -223,5 +232,5 @@ def main():
 	if merge_flag==True: SV.raw = merge_sv(SV.raw,SVs,min_ovr)
 	output(SV,SVs,Peds,ids,gen,outdir+ofh,anno_flag,tmp_dir)
 	shutil.rmtree(tmp_dir)
-	lfh.close()
+	if logfh!=None: lfh.close()
 	report_time(init_time,'GENOTYPING COMPLETE')

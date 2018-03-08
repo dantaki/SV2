@@ -2,7 +2,7 @@
 #cython: boundscheck=False
 #cython: wraparound=False
 #cython: cdivision=True
-from Backend import check_PAR,format_chrom
+from sv2_backend import check_PAR,format_chrom
 from Svm import biallelic_del_svm,biallelic_dup_svm,male_sex_chrom_svm
 from Variant import Variant
 import numpy as np

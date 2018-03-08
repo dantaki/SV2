@@ -1,5 +1,5 @@
 #!/usr/bin/env python
-from Backend import check_PAR,errFH,format_chrom,tokenize 
+from sv2_backend import check_PAR,errFH,format_chrom,tokenize 
 from pybedtools import BedTool
 import sys
 __help_url__='https://github.com/dantaki/SV2/wiki/input#sv-input' 

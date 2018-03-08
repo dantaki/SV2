@@ -1,5 +1,5 @@
 #!/usr/bin/env python
-from Backend import format_chrom
+from sv2_backend import format_chrom
 import numpy as np
 class Variant:
 	def __init__(self,data=None):

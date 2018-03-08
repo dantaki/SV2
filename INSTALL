@@ -1,0 +1,17 @@
+* Recommended *
+
+$ pip install sv2
+
+* Manual Install *
+
+$ python setup.py install [--prefix <PYTHONPATH>]
+
+    define --prefix <PYTHONPATH> for local installation
+    ignore numpy compilation warnings
+
+# download required resource files
+$ sv2 -download
+
+# configure sv2
+$ sv2 -hg19 FASTA [-hg38 -mm10]
+

@@ -2,7 +2,8 @@
 #cython: boundscheck=False
 #cython: wraparound=False
 #cython: cdivision=True
-from Backend import accepted_chrom,get_path,format_chrom,match_chrom_key,match_chrom_prefix
+from sv2_backend import accepted_chrom,format_chrom,match_chrom_key,match_chrom_prefix
+from sv2Config import Config
 from Preprocess import Preprocess
 from Snv import extract_snv_features
 from SV import skip_sv
@@ -158,9 +159,9 @@ cdef filter_sv(sv,Bam,gen,tmp_dir):
 	end_flank_dict=dict((i[4],(i[1],i[2])) for i in end_flank500bp)
 	os.remove(tmp_genome)
 	"""mask regions """
-	masked_sv = [(x[0],x[1],x[2],x[3],x[4]) for x in BedTool(annot_sv).subtract(BedTool(get_path()+'/resources/'+gen+'_excluded.bed.gz'))]
-	masked_start_flank = [(x[0],x[1],x[2],x[3],x[4]) for x in start_flank500bp.subtract(BedTool(get_path()+'/resources/'+gen+'_excluded.bed.gz'))]
-	masked_end_flank= [(x[0],x[1],x[2],x[3],x[4]) for x in end_flank500bp.subtract(BedTool(get_path()+'/resources/'+gen+'_excluded.bed.gz'))]
+	masked_sv = [(x[0],x[1],x[2],x[3],x[4]) for x in BedTool(annot_sv).subtract(BedTool('{}{}_excluded.bed.gz'.format(Config().resource_path(),gen)))]
+	masked_start_flank = [(x[0],x[1],x[2],x[3],x[4]) for x in start_flank500bp.subtract(BedTool('{}{}_excluded.bed.gz'.format(Config().resource_path(),gen)))]
+	masked_end_flank= [(x[0],x[1],x[2],x[3],x[4]) for x in end_flank500bp.subtract(BedTool('{}{}_excluded.bed.gz'.format(Config().resource_path(),gen)))]
 	"""take the union of the two masked call sets"""
 	if len(masked_sv) == 0:
 		print 'FATAL ERROR: SVs completely overlap with excluded regions'

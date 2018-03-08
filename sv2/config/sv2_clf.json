@@ -1,0 +1,10 @@
+{
+    "default": {
+        "delmsc": "1kgp_highcov_del_malesexchrom_svm_clf.pkl", 
+        "duphar": "1kgp_highcov_dup_har_svm_clf.pkl", 
+        "dellt": "1kgp_highcov_del_lt1kb_svm_clf.pkl", 
+        "dupbrk": "1kgp_lowcov_dup_breakpoint_svm_clf.pkl", 
+        "dupmsc": "1kgp_lowcov_dup_malesexchrom_svm_clf.pkl", 
+        "delgt": "1kgp_highcov_del_gt1kb_svm_clf.pkl"
+    }
+}
