@@ -45,19 +45,12 @@ SV<sup>2</sup> (support-vector structural-variant genotyper) is a machine learni
 
 ## Getting Started
 
-:one: 
-
-### [Installation](https://github.com/dantaki/SV2/wiki/installation)
+:one: [Installation](https://github.com/dantaki/SV2/wiki/installation)
 
 [Install with `pip`](https://github.com/dantaki/SV2/wiki/installation#install-with-pip) *Recommended* 
 
 ```
 $ pip install sv2 
-```
-or conda
-
-```
-$ conda install -c dantaki sv2 
 ```
 
 :two: [Configure SV<sup>2</sup>](https://github.com/dantaki/SV2/wiki/installation#configure)
@@ -99,7 +92,11 @@ Documentation for required inputs:
 
 ## [Output](https://github.com/dantaki/SV2/wiki/Output)
  
- Output is generated in the current working directory. 
+ Output is generated in the current working directory by default.
+
+```
+$ sv2 ... -O <output path prefix>
+``` 
  
  * `sv2_preprocessing/` contains preprocessing output 
 

@@ -1,0 +1,19 @@
+Metadata-Version: 1.1
+Name: sv2
+Version: 1.4.3
+Summary: SV2: Support Vector Structural Variation Genotyper
+Home-page: https://github.com/dantaki/SV2
+Author: Danny Antaki
+Author-email: dantaki@ucsd.edu
+License: MIT
+Description-Content-Type: UNKNOWN
+Description: UNKNOWN
+Platform: UNKNOWN
+Requires: cython
+Requires: json
+Requires: numpy
+Requires: pandas
+Requires: pybedtools
+Requires: pysam
+Requires: shutil
+Requires: wget

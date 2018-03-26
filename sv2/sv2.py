@@ -8,7 +8,7 @@ The above copyright notice and this permission notice shall be included in all c
 
 THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 '''
-__version__='1.4.1'
+__version__='1.4.3'
 from sv2_backend import check_ids,get_path,make_dir,rand_id,report_time,slash_check
 from Bam import bam_init
 from sv2Config import Config
@@ -71,8 +71,9 @@ optional arguments:
   -T, -tmp-dir        directory for temporary files [default: working directory]
   -s, -seed           random seed for preprocessing shuffling [default: 42]
   -o, -out            output prefix [default: sv2_genotypes]
+  -O, -odir           output path, location for sv2 output directories [default: working directory]
 
-  -h, -help          show this message and exit
+  -h, -help           show this message and exit
 """.format(__version__)
 def main():
 	init_time = int(time())
@@ -101,15 +102,15 @@ def main():
 	optArgs.add_argument('-T','-tmp-dir',default=os.getcwd()+'/sv2_tmp_'+rand_id(),required=False)
 	optArgs.add_argument('-s','-seed',required=False,default=42,type=int)
 	optArgs.add_argument('-o','-out',required=False,default="sv2_genotypes.vcf",type=str)
+	optArgs.add_argument('-O','-odir',required=False,default=os.getcwd(),type=str)
 	optArgs.add_argument('-h','-help',required=False,action="store_true",default=False)
-	
 	args = parser.parse_args()
 	bams,bed,vcf,snv,ped = args.i,args.b,args.v,args.snv,args.p
 	gen,pcrfree,legacy_m,merge_flag,min_ovr,anno_flag= args.g,args.pcrfree,args.M,args.merge,args.min_ovr,args.no_anno
 	predir,featsdir = args.pre,args.feats
 	clfLoad, classifier_name = args.load_clf,args.clf
 	download, conf_hg19,conf_hg38, conf_mm10=args.download,args.hg19,args.hg38,args.mm10
-	logfh, tmp_dir, seed, ofh = args.L,args.T,args.s,args.o
+	logfh, tmp_dir, seed, ofh, odir = args.L,args.T,args.s,args.o,args.O
 	_help = args.h
 	if (_help==True or len(sys.argv)==1):
 		print splash+__useage___
@@ -161,11 +162,13 @@ def main():
 	if not ofh.endswith('.vcf'): ofh=ofh+'.vcf'
 	make_dir(tmp_dir)
 	tmp_dir=slash_check(tmp_dir)
+	if not odir.endswith('/'): odir = odir+'/'
+	make_dir(odir)
 	"""
 	PREPROCESSING
 	"""
 	if predir == None  and featsdir==None:
-		outdir = os.getcwd()+'/sv2_preprocessing/'
+		outdir = odir+'sv2_preprocessing/'
 		make_dir(outdir)
 		for bam in Bams:
 			preofh = outdir+bam.id+'_sv2_preprocessing.txt'
@@ -189,7 +192,7 @@ def main():
 	FEATURE EXTRACTION
 	"""
 	if featsdir == None:
-		outdir = os.getcwd()+'/sv2_features/'
+		outdir = odir+'sv2_features/'
 		make_dir(outdir)
 		for bam in Bams:
 			if preprocess_files.get(bam.id) == None:
@@ -216,7 +219,7 @@ def main():
 	"""
 	GENOTYPING
 	"""
-	outdir = os.getcwd()+'/sv2_genotypes/'
+	outdir = odir+'sv2_genotypes/'
 	make_dir(outdir)
 	if merge_flag==True and min_ovr==None: min_ovr=0.8
 	if min_ovr!=None: merge_flag=True
