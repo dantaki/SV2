@@ -42,7 +42,7 @@ def find_data_files(srcdir, *wildcards, **kw):
         return file_list
 files = find_data_files('sv2/', '*.*')
 setup(  name='sv2',
-        version='1.4.3.1',
+        version='1.4.3.2',
         description='SV2: Support Vector Structural Variation Genotyper',
         url='https://github.com/dantaki/SV2',
         author='Danny Antaki',

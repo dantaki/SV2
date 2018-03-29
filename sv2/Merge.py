@@ -51,7 +51,9 @@ def merge_sv(raw,SVs,minOvr):
 		sv=tokenize_sv(tuple(sv))
 		result[sv]=1
 	for sv in raw:
-		if result.get(sv)!=None: merged.append(sv) 
+		chrom,start,end,svtype = sv
+                _sv = (format_chrom(chrom),start,end,svtype)
+                if result.get(_sv)!=None: merged.append(sv) 
 	return merged
 def skip_sv(x):
 	k1,k2 = tokenize_sv(x),tokenize_sv(x,False)
