@@ -66,6 +66,10 @@ cdef c_extract_snv_features(Bam,svs,master_sv,Pre,gen):
 			# foreach masked region within SV
 			c,s,e = str(locus[0]),int(locus[1]),int(locus[2])
 			c=match_chrom_prefix(c,Bam.Snv.chr_flag)
+			try: Itr.fetch(region='{}:{}-{}'.format(c,s+1,e))
+			except ValueError: 
+				sys.stderr.write('WARNING: region {}  {}  {} not present in SNV VCF'.format(c,s,e))
+				continue
 			for Variant in Itr.fetch(region='{}:{}-{}'.format(c,s+1,e)):
 				data= tokenize_vcf(Bam,Variant)
 				if data==0:continue
