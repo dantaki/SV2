@@ -7,7 +7,10 @@ __memsize__='238M'
 __resource_url__ = 'https://github.com/dantaki/SV2/releases/download/sv2v1.4.0/sv2_resources.zip'
 class Config():
 	def __init__(self):
-		self.fh=get_path()+'/config/sv2.ini'
+		if Config.ini:
+			self.fh = Config.ini
+		else:
+			self.fh=get_path()+'/config/sv2.ini'
 		self.json=get_path()+'/config/sv2_clf.json'
 		self.fasta_chr_flag=False
 		self.clfs=None
@@ -181,3 +184,6 @@ class Config():
 			if self.resource != None:
 				conf.set('RESOURCE_DIR','sv2_resource',self.resource)
 			with open(self.fh,'w') as conf_fh: conf.write(conf_fh)
+
+# Path to INI file, if any.
+Config.ini = None
