@@ -64,7 +64,7 @@ class VCF():
 			'##FORMAT=<ID=HA,Number=1,Type=Float,Description="Heterozygous allele ratio">',
 			'##FORMAT=<ID=NH,Number=1,Type=Integer,Description="Number of heterozygous SNVs">',
 			'##FORMAT=<ID=SQ,Number=1,Type=Float,Description="Phred-scaled genotype likelihood">',
-			'##FORMAT=<ID=GL,Number=2|3,Type=Float,Description="Phred-scaled genotype likelihoods in the order, REF:(0/0), HET:(0/1), HOM:(1/1)">',
+			'##FORMAT=<ID=GL,Number=G,Type=Float,Description="Phred-scaled genotype likelihoods in the order, REF:(0/0), HET:(0/1), HOM:(1/1)">',
 			'##ALT=<ID=DEL,Description="Deletion, if 80% reciprocal overlap with RepeatMasker element, the class, name, and family are given separated by colons">',
 			'##ALT=<ID=DUP,Description="Duplication, if 80% reciprocal overlap with RepeatMasker element, the class, name, and family are given separated by colons">',
 			'{}'.format('\n'.join(contigs)),
@@ -105,7 +105,7 @@ class VCF():
 		if allele==0: fail.append('NOALT')
 		if std_flt=='FAIL': fail.append('FAIL')
 		elif std_flt=='PASS' and ('GENOTYPEFAIL' not in fail and 'NOALT' not in fail): fail.append('PASS')
-		if len(fail) > 0: filt = ','.join(fail)
+		if len(fail) > 0: filt = ';'.join(fail)
 		if std_flt=='FAIL':dnm_flt='FAIL'
 		if ('NOALT' in filt or 'GENOTYPEFAIL' in filt) and dnm_flt=='PASS':dnm_flt='NA' 
 		if self.Annotations!=None:
