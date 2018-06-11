@@ -38,6 +38,7 @@ input arguments: github.com/dantaki/SV2/wiki/Options#input-arguments
   -b, -bed    ...     bed files(s) of SVs
   -snv        ...     snv vcf files(s), must be bgzipped and tabixed
   -p, -ped    ...     ped files(s)
+  -ini        ...     path to configuration INI file, default lives in sv2 package
 
 genotype arguments: github.com/dantaki/SV2/wiki/Options#genotype-arguments
 
@@ -67,6 +68,7 @@ def main():
 	inArgs.add_argument('-v','-vcf',type=str,default=None,nargs='*')
 	inArgs.add_argument('-snv',type=str,default=None,nargs='*')
 	inArgs.add_argument('-p','-ped',type=str,default=None,nargs='*')
+	inArgs.add_argument('-ini',type=str,default=None)
 	genoArgs.add_argument('-g','-genome',required=False,default='hg19',type=str)
 	genoArgs.add_argument('-pcrfree',required=False,default=False,action="store_true")
 	genoArgs.add_argument('-M',default=False,required=False,action="store_true")
@@ -79,7 +81,7 @@ def main():
 	optArgs.add_argument('-O','-odir',required=False,default=os.getcwd(),type=str)
 	optArgs.add_argument('-h','-help',required=False,action="store_true",default=False)
 	args = parser.parse_args()
-	bams,bed,vcf,snv,ped = args.i,args.b,args.v,args.snv,args.p
+	bams,bed,vcf,snv,ped,ini = args.i,args.b,args.v,args.snv,args.p,args.ini
 	gen,pcrfree,legacy_m,predir,featsdir= args.g,args.pcrfree,args.M,args.pre,args.feats
 	logfh, tmp_dir, seed, ofh, odir = args.L,args.T,args.s,args.o,args.O
 	_help = args.h
@@ -94,6 +96,7 @@ def main():
 	olog = logfh
 	if olog == None: olog = 'STDOUT'
 	print 'sv2 version:{}    report bugs to <dantaki at ucsd dot edu>       error messages located in {}'.format(__version__,olog)
+	Config.ini=ini
 	Confs=Config()
 	if bams==None and predir==None and featsdir==None:
 		print 'FATAL ERROR: No BAM file specified <-i, -bam  FILE ...>'
