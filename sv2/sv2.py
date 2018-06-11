@@ -40,7 +40,6 @@ input arguments: github.com/dantaki/SV2/wiki/Options#input-arguments
   -b, -bed    ...     bed files(s) of SVs
   -snv        ...     snv vcf files(s), must be bgzipped and tabixed
   -p, -ped    ...     ped files(s)
-  -ini        ...     configuration INI file (the default one lives in the sv2 package)
 
 genotype arguments: github.com/dantaki/SV2/wiki/Options#genotype-arguments
 
@@ -65,6 +64,7 @@ config arguments: github.com/dantaki/SV2/wiki/Options#config-arguments
   -hg19               hg19 fasta file
   -hg38               hg38 fasta file
   -mm10               mm10 fasta file
+  -ini                configuration INI file [default: $SV2_INSTALL_PATH/config/sv2.ini]
   
 optional arguments:
  
@@ -85,7 +85,6 @@ def main():
 	inArgs.add_argument('-v','-vcf',type=str,default=None,nargs='*')
 	inArgs.add_argument('-snv',type=str,default=None,nargs='*')
 	inArgs.add_argument('-p','-ped',type=str,default=None,nargs='*')
-	genoArgs.add_argument('-ini',required=False,default=None,type=str)
 	genoArgs.add_argument('-g','-genome',required=False,default='hg19',type=str)
 	genoArgs.add_argument('-pcrfree',required=False,default=False,action="store_true")
 	genoArgs.add_argument('-M',default=False,required=False,action="store_true")
@@ -100,6 +99,7 @@ def main():
 	configArgs.add_argument('-hg19',default=None,required=False)
 	configArgs.add_argument('-hg38',default=None,required=False)	
 	configArgs.add_argument('-mm10',default=None,required=False)
+	configArgs.add_argument('-ini',required=False,default=None,type=str)
 	optArgs.add_argument('-L','-log',default=None,required=False)
 	optArgs.add_argument('-T','-tmp-dir',default=os.getcwd()+'/sv2_tmp_'+rand_id(),required=False)
 	optArgs.add_argument('-s','-seed',required=False,default=42,type=int)
