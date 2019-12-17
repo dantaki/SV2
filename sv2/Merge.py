@@ -37,23 +37,26 @@ def merging(sv,non):
 			trash.append(k2)
 	return BedTool(list(set(merged)))
 def merge_sv(raw,SVs,minOvr):
-	non,result,merged={},{},[]
+	non,result,merged,premerge={},{},[],[]
 	for locus in SVs: non[locus]=SVs[locus].med_alt
 	dels = BedTool([(format_chrom(x[0]),x[1],x[2],x[3]) for x in raw if 'DEL' in x[3]])
 	dups = BedTool([(format_chrom(x[0]),x[1],x[2],x[3]) for x in raw if 'DUP' in x[3]])
 	dels_nomerge = first_merge(dels,minOvr)
 	while len(check_merge(dels,minOvr))>0:
 		dels = merging(check_merge(dels,minOvr),non)
+		for x in dels: premerge.append(x)
 	dups_nomerge = first_merge(dups,minOvr)
 	while len(check_merge(dups,minOvr))>0:
 		dups = merging(check_merge(dups,minOvr),non)
-	for sv in list(itertools.chain(dels,dels_nomerge,dups,dups_nomerge)): 
+		for x in dups: premerge.append(x)
+	premerge = set(premerge)
+	for sv in list(itertools.chain(dels,dels_nomerge,dups,dups_nomerge,premerge)): 
 		sv=tokenize_sv(tuple(sv))
 		result[sv]=1
 	for sv in raw:
 		chrom,start,end,svtype = sv
                 _sv = (format_chrom(chrom),start,end,svtype)
-                if result.get(_sv)!=None: merged.append(sv) 
+		if result.get(_sv)!=None: merged.append(sv) 
 	return merged
 def skip_sv(x):
 	k1,k2 = tokenize_sv(x),tokenize_sv(x,False)
