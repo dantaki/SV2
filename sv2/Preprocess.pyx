@@ -3,6 +3,7 @@
 #cython: wraparound=False
 #cython: cdivision=True
 from sv2_backend import format_chrom,get_path,make_dir,mask_bed,match_chrom_prefix
+from sv2Config import Config
 from Snv import preprocess_snv
 import numpy as np
 import os,pysam,sys
@@ -44,8 +45,8 @@ cdef sv2_preprocess(Bam,ofh,seed,gen,tmp_dir):
 	snv_depth=preprocess_snv(Bam,mask_bed(tmp_bed,gen))
 	os.remove(tmp_bed)
 	out = open(ofh,'a')
-	Itr = pysam.AlignmentFile(Bam.fh,'r{}'.format(Bam.char))  
-	from sv2Config import Config
+	Itr = pysam.AlignmentFile(Bam.fh,'r{}'.format(Bam.char),
+			reference_filename=Config().fasta(gen))  
 	for chrom in Bam.refs:
 		tmp_genome = Bam.tmp_chrom_file(tmp_dir,True,chrom)
 		chrom=format_chrom(chrom)
