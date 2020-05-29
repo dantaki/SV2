@@ -18,7 +18,8 @@ def extract_feats(Bam,sv,prefh,out,gen,pcrfree,legacyM,Conf,tmp_dir):
 	sv_gc=gc_sv(sv,master_sv,gen,Conf)
 	Pre = Preprocess(prefh)
 	snv_feats,het_feats=extract_snv_features(Bam,sv,master_sv,Pre,gen)
-	Itr = pysam.AlignmentFile(Bam.fh,'r{}'.format(Bam.char))
+	Itr = pysam.AlignmentFile(Bam.fh,'r{}'.format(Bam.char),
+			reference_filename=Config().fasta(gen))
 	insert_size, insert_mad = Pre.insert_size[Bam.id],Pre.insert_mad[Bam.id]
 	ofh = open(out,'w')
 	ofh.write('\t'.join(('#chr','start','end','type','size','id','coverage','coverage_GCcorrected','discordant_ratio','split_ratio','snv_coverage','heterozygous_allele_ratio','snvs','het_snvs'))+'\n')
@@ -47,7 +48,7 @@ def extract_feats(Bam,sv,prefh,out,gen,pcrfree,legacyM,Conf,tmp_dir):
 			gc_cov = cov * gc_norm_factor
 		else:
 			"""median depth of coverage estimation"""
-			median_doc = depth_of_coverage(sv_span,Bam.fh,Bam.chr_flag,Pre.read_len[Bam.id])
+			median_doc = depth_of_coverage(sv_span,Bam.fh,Bam.chr_flag,Pre.read_len[Bam.id], gen)
 			cov=float('nan')
 			if Pre.chr_cov[(Bam.id,chrom_key)]!= 0: cov = median_doc/Pre.chr_cov[(Bam.id,chrom_key)]
 			gc_norm_factor=1.0
@@ -86,13 +87,14 @@ cdef count_reads(sv_list,Itr,ci,chr_flag,legacyM):
 				continue
 			Aln_count+=1
 	return(Aln_count,bp_span)
-cdef depth_of_coverage(sv_list,bamfh,chr_flag,Aln_length):
+cdef depth_of_coverage(sv_list,bamfh,chr_flag,Aln_length, gen):
 	"""return median depth of coverage for SV <= 1kb"""
 	pos_doc={}
 	for (c,s,e) in sv_list:
 		c =  match_chrom_prefix(c,chr_flag)
 		region= str('{}:{}-{}').format(c,int(s)+1,e)
-		depth_result = pysam.depth("-a", "-Q" "40", "-r", region, "-l", str(Aln_length-10), bamfh)
+		depth_result = pysam.depth("-a", "-Q" "40", "-r", region, "-l", str(Aln_length-10), bamfh,
+			"--reference", Config().fasta(gen))
 		str_flag=0
 		if isinstance(depth_result,str):
 			depth_result = depth_result.split('\n')
